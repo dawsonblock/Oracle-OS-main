@@ -596,6 +596,61 @@ public enum MCPDispatch {
             sema.wait()
             return runResult ?? ToolResult(success: false, error: "Experiment task completed without setting result.")
 
+        // Architecture
+        case "oracle_architecture_review":
+            guard let goal = str(args, "goal_description"),
+                  let paths = args["candidate_paths"] as? [String] else {
+                return ToolResult(success: false, error: "Missing required parameters: goal_description, candidate_paths")
+            }
+            let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let engine = ArchitectureEngine()
+            let review = engine.review(goalDescription: goal, snapshot: snapshot, candidatePaths: paths)
+            
+            if let data = try? JSONEncoder().encode(review),
+               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                return ToolResult(success: true, data: ["review": dict])
+            }
+            return ToolResult(success: false, error: "Failed to serialize architecture review")
+
+        case "oracle_candidate_review":
+            guard let goal = str(args, "goal_description"),
+                  let candidateRaw = args["candidate"] as? [String: Any],
+                  let diffSummary = str(args, "diff_summary") else {
+                return ToolResult(success: false, error: "Missing required parameters: goal_description, candidate, diff_summary")
+            }
+            
+            guard let content = candidateRaw["content"] as? String,
+                  let rp = candidateRaw["workspace_relative_path"] as? String,
+                  let title = candidateRaw["title"] as? String,
+                  let summary = candidateRaw["summary"] as? String else {
+                return ToolResult(success: false, error: "Candidate is missing required fields (content, workspace_relative_path, title, summary)")
+            }
+            let candidate = CandidatePatch(
+                title: title,
+                summary: summary,
+                workspaceRelativePath: rp,
+                content: content,
+                hypothesis: candidateRaw["hypothesis"] as? String,
+                strategyKind: candidateRaw["strategy_kind"] as? String
+            )
+            
+            let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let engine = ArchitectureEngine()
+            let review = engine.reviewCandidatePatch(
+                goalDescription: goal,
+                snapshot: snapshot,
+                candidate: candidate,
+                diffSummary: diffSummary
+            )
+            
+            if let data = try? JSONEncoder().encode(review),
+               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                return ToolResult(success: true, data: ["review": dict])
+            }
+            return ToolResult(success: false, error: "Failed to serialize candidate architecture review")
+
         default:
             return ToolResult(success: false, error: "Unknown tool: \(tool)")
         }

@@ -11,7 +11,7 @@ public enum MCPTools {
     /// All tool definitions as MCP-compatible dictionaries.
     @MainActor
     public static func definitions() -> [[String: Any]] {
-        perception + actions + wait + recipes + vision + projectMemory + experiments
+        perception + actions + wait + recipes + vision + projectMemory + experiments + architecture
     }
 
     // MARK: - Perception Tools (7)
@@ -310,6 +310,31 @@ public enum MCPTools {
             ],
             required: ["goal_description", "candidates"]
         ),
+    ]
+
+    // MARK: - Architecture Tools (2)
+
+    @MainActor
+    private static let architecture: [[String: Any]] = [
+        tool(
+            name: "oracle_architecture_review",
+            description: "Review planned changes for architectural risks and potential invariant violations before executing them. Returns structured findings, risk scores, and refactoring proposals.",
+            properties: [
+                "goal_description": prop("string", "A summary of what the change is trying to achieve."),
+                "candidate_paths": propArray("string", "List of workspace relative paths that are expected to be changed."),
+            ],
+            required: ["goal_description", "candidate_paths"]
+        ),
+        tool(
+            name: "oracle_candidate_review",
+            description: "Deep architecture review of a specific code patch candidate. Identifies heuristic problems like touching wrong boundaries or expanding patch radii.",
+            properties: [
+                "goal_description": prop("string", "A summary of what the patch is trying to achieve."),
+                "candidate": prop("object", "Candidate patch object with 'title', 'summary', 'workspace_relative_path', and 'content' (the complete new file string)."),
+                "diff_summary": prop("string", "A short diff format summary of the change.")
+            ],
+            required: ["goal_description", "candidate", "diff_summary"]
+        )
     ]
 
     // MARK: - Schema Helpers
