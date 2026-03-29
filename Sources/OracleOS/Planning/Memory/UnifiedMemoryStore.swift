@@ -5,6 +5,11 @@ import Foundation
 public final class UnifiedMemoryStore: @unchecked Sendable {
     public let appMemory: StrategyMemory
     private var projectMemory: ProjectMemoryStore?
+    
+    public var projectStore: ProjectMemoryStore? {
+        projectMemory
+    }
+
     private let executionStore: ExecutionMemoryStore
     private let patternStore: PatternMemoryStore
     

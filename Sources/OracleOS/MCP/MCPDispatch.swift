@@ -36,6 +36,7 @@ public enum MCPDispatch {
     /// Wraps every tool call in a timeout so no single tool can block
     /// the MCP server indefinitely (the #1 user-reported issue).
     public static func handle(_ params: [String: Any]) -> [String: Any] {
+        runtimeContext.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
         guard let toolName = params["name"] as? String else {
             return errorContent("Missing tool name")
         }
@@ -438,6 +439,65 @@ public enum MCPDispatch {
                 appName: str(args, "app"),
                 cropBox: cropBox
             )
+
+        // Project Memory
+        case "oracle_memory_query":
+            let queryText = str(args, "query") ?? ""
+            let modules = args["modules"] as? [String] ?? []
+            let kindsRaw = args["kinds"] as? [String] ?? []
+            let kinds = kindsRaw.compactMap { ProjectMemoryKind(rawValue: $0) }
+            let limit = int(args, "limit") ?? 10
+            
+            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+                return ToolResult(success: false, error: "Project Memory store is not available. Ensure Oracle OS is running in a valid project workspace.")
+            }
+            
+            let results = projectStore.query(text: queryText, modules: modules, kinds: kinds, limit: limit)
+            let serialized = results.map { [
+                "id": $0.id,
+                "title": $0.title,
+                "summary": $0.summary,
+                "kind": $0.kind.rawValue,
+                "path": $0.path,
+                "affected_modules": $0.affectedModules,
+            ] as [String: Any] }
+            
+            return ToolResult(success: true, data: ["records": serialized, "count": serialized.count])
+            
+        case "oracle_memory_draft":
+            guard let title = str(args, "title"),
+                  let summary = str(args, "summary"),
+                  let kindRaw = str(args, "kind"),
+                  let body = str(args, "body") else {
+                return ToolResult(success: false, error: "Missing required parameters: title, summary, kind, body")
+            }
+            guard let kind = ProjectMemoryKind(rawValue: kindRaw) else {
+                return ToolResult(success: false, error: "Invalid kind: \(kindRaw)")
+            }
+            
+            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+                return ToolResult(success: false, error: "Project Memory store is not available.")
+            }
+            
+            let modules = args["affected_modules"] as? [String] ?? []
+            let evidence = args["evidence_refs"] as? [String] ?? []
+            let knowledgeClass = KnowledgeClass.reusable
+            
+            do {
+                let ref = try projectStore.writeDraft(ProjectMemoryDraft(
+                    kind: kind,
+                    knowledgeClass: knowledgeClass,
+                    title: title,
+                    summary: summary,
+                    affectedModules: modules,
+                    evidenceRefs: evidence,
+                    sourceTraceIDs: [],
+                    body: body
+                ))
+                return ToolResult(success: true, data: ["draft_id": ref.id, "path": ref.path])
+            } catch {
+                return ToolResult(success: false, error: "Failed to write draft: \(error)")
+            }
 
         default:
             return ToolResult(success: false, error: "Unknown tool: \(tool)")

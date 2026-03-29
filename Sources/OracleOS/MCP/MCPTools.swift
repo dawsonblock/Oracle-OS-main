@@ -11,7 +11,7 @@ public enum MCPTools {
     /// All tool definitions as MCP-compatible dictionaries.
     @MainActor
     public static func definitions() -> [[String: Any]] {
-        perception + actions + wait + recipes + vision
+        perception + actions + wait + recipes + vision + projectMemory
     }
 
     // MARK: - Perception Tools (7)
@@ -262,6 +262,36 @@ public enum MCPTools {
                 "crop_box": propArray("number", "Optional crop region [x1, y1, x2, y2] in logical points. Dramatically improves accuracy for overlapping panels (e.g. compose popup over inbox)."),
             ],
             required: ["description"]
+        ),
+    ]
+
+    // MARK: - Project Memory Tools (2)
+
+    @MainActor
+    private static let projectMemory: [[String: Any]] = [
+        tool(
+            name: "oracle_memory_query",
+            description: "Query the project memory store for past architecture decisions, known patterns, open problems, and risks.",
+            properties: [
+                "query": prop("string", "Text to search for. If empty, returns recent records."),
+                "modules": propArray("string", "Optional list of affected module names to filter by."),
+                "kinds": propArray("string", "Optional list of memory kinds to filter by: architecture-decision, open-problem, rejected-approach, known-good-pattern, risk."),
+                "limit": prop("integer", "Max results to return (default: 10).")
+            ],
+            required: []
+        ),
+        tool(
+            name: "oracle_memory_draft",
+            description: "Draft a new project memory record to persist organizational knowledge like architecture decisions, known safe patterns, risks, open problems, or rejected approaches.",
+            properties: [
+                "title": prop("string", "Short, concise title of the memory."),
+                "summary": prop("string", "A very short, 1-2 sentence summary of the context and outcome."),
+                "kind": prop("string", "Must be one of: architecture-decision, open-problem, rejected-approach, known-good-pattern, risk."),
+                "body": prop("string", "The detailed Markdown body explaining context, options, consequences, and actual implementation details."),
+                "affected_modules": propArray("string", "Optional list of modules this memory applies to."),
+                "evidence_refs": propArray("string", "Optional list of related files, commit SHAs, or ticket numbers for reference.")
+            ],
+            required: ["title", "summary", "kind", "body"]
         ),
     ]
 
