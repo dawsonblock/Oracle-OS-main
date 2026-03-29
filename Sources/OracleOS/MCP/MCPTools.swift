@@ -11,7 +11,7 @@ public enum MCPTools {
     /// All tool definitions as MCP-compatible dictionaries.
     @MainActor
     public static func definitions() -> [[String: Any]] {
-        perception + actions + wait + recipes + vision + projectMemory
+        perception + actions + wait + recipes + vision + projectMemory + experiments
     }
 
     // MARK: - Perception Tools (7)
@@ -292,6 +292,23 @@ public enum MCPTools {
                 "evidence_refs": propArray("string", "Optional list of related files, commit SHAs, or ticket numbers for reference.")
             ],
             required: ["title", "summary", "kind", "body"]
+        ),
+    ]
+
+    // MARK: - Experiment Tools (1)
+
+    @MainActor
+    private static let experiments: [[String: Any]] = [
+        tool(
+            name: "oracle_experiment_search",
+            description: "Run a bounded parallel experiment search. Evaluates multiple candidate file patches in isolated worktrees concurrently to find a working solution. Returns the ranking and test outputs of each candidate.",
+            properties: [
+                "goal_description": prop("string", "A summary of what the patches are trying to achieve."),
+                "candidates": propArray("object", "List of candidates. Each must be an object with 'title', 'summary', 'workspace_relative_path', and 'content' (the complete new file string). Optional 'hypothesis' and 'strategy_kind'."),
+                "build_command": propArray("string", "Optional explicit build command array (e.g. ['swift', 'build']). If omitted, auto-detected."),
+                "test_command": propArray("string", "Optional explicit test command array (e.g. ['swift', 'test']). If omitted, auto-detected.")
+            ],
+            required: ["goal_description", "candidates"]
         ),
     ]
 

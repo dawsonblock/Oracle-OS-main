@@ -72,7 +72,8 @@ public enum MCPDispatch {
         let queue = DispatchQueue(label: "oracle.mcp.tool.\(toolName)")
         queue.async(execute: work)
 
-        let deadline = DispatchTime.now() + toolTimeoutSeconds
+        let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
+        let deadline = DispatchTime.now() + actualTimeout
         let waitResult = semaphore.wait(timeout: deadline)
 
         // Log timing for every tool call (helps diagnose slow tools)
@@ -80,8 +81,8 @@ public enum MCPDispatch {
 
         if waitResult == .timedOut {
             work.cancel()
-            Log.error("Tool \(toolName) TIMED OUT after \(Int(toolTimeoutSeconds))s")
-            return errorContent("Tool \(toolName) timed out after \(Int(toolTimeoutSeconds))s")
+            Log.error("Tool \(toolName) TIMED OUT after \(Int(actualTimeout))s")
+            return errorContent("Tool \(toolName) timed out after \(Int(actualTimeout))s")
         }
 
         if elapsed > 5000 {
@@ -498,6 +499,102 @@ public enum MCPDispatch {
             } catch {
                 return ToolResult(success: false, error: "Failed to write draft: \(error)")
             }
+
+        // Experiments
+        case "oracle_experiment_search":
+            guard let goal = str(args, "goal_description"),
+                  let candidatesRaw = args["candidates"] as? [[String: Any]] else {
+                return ToolResult(success: false, error: "Missing required parameters: goal_description, candidates")
+            }
+            
+            var candidates = [CandidatePatch]()
+            for (i, c) in candidatesRaw.enumerated() {
+                guard let content = c["content"] as? String,
+                      let rp = c["workspace_relative_path"] as? String,
+                      let title = c["title"] as? String,
+                      let summary = c["summary"] as? String else {
+                    return ToolResult(success: false, error: "Candidate \(i) is missing required fields (content, workspace_relative_path, title, summary)")
+                }
+                candidates.append(CandidatePatch(
+                    title: title,
+                    summary: summary,
+                    workspaceRelativePath: rp,
+                    content: content,
+                    hypothesis: c["hypothesis"] as? String,
+                    strategyKind: c["strategy_kind"] as? String
+                ))
+            }
+            
+            let workspaceRoot = FileManager.default.currentDirectoryPath
+            let rootURL = URL(fileURLWithPath: workspaceRoot, isDirectory: true)
+            let buildTool = BuildToolDetector.detect(at: rootURL)
+            
+            var buildCommand: CommandSpec? = BuildToolDetector.defaultBuildCommand(for: buildTool, workspaceRoot: rootURL)
+            if let customBuild = args["build_command"] as? [String], !customBuild.isEmpty {
+                buildCommand = CommandSpec(
+                    category: .build,
+                    executable: "/usr/bin/env",
+                    arguments: customBuild,
+                    workspaceRoot: workspaceRoot,
+                    summary: customBuild.joined(separator: " ")
+                )
+            }
+            
+            var testCommand: CommandSpec? = BuildToolDetector.defaultTestCommand(for: buildTool, workspaceRoot: rootURL)
+            if let customTest = args["test_command"] as? [String], !customTest.isEmpty {
+                testCommand = CommandSpec(
+                    category: .test,
+                    executable: "/usr/bin/env",
+                    arguments: customTest,
+                    workspaceRoot: workspaceRoot,
+                    summary: customTest.joined(separator: " ")
+                )
+            }
+            
+            let spec = ExperimentSpec(
+                goalDescription: goal,
+                workspaceRoot: workspaceRoot,
+                candidates: candidates,
+                buildCommand: buildCommand,
+                testCommand: testCommand
+            )
+            
+            let sema = DispatchSemaphore(value: 0)
+            var runResult: ToolResult?
+            
+            // This MUST hop onto a new Task because dispatch() is synchronous 
+            // but run() is async.
+            Task {
+                do {
+                    let results = try await runtimeContext.experimentManager.run(spec: spec)
+                    // Format results
+                    let serialized = results.map { [
+                        "id": $0.id,
+                        "candidate_title": $0.candidate.title,
+                        "selected": $0.selected,
+                        "succeeded": $0.succeeded,
+                        "elapsed_ms": $0.elapsedMs,
+                        "diff_summary": $0.diffSummary,
+                        "architecture_risk_score": $0.architectureRiskScore,
+                        "command_results": $0.commandResults.map { [
+                            "category": $0.category.rawValue,
+                            "summary": $0.summary,
+                            "succeeded": $0.succeeded,
+                            "exit_code": $0.exitCode,
+                            "stdout": $0.stdout.count > 1000 ? String($0.stdout.prefix(1000)) + "...(truncated)" : $0.stdout,
+                            "stderr": $0.stderr.count > 1000 ? String($0.stderr.prefix(1000)) + "...(truncated)" : $0.stderr
+                        ] as [String: Any] }
+                    ] as [String: Any] }
+                    
+                    runResult = ToolResult(success: true, data: ["results": serialized])
+                } catch {
+                    runResult = ToolResult(success: false, error: "Experiment search failed: \(error)")
+                }
+                sema.signal()
+            }
+            
+            sema.wait()
+            return runResult ?? ToolResult(success: false, error: "Experiment task completed without setting result.")
 
         default:
             return ToolResult(success: false, error: "Unknown tool: \(tool)")
