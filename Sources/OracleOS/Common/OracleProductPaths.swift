@@ -54,6 +54,10 @@ public enum OracleProductPaths {
         return dataRootDirectory.appendingPathComponent("Recipes", isDirectory: true)
     }
 
+    public static var workflowsDirectory: URL {
+        dataRootDirectory.appendingPathComponent("Workflows", isDirectory: true)
+    }
+
     public static var approvalsDirectory: URL {
         if let override = environmentURL(for: approvalsOverrideKey, isDirectory: true) {
             return override
@@ -289,6 +293,7 @@ public enum OracleProductPaths {
             traceSessionsDirectory,
             traceArtifactsDirectory,
             recipesDirectory,
+            workflowsDirectory,
             approvalsDirectory,
             projectMemoryDirectory,
             experimentsDirectory,

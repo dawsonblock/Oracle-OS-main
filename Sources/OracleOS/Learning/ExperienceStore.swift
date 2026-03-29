@@ -46,6 +46,47 @@ public final class ExperienceStore: @unchecked Sendable {
         return fileURL
     }
 
+    public func loadRecentEvents(limit: Int = 1000) -> [TraceEvent] {
+        writeLock.lock()
+        defer { writeLock.unlock() }
+
+        guard let enumerator = FileManager.default.enumerator(at: directoryURL, includingPropertiesForKeys: [.creationDateKey]) else {
+            return []
+        }
+
+        var files = [(URL, Date)]()
+        for case let fileURL as URL in enumerator {
+            guard fileURL.pathExtension == "jsonl" else { continue }
+            let values = try? fileURL.resourceValues(forKeys: [.creationDateKey])
+            let date = values?.creationDate ?? Date.distantPast
+            files.append((fileURL, date))
+        }
+
+        files.sort { $0.1 > $1.1 } // newest first
+
+        var events = [TraceEvent]()
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        for (fileURL, _) in files {
+            guard let content = try? String(contentsOf: fileURL, encoding: .utf8) else { continue }
+            
+            let lines = content.split(separator: "\n")
+            for line in lines.reversed() { // read lines bottom-up to keep newest first inside file, then reverse later
+                guard let data = line.data(using: .utf8),
+                      let event = try? decoder.decode(TraceEvent.self, from: data) else {
+                    continue
+                }
+                events.append(event)
+                if events.count >= limit {
+                    return events.reversed() // order chronological
+                }
+            }
+        }
+
+        return events.reversed() // order chronological
+    }
+
     public static func traceRootDirectory() -> URL {
         OracleProductPaths.tracesRootDirectory
     }

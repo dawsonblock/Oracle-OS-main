@@ -651,6 +651,83 @@ public enum MCPDispatch {
             }
             return ToolResult(success: false, error: "Failed to serialize candidate architecture review")
 
+        // Workflows
+        case "oracle_workflow_mine":
+            guard let goalPattern = str(args, "goal_pattern") else {
+                return ToolResult(success: false, error: "Missing required parameter: goal_pattern")
+            }
+            let limit = int(args, "limit") ?? 1000
+            
+            let sema = DispatchSemaphore(value: 0)
+            var runResult: ToolResult?
+            Task {
+                let events = runtimeContext.traceStore.loadRecentEvents(limit: limit)
+                let synthesizer = WorkflowSynthesizer()
+                let plans = synthesizer.synthesize(goalPattern: goalPattern, events: events)
+                
+                let index = WorkflowIndex()
+                for plan in plans {
+                    index.add(plan)
+                }
+                
+                let serialized = plans.compactMap { plan -> [String: Any]? in
+                    guard let data = try? JSONEncoder().encode(plan),
+                          let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+                    return dict
+                }
+                runResult = ToolResult(success: true, data: ["mined_count": plans.count, "plans": serialized])
+                sema.signal()
+            }
+            sema.wait()
+            return runResult ?? ToolResult(success: false, error: "Task completed without result.")
+
+        case "oracle_workflow_list":
+            let index = WorkflowIndex()
+            let plans = index.allPlans()
+            let serialized = plans.compactMap { plan -> [String: Any]? in
+                guard let data = try? JSONEncoder().encode(plan),
+                      let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+                return dict
+            }
+            return ToolResult(success: true, data: ["count": plans.count, "plans": serialized])
+
+        case "oracle_workflow_execute":
+            guard let workflowID = str(args, "workflow_id") else {
+                return ToolResult(success: false, error: "Missing required parameter: workflow_id")
+            }
+            let index = WorkflowIndex()
+            guard let plan = index.plan(id: workflowID) else {
+                return ToolResult(success: false, error: "Workflow '\(workflowID)' not found.")
+            }
+            
+            // For execution, we can return the exact step progression required
+            // or we could bridge it directly to RecipeStore's run logic. For now,
+            // we will return the workflow plan details dynamically formatted.
+            
+            let substitutions = args["parameters"] as? [String: String] ?? [:]
+            
+            // Format for execution instructions
+            var executionSteps: [[String: Any]] = []
+            for (i, step) in plan.steps.enumerated() {
+                let contract = step.actionContract
+                // Replace parameters manually if we need to show substituted steps
+                executionSteps.append([
+                    "step_index": i,
+                    "agent_kind": step.agentKind.rawValue,
+                    "action_name": contract.skillName,
+                    "target": ParameterExtractor.applySlots(to: contract.targetLabel, parameters: substitutions.map { ExtractedParameter(name: $0.key, kind: "string", values: [$0.value]) }, stepIndex: i) ?? "",
+                    "path": ParameterExtractor.applySlots(to: contract.workspaceRelativePath, parameters: substitutions.map { ExtractedParameter(name: $0.key, kind: "string", values: [$0.value]) }, stepIndex: i) ?? "",
+                    "notes": step.notes
+                ])
+            }
+            
+            return ToolResult(success: true, data: [
+                "workflow_id": plan.id,
+                "goal_pattern": plan.goalPattern,
+                "success_rate": plan.successRate,
+                "execution_steps": executionSteps
+            ])
+            
         default:
             return ToolResult(success: false, error: "Unknown tool: \(tool)")
         }

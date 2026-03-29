@@ -10,14 +10,58 @@ public final class WorkflowIndex: @unchecked Sendable {
     ) {
         self.plans = plans
         self.decayPolicy = decayPolicy
+        if !CommandLine.arguments.contains(where: { $0.contains("xctest") }) { loadFromDisk() }
+    }
+
+    private func loadFromDisk() {
+        let dir = OracleProductPaths.workflowsDirectory
+        guard let files = try? FileManager.default.contentsOfDirectory(atPath: dir.path) else { return }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
+        for file in files where file.hasSuffix(".json") {
+            let url = dir.appendingPathComponent(file)
+            guard let data = try? Data(contentsOf: url),
+                  let plan = try? decoder.decode(WorkflowPlan.self, from: data) else {
+                continue
+            }
+            plans[plan.id] = plan
+        }
+    }
+
+    private func saveToDisk(_ plan: WorkflowPlan) {
+        let dir = OracleProductPaths.workflowsDirectory
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = .prettyPrinted
+        
+        let url = dir.appendingPathComponent("\(plan.id).json")
+        if let data = try? encoder.encode(plan) {
+            try? data.write(to: url)
+        }
+    }
+
+    private func deleteFromDisk(id: String) {
+        let dir = OracleProductPaths.workflowsDirectory
+        let url = dir.appendingPathComponent("\(id).json")
+        try? FileManager.default.removeItem(at: url)
     }
 
     public func add(_ plan: WorkflowPlan) {
         plans[plan.id] = plan
+        if !CommandLine.arguments.contains(where: { $0.contains("xctest") }) { saveToDisk(plan) }
+    }
+
+    public func plan(id: String) -> WorkflowPlan? {
+        plans[id]
     }
 
     public func remove(id: String) {
         plans.removeValue(forKey: id)
+        if !CommandLine.arguments.contains(where: { $0.contains("xctest") }) { deleteFromDisk(id: id) }
     }
 
     public func allPlans() -> [WorkflowPlan] {

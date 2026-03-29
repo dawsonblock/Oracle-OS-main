@@ -11,7 +11,7 @@ public enum MCPTools {
     /// All tool definitions as MCP-compatible dictionaries.
     @MainActor
     public static func definitions() -> [[String: Any]] {
-        perception + actions + wait + recipes + vision + projectMemory + experiments + architecture
+        perception + actions + wait + recipes + vision + projectMemory + experiments + architecture + workflows
     }
 
     // MARK: - Perception Tools (7)
@@ -334,6 +334,36 @@ public enum MCPTools {
                 "diff_summary": prop("string", "A short diff format summary of the change.")
             ],
             required: ["goal_description", "candidate", "diff_summary"]
+        )
+    ]
+
+    // MARK: - Workflow Tools (3)
+
+    @MainActor
+    private static let workflows: [[String: Any]] = [
+        tool(
+            name: "oracle_workflow_mine",
+            description: "Synthesize reusable workflows by mining recent telemetry and traces. Extracts generalized patterns of success.",
+            properties: [
+                "goal_pattern": prop("string", "The goal or pattern to search for in traces."),
+                "limit": prop("integer", "Maximum number of recent events to analyze (default: 1000).")
+            ],
+            required: ["goal_pattern"]
+        ),
+        tool(
+            name: "oracle_workflow_list",
+            description: "List all known synthesized workflows available in the index.",
+            properties: [:],
+            required: []
+        ),
+        tool(
+            name: "oracle_workflow_execute",
+            description: "Execute a synthesized workflow by its ID using the specified parameters.",
+            properties: [
+                "workflow_id": prop("string", "The ID of the workflow to execute."),
+                "parameters": prop("object", "Parameter substitutions for the workflow slots.")
+            ],
+            required: ["workflow_id"]
         )
     ]
 

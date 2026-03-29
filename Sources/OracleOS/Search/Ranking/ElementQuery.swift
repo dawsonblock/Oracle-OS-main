@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ElementQuery: Sendable {
+public struct ElementQuery: Sendable, Codable {
 
     public let text: String?
     public let role: String?

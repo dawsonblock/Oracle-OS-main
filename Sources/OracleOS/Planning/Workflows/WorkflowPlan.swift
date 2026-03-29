@@ -7,7 +7,7 @@ public enum WorkflowPromotionStatus: String, Codable, Sendable, CaseIterable {
     case stale
 }
 
-public struct WorkflowStep: Sendable, Identifiable {
+public struct WorkflowStep: Sendable, Identifiable, Codable {
     public let id: String
     public let agentKind: AgentKind
     public let stepPhase: TaskStepPhase
@@ -35,7 +35,7 @@ public struct WorkflowStep: Sendable, Identifiable {
     }
 }
 
-public struct WorkflowPlan: Sendable, Identifiable {
+public struct WorkflowPlan: Sendable, Identifiable, Codable {
     public let id: String
     public let agentKind: AgentKind
     public let goalPattern: String
