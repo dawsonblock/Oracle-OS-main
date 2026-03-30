@@ -31,7 +31,7 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         timeout: TimeInterval = defaultTimeoutSeconds,
         maxOutputBytes: Int = defaultMaxOutputBytes
     ) async throws -> ProcessResult {
-        let process = Process()
+        let process = Foundation.Process()
         process.currentDirectoryURL = workspace?.rootURL
         process.executableURL = URL(fileURLWithPath: command.executable)
         process.arguments = command.arguments
@@ -104,7 +104,7 @@ public final class DefaultProcessAdapter: ProcessAdapter {
     
     /// Synchronous version for backward compatibility - uses dispatch queues for concurrent draining.
     public func runSync(_ command: SystemCommand, in workspace: WorkspaceContext?, policy: CommandExecutionPolicy? = nil) throws -> ProcessResult {
-        let process = Process()
+        let process = Foundation.Process()
         process.currentDirectoryURL = workspace?.rootURL
         process.executableURL = URL(fileURLWithPath: command.executable)
         process.arguments = command.arguments
@@ -214,7 +214,7 @@ public final class DefaultProcessAdapter: ProcessAdapter {
     }
     
     /// Wait for a process to exit with timeout.
-    private func waitForProcess(_ process: Process, timeout: TimeInterval) async -> Bool {
+    private func waitForProcess(_ process: Foundation.Process, timeout: TimeInterval) async -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         
         // Poll for completion
@@ -229,13 +229,13 @@ public final class DefaultProcessAdapter: ProcessAdapter {
     }
 
     private struct DefaultBackgroundProcess: BackgroundProcess {
-        let process: Process
+        let process: Foundation.Process
         var processIdentifier: Int32 { process.processIdentifier }
         func terminate() { process.terminate() }
     }
 
     public func spawnBackground(_ command: SystemCommand, in workspace: WorkspaceContext?) throws -> any BackgroundProcess {
-        let process = Process()
+        let process = Foundation.Process()
         process.currentDirectoryURL = workspace?.rootURL
         process.executableURL = URL(fileURLWithPath: command.executable)
         process.arguments = command.arguments

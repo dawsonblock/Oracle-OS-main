@@ -8,6 +8,7 @@ public enum DomainEvent: Sendable, Codable {
     case evaluationCompleted(EvaluationCompletedEvent)
     case uiObserved(UIObservedEvent)
     case memoryRecorded(MemoryRecordedEvent)
+    case fileModified(FileModifiedEvent)
 }
 
 public struct IntentReceivedEvent: Sendable, Codable {
@@ -52,6 +53,11 @@ public struct MemoryRecordedEvent: Sendable, Codable {
     public let key: String?
 }
 
+public struct FileModifiedEvent: Sendable, Codable {
+    public let path: String
+    public let operation: String
+}
+
 public enum DomainEventCodec {
     public static func decode(from envelope: EventEnvelope) -> DomainEvent? {
         let decoder = JSONDecoder()
@@ -84,6 +90,10 @@ public enum DomainEventCodec {
         case "memory.recorded":
             guard let payload = try? decoder.decode(MemoryRecordedEvent.self, from: envelope.payload) else { return nil }
             return .memoryRecorded(payload)
+
+        case "file.modified":
+            guard let payload = try? decoder.decode(FileModifiedEvent.self, from: envelope.payload) else { return nil }
+            return .fileModified(payload)
 
         case "CommandSucceeded":
             let payload = (try? JSONSerialization.jsonObject(with: envelope.payload) as? [String: Any]) ?? [:]

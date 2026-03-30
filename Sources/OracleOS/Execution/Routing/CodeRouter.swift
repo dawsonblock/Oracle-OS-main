@@ -121,6 +121,12 @@ public struct CodeRouter: @unchecked Sendable {
         case .file(let spec):
             do {
                 try await workspaceRunner?.applyFile(spec)
+                let fileEvent = DomainEventFactory.fileModified(
+                    path: spec.path,
+                    operation: spec.operation.rawValue,
+                    commandID: command.id,
+                    intentID: command.metadata.intentID
+                )
                 return CommandRouter.successOutcome(
                     command: command,
                     observations: [
@@ -131,7 +137,8 @@ public struct CodeRouter: @unchecked Sendable {
                     ],
                     artifacts: [],
                     policyDecision: policyDecision,
-                    router: "code"
+                    router: "code",
+                    additionalEvents: [fileEvent]
                 )
             } catch {
                 return CommandRouter.failureOutcome(
@@ -221,32 +228,6 @@ case .ui:
                 command: command,
                 observations: [ObservationPayload(kind: "fileContent", content: text)],
                 artifacts: [ArtifactPayload(kind: "file", identifier: resolvedPath.path, data: data)],
-                policyDecision: policyDecision,
-                router: "code"
-            )
-
-        case "modifyFile":
-            guard let resolvedPath = try resolvePath(filePath: action.filePath, workspacePath: action.workspacePath) else {
-                return CommandRouter.failureOutcome(
-                    command: command,
-                    reason: "Unable to resolve \(action.filePath ?? "file")",
-                    policyDecision: policyDecision,
-                    router: "code"
-                )
-            }
-            let existing = FileManager.default.contents(atPath: resolvedPath.path)
-                .flatMap { String(data: $0, encoding: .utf8) } ?? ""
-            let newContent = action.patch ?? existing
-            try newContent.write(to: resolvedPath, atomically: true, encoding: .utf8)
-            return CommandRouter.successOutcome(
-                command: command,
-                observations: [
-                    ObservationPayload(
-                        kind: "fileModified",
-                        content: "modified \(resolvedPath.path): \(existing.count)->\(newContent.count) chars"
-                    ),
-                ],
-                artifacts: [ArtifactPayload(kind: "patch", identifier: resolvedPath.path)],
                 policyDecision: policyDecision,
                 router: "code"
             )

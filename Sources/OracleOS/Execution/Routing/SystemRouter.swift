@@ -118,6 +118,12 @@ public struct SystemRouter: @unchecked Sendable {
         case .file(let spec):
             do {
                 try await workspaceRunner?.applyFile(spec)
+                let fileEvent = DomainEventFactory.fileModified(
+                    path: spec.path,
+                    operation: spec.operation.rawValue,
+                    commandID: command.id,
+                    intentID: command.metadata.intentID
+                )
                 return CommandRouter.successOutcome(
                     command: command,
                     observations: [
@@ -128,7 +134,8 @@ public struct SystemRouter: @unchecked Sendable {
                     ],
                     artifacts: [],
                     policyDecision: policyDecision,
-                    router: "system"
+                    router: "system",
+                    additionalEvents: [fileEvent]
                 )
             } catch {
                 return CommandRouter.failureOutcome(

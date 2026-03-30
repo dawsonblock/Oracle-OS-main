@@ -134,6 +134,23 @@ public enum DomainEventFactory {
         )
     }
 
+    // MARK: - File Events
+
+    public static func fileModified(
+        path: String,
+        operation: String,
+        commandID: UUID? = nil,
+        intentID: UUID? = nil
+    ) -> EventEnvelope {
+        let payload = FileModifiedEvent(path: path, operation: operation)
+        return encode(
+            eventType: "file.modified",
+            payload: payload,
+            commandID: commandID,
+            intentID: intentID
+        )
+    }
+
     // MARK: - Private Encoding
 
     private static func encode<T: Encodable>(

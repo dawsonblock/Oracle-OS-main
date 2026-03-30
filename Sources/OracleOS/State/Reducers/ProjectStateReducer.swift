@@ -47,6 +47,13 @@ public struct ProjectStateReducer: EventReducer {
                     )
                 }
 
+            case .fileModified(let payload):
+                state.update { snapshot in
+                    var notes = snapshot.notes
+                    notes.append("fileModified=\(payload.operation):\(payload.path)")
+                    return snapshot.copy(notes: Array(notes.suffix(25)))
+                }
+
             default:
                 break
             }

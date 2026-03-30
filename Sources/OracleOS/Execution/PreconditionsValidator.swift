@@ -21,13 +21,13 @@ public struct PreconditionsValidator: Sendable {
         // Code Commands require repository context
         // Supports both canonical ("build", "test") and legacy ("runBuild", "runTests") forms
         case "search", "searchRepository", "search_code", "read_repository",
-             "modify", "modifyFile", "open_file",
+             "modify", "file", "open_file",
              "build", "runBuild", "test", "runTests", "readFile":
             guard state.repositoryRoot != nil else {
                 throw PreconditionError.noRepositoryContext
             }
             // Block dangerous operations on dirty git state
-            if (command.kind == "modify" || command.kind == "modifyFile") && state.isGitDirty {
+            if (command.kind == "modify" || command.kind == "file") && state.isGitDirty {
                 throw PreconditionError.gitDirty
             }
             

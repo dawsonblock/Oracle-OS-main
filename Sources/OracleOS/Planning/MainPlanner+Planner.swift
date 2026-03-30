@@ -103,7 +103,7 @@ extension MainPlanner: Planner {
             let patch = intent.metadata["patch"] ?? intent.objective
             return Command(
                 type: .code,
-                payload: .code(CodeAction(name: "modifyFile", filePath: path, patch: patch)),
+                payload: .file(FileMutationSpec(path: path, operation: .write, content: patch)),
                 metadata: metadata
             )
         }

@@ -5,7 +5,7 @@ import Foundation
 public struct SafetyValidator: Sendable {
     // Sensitive operations that require extra scrutiny
     private let sensitiveKinds: Set<String> = [
-        "modifyFile", "launchApp", "openURL", "runBuild"
+        "file", "launchApp", "openURL", "build"
     ]
     
     // Protected applications that require approval

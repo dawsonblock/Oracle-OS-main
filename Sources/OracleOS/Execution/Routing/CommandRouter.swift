@@ -41,7 +41,8 @@ public struct CommandRouter: @unchecked Sendable {
         observations: [ObservationPayload],
         artifacts: [ArtifactPayload],
         policyDecision: PolicyDecision,
-        router: String
+        router: String,
+        additionalEvents: [EventEnvelope] = []
     ) -> ExecutionOutcome {
         let event = DomainEventFactory.commandExecuted(
             command: command,
@@ -53,7 +54,7 @@ public struct CommandRouter: @unchecked Sendable {
             status: .success,
             observations: observations,
             artifacts: artifacts,
-            events: [event],
+            events: [event] + additionalEvents,
             verifierReport: VerifierReport(
                 commandID: command.id,
                 preconditionsPassed: true,
