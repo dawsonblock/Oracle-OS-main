@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![Platform: macOS 14+](https://img.shields.io/badge/Platform-macOS%2014%2B-blue.svg)
 [![Swift 6.0+](https://img.shields.io/badge/Swift-6.0%2B-F05138.svg)](https://swift.org)
-![MCP Tools](https://img.shields.io/badge/MCP%20Tools-22-8A2BE2.svg)
+![MCP Tools](https://img.shields.io/badge/MCP%20Tools-30-8A2BE2.svg)
 
 [Quick Start](#-quick-start) · [Features](#-features) · [Architecture](#-architecture) · [MCP Tools](#-mcp-tool-surface) · [Docs](docs/README.md) · [Contributing](CONTRIBUTING.md)
 
@@ -50,7 +50,7 @@ swift build
 
 Current highlights:
 
-- 22 public MCP tools remain available under stable `oracle_*` names
+- 30 public MCP tools remain available under stable `oracle_*` names
 - native local controller and bundled host process are working
 - verified execution is active for the core interaction actions
 - canonical observation snapshots are real and used by runtime logic

@@ -43,16 +43,17 @@ public struct CommandRouter: @unchecked Sendable {
         policyDecision: PolicyDecision,
         router: String
     ) -> ExecutionOutcome {
-        let events = [
-            makeEvent(command: command, eventType: "CommandStarted", payload: ["router": router]),
-            makeEvent(command: command, eventType: "CommandSucceeded", payload: ["router": router]),
-        ]
+        let event = DomainEventFactory.commandExecuted(
+            command: command,
+            status: "success",
+            notes: ["router: \(router)"]
+        )
         return ExecutionOutcome(
             commandID: command.id,
             status: .success,
             observations: observations,
             artifacts: artifacts,
-            events: events,
+            events: [event],
             verifierReport: VerifierReport(
                 commandID: command.id,
                 preconditionsPassed: true,
@@ -69,16 +70,16 @@ public struct CommandRouter: @unchecked Sendable {
         router: String,
         status: ExecutionStatus = .failed
     ) -> ExecutionOutcome {
-        let events = [
-            makeEvent(command: command, eventType: "CommandStarted", payload: ["router": router]),
-            makeEvent(command: command, eventType: "CommandFailed", payload: ["reason": reason, "router": router]),
-        ]
+        let event = DomainEventFactory.commandFailed(
+            command: command,
+            error: "\(reason) (router: \(router))"
+        )
         return ExecutionOutcome(
             commandID: command.id,
             status: status,
             observations: [],
             artifacts: [],
-            events: events,
+            events: [event],
             verifierReport: VerifierReport(
                 commandID: command.id,
                 preconditionsPassed: true,
@@ -86,22 +87,6 @@ public struct CommandRouter: @unchecked Sendable {
                 postconditionsPassed: false,
                 notes: [reason]
             )
-        )
-    }
-
-    static func makeEvent(
-        command: Command,
-        eventType: String,
-        payload: [String: String]
-    ) -> EventEnvelope {
-        let encodedPayload = (try? JSONSerialization.data(withJSONObject: payload)) ?? Data()
-        return EventEnvelope(
-            sequenceNumber: 0,
-            commandID: command.id,
-            intentID: command.metadata.intentID,
-            timestamp: Date(),
-            eventType: eventType,
-            payload: encodedPayload
         )
     }
 }

@@ -5,34 +5,35 @@ import Foundation
 public struct PreconditionsValidator: Sendable {
     public init() {}
     
-    public func validate(_ command: Command, state: WorldStateModel) throws -> Bool {
-        // Get current state snapshot for validation
-        let snapshot = state.snapshot
-        
+    public func validate(_ command: Command, state: WorldModelSnapshot) throws -> Bool {
         // Validate based on command domain
         switch command.kind {
         // UI Commands require active application context
-        case "clickElement", "typeText", "focusWindow", "readElement":
-            guard snapshot.activeApplication != nil else {
+        // Supports both canonical ("click", "type") and legacy ("clickElement", "typeText") forms
+        case "click", "clickElement", "type", "typeText", "focus", "focusWindow", "read", "readElement":
+            guard state.activeApplication != nil else {
                 throw PreconditionError.noActiveApplication
             }
-            guard !snapshot.modalPresent else {
+            guard !state.modalPresent else {
                 throw PreconditionError.modalPresent
             }
             
         // Code Commands require repository context
-        case "searchRepository", "modifyFile", "runBuild", "runTests", "readFile":
-            guard snapshot.repositoryRoot != nil else {
+        // Supports both canonical ("build", "test") and legacy ("runBuild", "runTests") forms
+        case "search", "searchRepository", "search_code", "read_repository",
+             "modify", "modifyFile", "open_file",
+             "build", "runBuild", "test", "runTests", "readFile":
+            guard state.repositoryRoot != nil else {
                 throw PreconditionError.noRepositoryContext
             }
             // Block dangerous operations on dirty git state
-            if command.kind == "modifyFile" && snapshot.isGitDirty {
+            if (command.kind == "modify" || command.kind == "modifyFile") && state.isGitDirty {
                 throw PreconditionError.gitDirty
             }
             
-        // System Commands require app context and no modal
-        case "launchApp", "openURL":
-            guard !snapshot.modalPresent else {
+        // System Commands require no modal
+        case "launch", "launchApp", "open", "openURL":
+            guard !state.modalPresent else {
                 throw PreconditionError.modalPresent
             }
             

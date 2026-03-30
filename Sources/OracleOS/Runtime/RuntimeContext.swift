@@ -94,26 +94,33 @@ public final class RuntimeContext {
         config: RuntimeConfig = .live(),
         traceRecorder: TraceRecorder,
         traceStore: ExperienceStore,
-        artifactWriter: FailureArtifactWriter
+        artifactWriter: FailureArtifactWriter,
+        policyEngine: PolicyEngine? = nil,
+        workspaceRunner: WorkspaceRunner? = nil,
+        repositoryIndexer: RepositoryIndexer? = nil
     ) -> RuntimeContext {
-        let policyEngine = PolicyEngine(mode: config.policyMode)
+        let policy = policyEngine ?? PolicyEngine(mode: config.policyMode)
         let approvalStore = ApprovalStore(rootDirectory: config.approvalsDirectory)
         let graphStore = GraphStore()
         let stateMemoryIndex = StateMemoryIndex()
+        
+        // Use injected adapters or create defaults
+        let workspace = workspaceRunner ?? WorkspaceRunner()
+        let repoIndexer = repositoryIndexer ?? RepositoryIndexer()
 
         return RuntimeContext(
             config: config,
             traceRecorder: traceRecorder,
             traceStore: traceStore,
             artifactWriter: artifactWriter,
-            policyEngine: policyEngine,
+            policyEngine: policy,
             approvalStore: approvalStore,
             graphStore: graphStore,
             memoryStore: UnifiedMemoryStore(),
             stateAbstraction: StateAbstraction(),
             recoveryEngine: RecoveryEngine(),
-            workspaceRunner: WorkspaceRunner(),
-            repositoryIndexer: RepositoryIndexer(),
+            workspaceRunner: workspace,
+            repositoryIndexer: repoIndexer,
             architectureEngine: ArchitectureEngine(),
             experimentManager: ExperimentManager(),
             automationHost: .live(),
