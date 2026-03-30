@@ -99,14 +99,13 @@ final class EventReplayTests: XCTestCase {
     /// CommitCoordinator snapshot reflects committed event history.
     func test_snapshot_reflects_committed_events() async throws {
         let store = MemoryEventStore()
-        let coordinator = CommitCoordinator(eventStore: store, reducers: [])
+        let coordinator = CommitCoordinator(eventStore: store, reducers: [RuntimeStateReducer()])
 
         let initial = await coordinator.snapshot()
         XCTAssertEqual(initial.cycleCount, 0, "Initial cycle count must be zero")
 
-        // Commit events — reducers are empty so state stays the same,
-        // but event count in store grows
-        try await coordinator.commit([
+        // Commit events — reducer will update state
+        _ = try await coordinator.commit([
             EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "e1", payload: Data()),
             EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "e2", payload: Data())
         ])

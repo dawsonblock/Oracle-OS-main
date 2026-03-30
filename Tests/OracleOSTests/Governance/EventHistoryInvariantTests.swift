@@ -70,7 +70,7 @@ final class EventHistoryInvariantTests: XCTestCase {
         let ancestry = [UUID(), UUID(), UUID()]
         let snapshot = StateSnapshot(
             sequenceNumber: 10,
-            state: WorldStateModel(),
+            state: WorldStateModel().snapshot,
             eventAncestry: ancestry
         )
         XCTAssertFalse(snapshot.eventAncestry.isEmpty)
@@ -102,7 +102,7 @@ final class EventHistoryInvariantTests: XCTestCase {
             payload: Data()
         )
 
-        try await coordinator.commit([envelope])
+        _ = try await coordinator.commit([envelope])
 
         let events = await store.all()
         XCTAssertEqual(events.count, 1, "Event must be appended to store on commit")
@@ -112,15 +112,21 @@ final class EventHistoryInvariantTests: XCTestCase {
 
     func test_commit_coordinator_empty_commit_is_noop() async throws {
         let store = MemoryEventStore()
-        let coordinator = CommitCoordinator(eventStore: store, reducers: [])
-        try await coordinator.commit([])
+        let coordinator = CommitCoordinator(eventStore: store, reducers: [RuntimeStateReducer()])
+        // Empty commit now throws CommitError.emptyCommit
+        do {
+            _ = try await coordinator.commit([])
+            XCTFail("Expected CommitError.emptyCommit to be thrown")
+        } catch CommitError.emptyCommit {
+            // Expected behavior
+        }
         let events = await store.all()
         XCTAssertEqual(events.count, 0, "Empty commit must not append any events")
     }
 
     func test_commit_coordinator_assigns_sequence_numbers() async throws {
         let store = MemoryEventStore()
-        let coordinator = CommitCoordinator(eventStore: store, reducers: [])
+        let coordinator = CommitCoordinator(eventStore: store, reducers: [RuntimeStateReducer()])
 
         let envelopes = [
             EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "e1", payload: Data()),
@@ -128,7 +134,7 @@ final class EventHistoryInvariantTests: XCTestCase {
             EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "e3", payload: Data())
         ]
 
-        try await coordinator.commit(envelopes)
+        _ = try await coordinator.commit(envelopes)
         let events = await store.all()
         XCTAssertEqual(events.count, 3)
 

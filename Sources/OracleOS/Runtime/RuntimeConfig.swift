@@ -52,4 +52,21 @@ public struct RuntimeConfig: Sendable {
             experimentsDirectory: OracleProductPaths.experimentsDirectory
         )
     }
+
+    /// Test configuration with in-memory/temp paths suitable for unit tests.
+    public static func test() -> RuntimeConfig {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        return RuntimeConfig(
+            policyMode: .open,
+            approvalRequiredSurfaces: [],
+            blockedApplications: [],
+            protectedOperations: [],
+            traceDirectory: tempDir.appendingPathComponent("traces"),
+            recipesDirectory: tempDir.appendingPathComponent("recipes"),
+            controllerApprovalRequiredForRiskyActions: false,
+            approvalsDirectory: tempDir.appendingPathComponent("approvals"),
+            projectMemoryDirectory: tempDir.appendingPathComponent("memory"),
+            experimentsDirectory: tempDir.appendingPathComponent("experiments")
+        )
+    }
 }

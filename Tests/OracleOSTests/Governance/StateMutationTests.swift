@@ -87,9 +87,14 @@ final class StateMutationTests: XCTestCase {
     /// CommitCoordinator must require non-empty event arrays.
     func test_commit_coordinator_rejects_empty_events() async throws {
         let store = MemoryEventStore()
-        let coordinator = CommitCoordinator(eventStore: store, reducers: [])
-        // Commit with empty events should be a no-op (not crash)
-        try await coordinator.commit([])
+        let coordinator = CommitCoordinator(eventStore: store, reducers: [RuntimeStateReducer()])
+        // Commit with empty events should throw CommitError.emptyCommit
+        do {
+            _ = try await coordinator.commit([])
+            XCTFail("Expected CommitError.emptyCommit to be thrown")
+        } catch CommitError.emptyCommit {
+            // Expected
+        }
         let events = await store.all()
         XCTAssertEqual(events.count, 0, "Empty commit must not append events")
     }
@@ -98,7 +103,7 @@ final class StateMutationTests: XCTestCase {
     func test_snapshot_requires_event_ancestry() {
         let snapshot = StateSnapshot(
             sequenceNumber: 5,
-            state: WorldStateModel(),
+            state: WorldStateModel().snapshot,
             eventAncestry: [UUID(), UUID()]
         )
         XCTAssertFalse(snapshot.eventAncestry.isEmpty, "Every StateSnapshot must have event ancestry")

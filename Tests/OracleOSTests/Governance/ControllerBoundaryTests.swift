@@ -50,10 +50,9 @@ final class ControllerBoundaryTests: XCTestCase {
     }
 
     /// RuntimeOrchestrator must conform to IntentAPI — it is the sole implementation.
-    func test_runtime_orchestrator_conforms_to_intent_api() {
-        let store = MemoryEventStore()
-        let coordinator = CommitCoordinator(eventStore: store, reducers: [])
-        let orchestrator = RuntimeOrchestrator(eventStore: store, commitCoordinator: coordinator)
+    func test_runtime_orchestrator_conforms_to_intent_api() throws {
+        let container = try RuntimeBootstrap.makeDefault(configuration: .test())
+        let orchestrator = RuntimeOrchestrator(container: container)
 
         // RuntimeOrchestrator must be usable as IntentAPI — this is the controller boundary
         let api: any IntentAPI = orchestrator
