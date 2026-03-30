@@ -3,13 +3,14 @@ import OracleControllerShared
 
 @main
 struct OracleControllerHostMain {
+    @MainActor
     static func main() async {
         let output = HostOutput()
         
         // Use async bootstrap for proper recovery handling
         let bridge: ControllerRuntimeBridge
         do {
-            bridge = try await MainActor.run { try await ControllerRuntimeBridge() }
+            bridge = try await ControllerRuntimeBridge()
         } catch {
             await output.send(response: ControllerHostResponse(
                 requestID: UUID().uuidString,

@@ -3,6 +3,7 @@ import Foundation
 /// The authoritative runtime container.
 /// All stateful runtime services must be created here once and shared.
 /// Do NOT create competing instances of these services elsewhere.
+@MainActor
 public final class RuntimeContainer: @unchecked Sendable {
     // MARK: - Kernel Services (authoritative execution path)
     public let planner: any Planner
@@ -25,36 +26,10 @@ public final class RuntimeContainer: @unchecked Sendable {
     public let metricsRecorder: MetricsRecorder
 
     // MARK: - Shared Stateful Read-Side Services
-    // These require MainActor for creation. Optional for deprecated sync path.
-    private let _graphStore: GraphStore?
-    private let _memoryStore: UnifiedMemoryStore?
-    private let _stateMemoryIndex: StateMemoryIndex?
-    private let _searchController: SearchController?
-    
-    // Lazy creation for deprecated sync path (creates on MainActor when accessed)
-    @MainActor
-    public var graphStore: GraphStore {
-        if let store = _graphStore { return store }
-        fatalError("GraphStore not available. Use RuntimeBootstrap.makeBootstrappedRuntime() for full container.")
-    }
-    
-    @MainActor
-    public var memoryStore: UnifiedMemoryStore {
-        if let store = _memoryStore { return store }
-        fatalError("UnifiedMemoryStore not available. Use RuntimeBootstrap.makeBootstrappedRuntime() for full container.")
-    }
-    
-    @MainActor
-    public var stateMemoryIndex: StateMemoryIndex {
-        if let index = _stateMemoryIndex { return index }
-        fatalError("StateMemoryIndex not available. Use RuntimeBootstrap.makeBootstrappedRuntime() for full container.")
-    }
-    
-    @MainActor
-    public var searchController: SearchController {
-        if let controller = _searchController { return controller }
-        fatalError("SearchController not available. Use RuntimeBootstrap.makeBootstrappedRuntime() for full container.")
-    }
+    public let graphStore: GraphStore
+    public let memoryStore: UnifiedMemoryStore
+    public let stateMemoryIndex: StateMemoryIndex
+    public let searchController: SearchController
 
     // MARK: - Recovery State
     public private(set) var recoveryReport: RecoveryReport?
@@ -74,10 +49,10 @@ public final class RuntimeContainer: @unchecked Sendable {
         artifactWriter: FailureArtifactWriter,
         approvalStore: ApprovalStore,
         metricsRecorder: MetricsRecorder,
-        graphStore: GraphStore?,
-        memoryStore: UnifiedMemoryStore?,
-        stateMemoryIndex: StateMemoryIndex?,
-        searchController: SearchController?
+        graphStore: GraphStore,
+        memoryStore: UnifiedMemoryStore,
+        stateMemoryIndex: StateMemoryIndex,
+        searchController: SearchController
     ) {
         self.planner = planner
         self.executor = executor
@@ -93,10 +68,10 @@ public final class RuntimeContainer: @unchecked Sendable {
         self.artifactWriter = artifactWriter
         self.approvalStore = approvalStore
         self.metricsRecorder = metricsRecorder
-        self._graphStore = graphStore
-        self._memoryStore = memoryStore
-        self._stateMemoryIndex = stateMemoryIndex
-        self._searchController = searchController
+        self.graphStore = graphStore
+        self.memoryStore = memoryStore
+        self.stateMemoryIndex = stateMemoryIndex
+        self.searchController = searchController
     }
 
     /// Records the recovery report after startup recovery completes.

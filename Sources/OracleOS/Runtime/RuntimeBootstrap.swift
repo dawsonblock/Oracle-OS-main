@@ -11,7 +11,7 @@ public enum RuntimeBootstrap {
     public static func makeBootstrappedRuntime(
         configuration: RuntimeConfig = .live()
     ) async throws -> BootstrappedRuntime {
-        let container = try await makeContainer(configuration: configuration)
+        let container = try makeContainer(configuration: configuration)
 
         // Run recovery BEFORE runtime becomes available
         let recoveryReport = try await container.commitCoordinator.recoverIfNeeded()
@@ -29,98 +29,14 @@ public enum RuntimeBootstrap {
     /// Synchronous bootstrap for contexts that cannot await.
     /// Recovery will be run on first use. Prefer async version.
     @available(*, deprecated, message: "Use async makeBootstrappedRuntime() instead")
-    nonisolated public static func makeDefault(configuration: RuntimeConfig) throws -> RuntimeContainer {
-        // For synchronous contexts, we cannot create MainActor-isolated types.
-        // This is deprecated - callers should migrate to async version.
-        // Create minimal container without MainActor-dependent services.
-        return try makeContainerMinimal(configuration: configuration)
+    public static func makeDefault(configuration: RuntimeConfig) throws -> RuntimeContainer {
+        return try makeContainer(configuration: configuration)
     }
 
     // MARK: - Internal Assembly
     
-    /// Full container creation - requires MainActor for shared services
-    private static func makeContainer(configuration: RuntimeConfig) async throws -> RuntimeContainer {
-        // Create core components first (not MainActor-dependent)
-        let (coreComponents, processAdapter) = try makeCore(configuration: configuration)
-        
-        // Create shared stateful read-side services (MainActor-dependent)
-        let graphStore = GraphStore()
-        let memoryStore = UnifiedMemoryStore()
-        let stateMemoryIndex = StateMemoryIndex()
-        let searchController = SearchController(
-            generator: CandidateGenerator(
-                stateMemoryIndex: stateMemoryIndex,
-                graphStore: graphStore
-            )
-        )
-
-        return RuntimeContainer(
-            planner: coreComponents.planner,
-            executor: coreComponents.executor,
-            commitCoordinator: coreComponents.commitCoordinator,
-            eventStore: coreComponents.eventStore,
-            reducer: coreComponents.reducer,
-            policyEngine: coreComponents.policyEngine,
-            processAdapter: processAdapter,
-            commandRouter: coreComponents.commandRouter,
-            config: configuration,
-            traceRecorder: coreComponents.traceRecorder,
-            traceStore: coreComponents.traceStore,
-            artifactWriter: coreComponents.artifactWriter,
-            approvalStore: coreComponents.approvalStore,
-            metricsRecorder: coreComponents.metricsRecorder,
-            graphStore: graphStore,
-            memoryStore: memoryStore,
-            stateMemoryIndex: stateMemoryIndex,
-            searchController: searchController
-        )
-    }
-    
-    /// Minimal container for deprecated sync path
-    nonisolated private static func makeContainerMinimal(configuration: RuntimeConfig) throws -> RuntimeContainer {
-        let (coreComponents, processAdapter) = try makeCore(configuration: configuration)
-        
-        // For sync path, we need nonisolated-compatible types
-        // These services will need to be lazily created by callers
-        return RuntimeContainer(
-            planner: coreComponents.planner,
-            executor: coreComponents.executor,
-            commitCoordinator: coreComponents.commitCoordinator,
-            eventStore: coreComponents.eventStore,
-            reducer: coreComponents.reducer,
-            policyEngine: coreComponents.policyEngine,
-            processAdapter: processAdapter,
-            commandRouter: coreComponents.commandRouter,
-            config: configuration,
-            traceRecorder: coreComponents.traceRecorder,
-            traceStore: coreComponents.traceStore,
-            artifactWriter: coreComponents.artifactWriter,
-            approvalStore: coreComponents.approvalStore,
-            metricsRecorder: coreComponents.metricsRecorder,
-            graphStore: nil,
-            memoryStore: nil,
-            stateMemoryIndex: nil,
-            searchController: nil
-        )
-    }
-    
-    /// Core components that don't require MainActor
-    private struct CoreComponents {
-        let planner: MainPlanner
-        let executor: VerifiedExecutor
-        let commitCoordinator: CommitCoordinator
-        let eventStore: FileEventStore
-        let reducer: CompositeStateReducer
-        let policyEngine: PolicyEngine
-        let commandRouter: CommandRouter
-        let traceRecorder: TraceRecorder
-        let traceStore: ExperienceStore
-        let artifactWriter: FailureArtifactWriter
-        let approvalStore: ApprovalStore
-        let metricsRecorder: MetricsRecorder
-    }
-
-    nonisolated private static func makeCore(configuration: RuntimeConfig) throws -> (CoreComponents, DefaultProcessAdapter) {
+    /// Full container creation with all shared services
+    private static func makeContainer(configuration: RuntimeConfig) throws -> RuntimeContainer {
         let rootURL = configuration.traceDirectory
 
         // Create WAL first for crash safety
@@ -173,21 +89,36 @@ public enum RuntimeBootstrap {
         let approvalStore = ApprovalStore(rootDirectory: configuration.approvalsDirectory)
         let metricsRecorder = MetricsRecorder()
         
-        let components = CoreComponents(
+        // Create shared stateful read-side services (MainActor-dependent)
+        let graphStore = GraphStore()
+        let memoryStore = UnifiedMemoryStore()
+        let stateMemoryIndex = StateMemoryIndex()
+        let searchController = SearchController(
+            generator: CandidateGenerator(
+                stateMemoryIndex: stateMemoryIndex,
+                graphStore: graphStore
+            )
+        )
+
+        return RuntimeContainer(
             planner: planner,
             executor: executor,
             commitCoordinator: commitCoordinator,
             eventStore: eventStore,
             reducer: compositeReducer,
             policyEngine: policyEngine,
+            processAdapter: processAdapter,
             commandRouter: commandRouter,
+            config: configuration,
             traceRecorder: traceRecorder,
             traceStore: traceStore,
             artifactWriter: artifactWriter,
             approvalStore: approvalStore,
-            metricsRecorder: metricsRecorder
+            metricsRecorder: metricsRecorder,
+            graphStore: graphStore,
+            memoryStore: memoryStore,
+            stateMemoryIndex: stateMemoryIndex,
+            searchController: searchController
         )
-
-        return (components, processAdapter)
     }
 }

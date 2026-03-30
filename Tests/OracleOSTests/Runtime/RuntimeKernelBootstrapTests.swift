@@ -3,23 +3,24 @@ import Testing
 @testable import OracleOS
 
 /// Tests that prove the runtime kernel bootstrap path is the only live path.
+@MainActor
 struct RuntimeKernelBootstrapTests {
 
     // MARK: - Bootstrap Truth Tests
 
-    @Test func kernelBootstrapReturnsCompleteKernel() throws {
-        // Verify that RuntimeBootstrap.makeDefault returns a complete RuntimeContainer
+    @Test func kernelBootstrapReturnsCompleteKernel() async throws {
+        // Verify that RuntimeBootstrap.makeBootstrappedRuntime returns a complete runtime
         // with real reducers, not empty arrays.
         let config = RuntimeConfig.test()
-        let container = try RuntimeBootstrap.makeDefault(configuration: config)
+        let bootstrapped = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: config)
 
         // The container must have a non-nil reducer
-        #expect(container.reducer != nil, "Kernel must have real reducers")
+        #expect(bootstrapped.container.reducer != nil, "Kernel must have real reducers")
     }
 
     @Test func commitCoordinatorHasReducers() async throws {
         let config = RuntimeConfig.test()
-        let container = try RuntimeBootstrap.makeDefault(configuration: config)
+        let bootstrapped = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: config)
 
         // Create a test event and commit it
         let intentID = UUID()
@@ -34,12 +35,12 @@ struct RuntimeKernelBootstrapTests {
         )
 
         // After commit, state should change (proving reducers ran)
-        let snapshotBefore = await container.commitCoordinator.snapshot()
+        let snapshotBefore = await bootstrapped.container.commitCoordinator.snapshot()
         let cycleCountBefore = snapshotBefore.cycleCount
 
-        _ = try await container.commitCoordinator.commit([event])
+        _ = try await bootstrapped.container.commitCoordinator.commit([event])
 
-        let snapshotAfter = await container.commitCoordinator.snapshot()
+        let snapshotAfter = await bootstrapped.container.commitCoordinator.snapshot()
         let cycleCountAfter = snapshotAfter.cycleCount
 
         #expect(cycleCountAfter > cycleCountBefore, "Reducers must increment cycle count")
