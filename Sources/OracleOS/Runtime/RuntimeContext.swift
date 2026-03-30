@@ -67,12 +67,8 @@ public final class RuntimeContext {
         self.stateMemoryIndex = container.stateMemoryIndex
         self.searchController = container.searchController
         self.policyEngine = container.policyEngine
-
-        // WorkspaceRunner and RepositoryIndexer come from CommandRouter
-        // Create compatible instances using container's process adapter
-        let processAdapter = container.processAdapter
-        self.workspaceRunner = WorkspaceRunner(processAdapter: processAdapter)
-        self.repositoryIndexer = RepositoryIndexer(processAdapter: processAdapter)
+        self.workspaceRunner = container.workspaceRunner
+        self.repositoryIndexer = container.repositoryIndexer
 
         // Peripheral services that don't need sharing
         self.stateAbstraction = stateAbstraction
@@ -88,7 +84,7 @@ public final class RuntimeContext {
         self.browserPageStateBuilder = browserPageStateBuilder
     }
 
-    @available(*, deprecated, message: "Use init(container:) with RuntimeBootstrap.makeBootstrappedRuntime()")
+    @available(*, unavailable, message: "Use init(container:) with RuntimeBootstrap.makeBootstrappedRuntime()")
     public init(
         config: RuntimeConfig = .live(),
         traceRecorder: TraceRecorder,

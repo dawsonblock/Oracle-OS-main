@@ -47,7 +47,7 @@ public final class MCPServer {
 
     /// Run the MCP server. Blocks forever reading stdin, dispatching tool calls,
     /// and writing responses. Exits when stdin closes.
-    public func run() {
+    public func run() async {
         Log.info("Oracle OS v\(OracleOS.version) MCP server starting")
 
         while let message = readMessage() {
@@ -77,7 +77,7 @@ public final class MCPServer {
 
             case "tools/call":
                 if let id {
-                    writeResponse(id: id, result: MCPDispatch.handle(params))
+                    writeResponse(id: id, result: await MCPDispatch.handle(params))
                 }
 
             case "ping":

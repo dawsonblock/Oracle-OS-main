@@ -24,7 +24,7 @@ func main() async {
     switch command {
     case "mcp":
         let server = MCPServer()
-        server.run()
+        await server.run()
 
     case "setup":
         let wizard = SetupWizard()

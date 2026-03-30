@@ -11,7 +11,7 @@ public actor CommitCoordinator {
     /// Recovery state to ensure idempotent startup
     private enum RecoveryState {
         case notStarted
-        case running
+        case running(Task<RecoveryReport, Error>)
         case completed(RecoveryReport)
     }
     private var recoveryState: RecoveryState = .notStarted
@@ -30,44 +30,46 @@ public actor CommitCoordinator {
 
     /// Recover any pending commits from WAL after crash.
     /// MUST be called at startup before accepting new commits.
-    /// Idempotent: subsequent calls return the same report.
+    /// Idempotent: subsequent concurrent or serial calls return the same report.
     @discardableResult
     public func recoverIfNeeded() async throws -> RecoveryReport {
-        // Return cached result if already completed
-        if case .completed(let report) = recoveryState {
+        switch recoveryState {
+        case .completed(let report):
             return report
+        case .running(let task):
+            return try await task.value
+        case .notStarted:
+            let task = Task { () -> RecoveryReport in
+                guard let wal = self.wal, let pending = try wal.readPending() else {
+                    return RecoveryReport.noRecoveryNeeded
+                }
+
+                // Replay pending events to event store
+                try await self.eventStore.append(contentsOf: pending)
+                for reducer in self.reducers {
+                    reducer.apply(events: pending, to: &self.currentState)
+                }
+                try wal.clear()
+
+                return RecoveryReport(
+                    didRecover: true,
+                    walEntriesRecovered: pending.count,
+                    eventsReplayed: pending.count,
+                    rebuiltSnapshotID: UUID(),
+                    completedAt: Date()
+                )
+            }
+            recoveryState = .running(task)
+            
+            do {
+                let report = try await task.value
+                recoveryState = .completed(report)
+                return report
+            } catch {
+                recoveryState = .notStarted
+                throw error
+            }
         }
-
-        // Guard against concurrent recovery
-        guard case .notStarted = recoveryState else {
-            // Wait for ongoing recovery - return no-op report
-            return .noRecoveryNeeded
-        }
-
-        recoveryState = .running
-
-        guard let wal = wal, let pending = try wal.readPending() else {
-            let report = RecoveryReport.noRecoveryNeeded
-            recoveryState = .completed(report)
-            return report
-        }
-
-        // Replay pending events to event store
-        try await eventStore.append(contentsOf: pending)
-        for reducer in reducers {
-            reducer.apply(events: pending, to: &currentState)
-        }
-        try wal.clear()
-
-        let report = RecoveryReport(
-            didRecover: true,
-            walEntriesRecovered: pending.count,
-            eventsReplayed: pending.count,
-            rebuiltSnapshotID: UUID(),
-            completedAt: Date()
-        )
-        recoveryState = .completed(report)
-        return report
     }
 
     public func commit(_ envelopes: [EventEnvelope]) async throws -> CommitReceipt {

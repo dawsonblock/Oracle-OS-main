@@ -54,6 +54,10 @@ public enum MCPDispatch {
     private static var runtime: RuntimeOrchestrator { _bootstrappedRuntime!.orchestrator }
     private static var runtimeContainer: RuntimeContainer { _bootstrappedRuntime!.container }
 
+    private struct ResultWrapper: @unchecked Sendable {
+        let payload: [String: Any]?
+    }
+
     /// Handle a tools/call request. Returns MCP-formatted result.
     /// Wraps every tool call in a timeout so no single tool can block
     /// the MCP server indefinitely (the #1 user-reported issue).
@@ -73,53 +77,68 @@ public enum MCPDispatch {
         let startTime = DispatchTime.now()
         Log.info("Tool call: \(toolName)")
 
-        // Run the actual tool dispatch with a hard timeout.
-        // We use a DispatchWorkItem on a serial queue so the main
-        // run-loop stays responsive to cancellation signals.
-        let semaphore = DispatchSemaphore(value: 0)
-        var response: [String: Any]?
-        let work = DispatchWorkItem { [args] in
-            let result: [String: Any]
-            if toolName == "oracle_screenshot" {
-                result = handleScreenshot(args)
-            } else {
-                let toolResult = dispatch(tool: toolName, args: args)
-                result = formatResult(toolResult, toolName: toolName)
+        let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
+
+        let responseWrapper: ResultWrapper = await withCheckedContinuation { continuation in
+            let queue = DispatchQueue(label: "oracle.mcp.tool.\(toolName)")
+            let lock = NSLock()
+            var resumed = false
+
+            let work = DispatchWorkItem { [args] in
+                let result: [String: Any]
+                if toolName == "oracle_screenshot" {
+                    result = handleScreenshot(args)
+                } else {
+                    let toolResult = dispatch(tool: toolName, args: args)
+                    result = formatResult(toolResult, toolName: toolName)
+                }
+                
+                lock.lock()
+                if !resumed {
+                    resumed = true
+                    lock.unlock()
+                    continuation.resume(returning: ResultWrapper(payload: result))
+                } else {
+                    lock.unlock()
+                }
             }
-            response = result
-            semaphore.signal()
+
+            queue.async(execute: work)
+
+            queue.asyncAfter(deadline: .now() + actualTimeout) {
+                lock.lock()
+                if !resumed {
+                    resumed = true
+                    work.cancel()
+                    lock.unlock()
+                    continuation.resume(returning: ResultWrapper(payload: nil))
+                } else {
+                    lock.unlock()
+                }
+            }
         }
 
-        // Dispatch onto a dedicated queue so we can enforce the timeout.
-        // NOTE: @MainActor methods called inside dispatch() will hop back
-        // to the main actor automatically — we are only using the queue
-        // as a timeout-enforcing wrapper, not to change isolation.
-        // This pattern is intentional: we need hard timeouts to prevent
-        // stuck tools from blocking the MCP server, which is the #1
-        // user-reported issue.
-        let queue = DispatchQueue(label: "oracle.mcp.tool.\(toolName)")
-        queue.async(execute: work)
-
-        let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
-        let deadline = DispatchTime.now() + actualTimeout
-        let waitResult = semaphore.wait(timeout: deadline)
-
-        // Log timing for every tool call (helps diagnose slow tools)
         let elapsed = Double(DispatchTime.now().uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000
 
-        if waitResult == .timedOut {
-            work.cancel()
+        guard let payload = responseWrapper.payload else {
             Log.error("Tool \(toolName) TIMED OUT after \(Int(actualTimeout))s")
             return errorContent("Tool \(toolName) timed out after \(Int(actualTimeout))s")
         }
 
-        if elapsed > 5000 {
-            Log.warn("Tool \(toolName) took \(Int(elapsed))ms (slow)")
+        if let errStr = payload["isError"] as? Bool, errStr, 
+           let firstContent = (payload["content"] as? [[String: Any]])?.first,
+           let textStr = firstContent["text"] as? String, 
+           textStr.contains("timed out") {
+            // Already logged error inside closure
         } else {
-            Log.info("Tool \(toolName) completed in \(Int(elapsed))ms")
+            if elapsed > 5000 {
+                Log.warn("Tool \(toolName) took \(Int(elapsed))ms (slow)")
+            } else {
+                Log.info("Tool \(toolName) completed in \(Int(elapsed))ms")
+            }
         }
 
-        return response ?? errorContent("Tool \(toolName) returned nil response")
+        return payload
     }
 
     /// Screenshot handler returns MCP image content type for inline display.

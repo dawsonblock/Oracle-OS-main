@@ -14,8 +14,13 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         self.policyEngine = policyEngine
     }
 
-    public func run(_ command: SystemCommand, in workspace: WorkspaceContext?) async throws -> ProcessResult {
-        return try await runWithTimeout(command, in: workspace, timeout: Self.defaultTimeoutSeconds)
+    public func run(_ command: SystemCommand, in workspace: WorkspaceContext?, policy: CommandExecutionPolicy? = nil) async throws -> ProcessResult {
+        return try await runWithTimeout(
+            command,
+            in: workspace,
+            timeout: policy?.timeoutSeconds ?? Self.defaultTimeoutSeconds,
+            maxOutputBytes: policy?.maxOutputBytes ?? Self.defaultMaxOutputBytes
+        )
     }
 
     /// Run a command with proper concurrent pipe draining to avoid deadlocks.
@@ -37,41 +42,68 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         process.standardError = stderr
         process.environment = sanitizedEnvironment()
 
+        let start = Date()
+
         // Start the process
         try process.run()
         
         // Drain pipes concurrently to prevent deadlock.
         // Key insight: we must read from pipes WHILE the process runs,
         // not after waitUntilExit(). If pipes fill (64KB), process blocks.
-        async let stdoutData = drainPipe(stdout, maxBytes: maxOutputBytes)
-        async let stderrData = drainPipe(stderr, maxBytes: maxOutputBytes)
+        async let stdoutDrain = drainPipe(stdout, maxBytes: maxOutputBytes)
+        async let stderrDrain = drainPipe(stderr, maxBytes: maxOutputBytes)
         
         // Wait for process with timeout
         let completed = await waitForProcess(process, timeout: timeout)
+        var terminationReason: ProcessTerminationReason = .exit
         
         if !completed {
+            terminationReason = .timeout
             process.terminate()
             // Give it a moment to clean up
             try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
             if process.isRunning {
                 process.interrupt() // SIGINT
+                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
             }
+            // A final forced stop path if the process is STILL running
+            // kill() can be called using Task {} or just kill command
+            // or simply wait if it is killed. process.terminate() is SIGTERM.
+            // There's no forced kill(SIGKILL) exposed on `Process` directly, 
+            // but we can execute kill -9 pid
+            if process.isRunning {
+                kill(process.processIdentifier, SIGKILL)
+            }
+        } else if process.terminationReason == .uncaughtSignal {
+            terminationReason = .uncaughtSignal
         }
         
         // Collect drained output
-        let out = await stdoutData
-        let err = await stderrData
-        
+        let outDrain = await stdoutDrain
+        let errDrain = await stderrDrain
+
         let exitCode = completed ? process.terminationStatus : -1
+        let durationMs = Date().timeIntervalSince(start) * 1000.0
+
+        var errString = String(data: errDrain.data, encoding: .utf8) ?? ""
+        if !completed {
+            errString += "\n[Oracle OS: Process timed out after \(Int(timeout))s]"
+        }
+
         return ProcessResult(
             exitCode: exitCode,
-            stdout: String(data: out, encoding: .utf8) ?? "",
-            stderr: completed ? String(data: err, encoding: .utf8) ?? "" : "Process timed out after \(Int(timeout))s"
+            stdout: String(data: outDrain.data, encoding: .utf8) ?? "",
+            stderr: errString,
+            durationMs: durationMs,
+            timedOut: !completed,
+            terminationReason: terminationReason,
+            stdoutTruncated: outDrain.truncated,
+            stderrTruncated: errDrain.truncated
         )
     }
     
     /// Synchronous version for backward compatibility - uses dispatch queues for concurrent draining.
-    public func runSync(_ command: SystemCommand, in workspace: WorkspaceContext?) throws -> ProcessResult {
+    public func runSync(_ command: SystemCommand, in workspace: WorkspaceContext?, policy: CommandExecutionPolicy? = nil) throws -> ProcessResult {
         let process = Process()
         process.currentDirectoryURL = workspace?.rootURL
         process.executableURL = URL(fileURLWithPath: command.executable)
@@ -89,22 +121,30 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         // Concurrent pipe draining using dispatch queues
         // IMPORTANT: Pipes must be drained WHILE process runs to prevent buffer deadlock
         var stdoutData = Data()
+        var stdoutTruncated = false
         var stderrData = Data()
+        var stderrTruncated = false
         let maxBytes = Self.defaultMaxOutputBytes
         
         let stdoutQueue = DispatchQueue(label: "oracle.process.stdout")
         let stderrQueue = DispatchQueue(label: "oracle.process.stderr")
         let group = DispatchGroup()
         
+        let start = Date()
+
         group.enter()
         stdoutQueue.async {
-            stdoutData = self.drainPipeSync(stdout, maxBytes: maxBytes)
+            let res = self.drainPipeSync(stdout, maxBytes: maxBytes)
+            stdoutData = res.data
+            stdoutTruncated = res.truncated
             group.leave()
         }
         
         group.enter()
         stderrQueue.async {
-            stderrData = self.drainPipeSync(stderr, maxBytes: maxBytes)
+            let res = self.drainPipeSync(stderr, maxBytes: maxBytes)
+            stderrData = res.data
+            stderrTruncated = res.truncated
             group.leave()
         }
         
@@ -113,28 +153,36 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         group.wait()
         process.waitUntilExit()
 
+        let durationMs = Date().timeIntervalSince(start) * 1000.0
+
         return ProcessResult(
             exitCode: process.terminationStatus,
             stdout: String(data: stdoutData, encoding: .utf8) ?? "",
-            stderr: String(data: stderrData, encoding: .utf8) ?? ""
+            stderr: String(data: stderrData, encoding: .utf8) ?? "",
+            durationMs: durationMs,
+            timedOut: false,
+            terminationReason: .exit,
+            stdoutTruncated: stdoutTruncated,
+            stderrTruncated: stderrTruncated
         )
     }
     
     // MARK: - Pipe Draining
     
     /// Drain a pipe asynchronously with bounded output.
-    private func drainPipe(_ pipe: Pipe, maxBytes: Int) async -> Data {
+    private func drainPipe(_ pipe: Pipe, maxBytes: Int) async -> (data: Data, truncated: Bool) {
         return await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
-                let data = self.drainPipeSync(pipe, maxBytes: maxBytes)
-                continuation.resume(returning: data)
+                let res = self.drainPipeSync(pipe, maxBytes: maxBytes)
+                continuation.resume(returning: res)
             }
         }
     }
     
     /// Drain a pipe synchronously with bounded output.
-    private func drainPipeSync(_ pipe: Pipe, maxBytes: Int) -> Data {
+    private func drainPipeSync(_ pipe: Pipe, maxBytes: Int) -> (data: Data, truncated: Bool) {
         var accumulated = Data()
+        var truncated = false
         let handle = pipe.fileHandleForReading
         
         // Read in chunks to allow for bounding
@@ -149,6 +197,7 @@ public final class DefaultProcessAdapter: ProcessAdapter {
             let remaining = maxBytes - accumulated.count
             if remaining <= 0 {
                 // Truncate - we've hit the limit
+                truncated = true
                 break
             }
             
@@ -156,11 +205,12 @@ public final class DefaultProcessAdapter: ProcessAdapter {
                 accumulated.append(chunk)
             } else {
                 accumulated.append(chunk.prefix(remaining))
+                truncated = true
                 break
             }
         }
         
-        return accumulated
+        return (data: accumulated, truncated: truncated)
     }
     
     /// Wait for a process to exit with timeout.
