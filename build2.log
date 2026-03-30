@@ -1,0 +1,710 @@
+Building for debugging...
+[0/11] Write sources
+[1/11] Write swift-version--58304C5D6DBC2206.txt
+[3/59] Compiling OracleOS StrategySelector.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:172:49: error: type 'AgentKind' has no member 'mixed'
+170 | 
+171 |         // Priority 6: Code agent with repo → diagnosticAnalysis or repoRepair.
+172 |         if (agentKind == .code || agentKind == .mixed),
+    |                                                 `- error: type 'AgentKind' has no member 'mixed'
+173 |            conditions.contains(.repositoryOpen) {
+174 |             return .repoRepair
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:322:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+320 |                 kind: .codeRepair,
+321 |                 description: "Repair failing code using fault localization and patching",
+322 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+323 |                 requiredConditions: [.repositoryOpen],
+324 |                 priorityScore: 0.7
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:329:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+327 |                 kind: .testFix,
+328 |                 description: "Fix failing tests by analyzing stack traces and applying targeted patches",
+329 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+330 |                 requiredConditions: [.repositoryOpen, .testsFailing],
+331 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:336:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+334 |                 kind: .buildFix,
+335 |                 description: "Fix build failures by analyzing compiler errors",
+336 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+337 |                 requiredConditions: [.repositoryOpen, .buildFailing],
+338 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:343:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+341 |                 kind: .dependencyRepair,
+342 |                 description: "Repair dependency issues in the project",
+343 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+344 |                 requiredConditions: [.repositoryOpen],
+345 |                 priorityScore: 0.6
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:357:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+355 |                 kind: .navigation,
+356 |                 description: "Navigate to a target application or page",
+357 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+358 |                 priorityScore: 0.5
+359 |             ),
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:363:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+361 |                 kind: .uiExploration,
+362 |                 description: "Explore the UI to discover available actions",
+363 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+364 |                 priorityScore: 0.3,
+365 |                 notes: ["Lowest priority — used when other strategies don't apply"]
+[4/59] Compiling OracleOS WorkflowStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:172:49: error: type 'AgentKind' has no member 'mixed'
+170 | 
+171 |         // Priority 6: Code agent with repo → diagnosticAnalysis or repoRepair.
+172 |         if (agentKind == .code || agentKind == .mixed),
+    |                                                 `- error: type 'AgentKind' has no member 'mixed'
+173 |            conditions.contains(.repositoryOpen) {
+174 |             return .repoRepair
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:322:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+320 |                 kind: .codeRepair,
+321 |                 description: "Repair failing code using fault localization and patching",
+322 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+323 |                 requiredConditions: [.repositoryOpen],
+324 |                 priorityScore: 0.7
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:329:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+327 |                 kind: .testFix,
+328 |                 description: "Fix failing tests by analyzing stack traces and applying targeted patches",
+329 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+330 |                 requiredConditions: [.repositoryOpen, .testsFailing],
+331 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:336:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+334 |                 kind: .buildFix,
+335 |                 description: "Fix build failures by analyzing compiler errors",
+336 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+337 |                 requiredConditions: [.repositoryOpen, .buildFailing],
+338 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:343:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+341 |                 kind: .dependencyRepair,
+342 |                 description: "Repair dependency issues in the project",
+343 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+344 |                 requiredConditions: [.repositoryOpen],
+345 |                 priorityScore: 0.6
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:357:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+355 |                 kind: .navigation,
+356 |                 description: "Navigate to a target application or page",
+357 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+358 |                 priorityScore: 0.5
+359 |             ),
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:363:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+361 |                 kind: .uiExploration,
+362 |                 description: "Explore the UI to discover available actions",
+363 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+364 |                 priorityScore: 0.3,
+365 |                 notes: ["Lowest priority — used when other strategies don't apply"]
+[5/59] Compiling OracleOS TraceClusterer.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:172:49: error: type 'AgentKind' has no member 'mixed'
+170 | 
+171 |         // Priority 6: Code agent with repo → diagnosticAnalysis or repoRepair.
+172 |         if (agentKind == .code || agentKind == .mixed),
+    |                                                 `- error: type 'AgentKind' has no member 'mixed'
+173 |            conditions.contains(.repositoryOpen) {
+174 |             return .repoRepair
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:322:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+320 |                 kind: .codeRepair,
+321 |                 description: "Repair failing code using fault localization and patching",
+322 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+323 |                 requiredConditions: [.repositoryOpen],
+324 |                 priorityScore: 0.7
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:329:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+327 |                 kind: .testFix,
+328 |                 description: "Fix failing tests by analyzing stack traces and applying targeted patches",
+329 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+330 |                 requiredConditions: [.repositoryOpen, .testsFailing],
+331 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:336:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+334 |                 kind: .buildFix,
+335 |                 description: "Fix build failures by analyzing compiler errors",
+336 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+337 |                 requiredConditions: [.repositoryOpen, .buildFailing],
+338 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:343:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+341 |                 kind: .dependencyRepair,
+342 |                 description: "Repair dependency issues in the project",
+343 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+344 |                 requiredConditions: [.repositoryOpen],
+345 |                 priorityScore: 0.6
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:357:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+355 |                 kind: .navigation,
+356 |                 description: "Navigate to a target application or page",
+357 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+358 |                 priorityScore: 0.5
+359 |             ),
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:363:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+361 |                 kind: .uiExploration,
+362 |                 description: "Explore the UI to discover available actions",
+363 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+364 |                 priorityScore: 0.3,
+365 |                 notes: ["Lowest priority — used when other strategies don't apply"]
+[6/59] Compiling OracleOS WorkflowConfidenceModel.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:172:49: error: type 'AgentKind' has no member 'mixed'
+170 | 
+171 |         // Priority 6: Code agent with repo → diagnosticAnalysis or repoRepair.
+172 |         if (agentKind == .code || agentKind == .mixed),
+    |                                                 `- error: type 'AgentKind' has no member 'mixed'
+173 |            conditions.contains(.repositoryOpen) {
+174 |             return .repoRepair
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:322:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+320 |                 kind: .codeRepair,
+321 |                 description: "Repair failing code using fault localization and patching",
+322 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+323 |                 requiredConditions: [.repositoryOpen],
+324 |                 priorityScore: 0.7
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:329:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+327 |                 kind: .testFix,
+328 |                 description: "Fix failing tests by analyzing stack traces and applying targeted patches",
+329 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+330 |                 requiredConditions: [.repositoryOpen, .testsFailing],
+331 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:336:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+334 |                 kind: .buildFix,
+335 |                 description: "Fix build failures by analyzing compiler errors",
+336 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+337 |                 requiredConditions: [.repositoryOpen, .buildFailing],
+338 |                 priorityScore: 0.75
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:343:48: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+341 |                 kind: .dependencyRepair,
+342 |                 description: "Repair dependency issues in the project",
+343 |                 applicableAgentKinds: [.code, .mixed],
+    |                                                `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+344 |                 requiredConditions: [.repositoryOpen],
+345 |                 priorityScore: 0.6
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:357:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+355 |                 kind: .navigation,
+356 |                 description: "Navigate to a target application or page",
+357 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+358 |                 priorityScore: 0.5
+359 |             ),
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Strategies/StrategySelector.swift:363:46: error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+361 |                 kind: .uiExploration,
+362 |                 description: "Explore the UI to discover available actions",
+363 |                 applicableAgentKinds: [.os, .mixed],
+    |                                              `- error: type 'Array<AgentKind>.ArrayLiteralElement' (aka 'AgentKind') has no member 'mixed'
+364 |                 priorityScore: 0.3,
+365 |                 notes: ["Lowest priority — used when other strategies don't apply"]
+[7/63] Compiling OracleOS SelectedStrategy.swift
+[8/63] Compiling OracleOS StrategyEvaluator.swift
+[9/63] Compiling OracleOS StrategyKind.swift
+[10/63] Compiling OracleOS StrategyLibrary.swift
+[11/63] Compiling OracleOS LedgerStrategy.swift
+[12/63] Compiling OracleOS OSPlanningStrategy.swift
+[13/63] Compiling OracleOS OperatorFamily.swift
+[14/63] Compiling OracleOS ReasoningStrategy.swift
+[15/65] Compiling OracleOS PlanDiagnostics.swift
+[16/65] Compiling OracleOS PlanEvaluator.swift
+[17/65] Compiling OracleOS PlanGenerator.swift
+[18/65] Compiling OracleOS PlanScore.swift
+[19/66] Compiling OracleOS WorkflowDecayPolicy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowIndex.swift:82:38: error: type 'AgentKind?' has no member 'mixed'
+80 |                 && (
+81 |                 agentKind == nil
+82 |                     || agentKind == .mixed
+   |                                      `- error: type 'AgentKind?' has no member 'mixed'
+83 |                     || plan.agentKind == agentKind
+84 |             )
+[20/66] Compiling OracleOS WorkflowExecutor.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowIndex.swift:82:38: error: type 'AgentKind?' has no member 'mixed'
+80 |                 && (
+81 |                 agentKind == nil
+82 |                     || agentKind == .mixed
+   |                                      `- error: type 'AgentKind?' has no member 'mixed'
+83 |                     || plan.agentKind == agentKind
+84 |             )
+[21/66] Compiling OracleOS WorkflowIndex.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowIndex.swift:82:38: error: type 'AgentKind?' has no member 'mixed'
+80 |                 && (
+81 |                 agentKind == nil
+82 |                     || agentKind == .mixed
+   |                                      `- error: type 'AgentKind?' has no member 'mixed'
+83 |                     || plan.agentKind == agentKind
+84 |             )
+[22/66] Compiling OracleOS AgentKind.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowIndex.swift:82:38: error: type 'AgentKind?' has no member 'mixed'
+80 |                 && (
+81 |                 agentKind == nil
+82 |                     || agentKind == .mixed
+   |                                      `- error: type 'AgentKind?' has no member 'mixed'
+83 |                     || plan.agentKind == agentKind
+84 |             )
+[23/67] Compiling OracleOS PlanSelection.swift
+[24/67] Compiling OracleOS Planner.swift
+[25/67] Compiling OracleOS PlannerDecision.swift
+[26/67] Compiling OracleOS LLMClient.swift
+[27/67] Compiling OracleOS MemoryInfluence.swift
+[28/67] Compiling OracleOS MemoryPromotionPolicy.swift
+[29/67] Compiling OracleOS MemoryQueryContext.swift
+[30/67] Compiling OracleOS MemoryRouter.swift
+[31/67] Compiling OracleOS MemoryScorer.swift
+[32/67] Compiling OracleOS PlanSimulator.swift
+[33/67] Compiling OracleOS ProposalEngine.swift
+[34/67] Compiling OracleOS ReasoningEngine.swift
+[35/67] Compiling OracleOS ReasoningParser.swift
+[36/70] Compiling OracleOS OpenAIProvider.swift
+[37/70] Compiling OracleOS Operator.swift
+[38/70] Compiling OracleOS OperatorRegistry.swift
+[39/70] Compiling OracleOS PlanCandidate.swift
+[40/71] Compiling OracleOS LLMRepairAdvisor.swift
+[41/71] Compiling OracleOS LLMTargetResolver.swift
+[42/73] Compiling OracleOS ReasoningPlanningState.swift
+[43/73] Compiling OracleOS CodePlanningStrategy.swift
+[44/73] Compiling OracleOS ConstraintStrategy.swift
+[45/73] Compiling OracleOS GraphPathStrategy.swift
+[46/74] Compiling OracleOS DiagnosticsWriter.swift
+[47/75] Compiling OracleOS CommandAssembler.swift
+[48/76] Compiling OracleOS StrategyDiagnostics.swift
+[49/77] Compiling OracleOS PlanningContext.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/PlanningContext.swift:31:33: error: type 'AgentKind' has no member 'mixed'
+29 |         memoryInfluence: MemoryInfluence = MemoryInfluence(),
+30 |         recentFailureCount: Int = 0,
+31 |         agentKind: AgentKind = .mixed,
+   |                                 `- error: type 'AgentKind' has no member 'mixed'
+32 |         currentStrategy: SelectedStrategy? = nil,
+33 |         strategyStartStep: Int = 0,
+[50/78] Compiling OracleOS WorkflowRetriever.swift
+[51/79] Compiling OracleOS WorkflowMatcher.swift
+[52/80] Compiling OracleOS LLMRecoveryAdvisor.swift
+[53/81] Compiling OracleOS RecoveryPlanner.swift
+error: emit-module command failed with exit code 1 (use -v to see invocation)
+[54/82] Emitting module OracleOS
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:34:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 32 | 
+ 33 | public final class WorkspaceRunner: @unchecked Sendable {
+ 34 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:36:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 34 |     private let processAdapter: ProcessAdapter
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 37 |         self.processAdapter = processAdapter
+ 38 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:4:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  2 | 
+  3 | public final class RepositoryIndexer: @unchecked Sendable {
+  4 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  5 | 
+  6 |     private struct ParsedFile {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:18:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 16 |     }
+ 17 | 
+ 18 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |         self.processAdapter = processAdapter
+ 20 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  4 | /// INVARIANT: No state write may bypass CommitCoordinator.
+  5 | public actor CommitCoordinator {
+  6 |     private let eventStore: EventStore
+    |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  7 |     private let reducers: [any EventReducer]
+  8 |     private let wal: CommitWAL?
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:14:43: warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 12 |     private enum RecoveryState {
+ 13 |         case notStarted
+ 14 |         case running(Task<RecoveryReport, Error>)
+    |                                           `- warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 15 |         case completed(RecoveryReport)
+ 16 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:20:21: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 18 | 
+ 19 |     public init(
+ 20 |         eventStore: EventStore,
+    |                     `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 21 |         reducers: [any EventReducer],
+ 22 |         wal: CommitWAL? = nil,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:21:32: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |     private let preconditionsValidator: PreconditionsValidator
+ 20 |     private let postconditionsValidator: PostconditionsValidator
+ 21 |     private let stateProvider: WorldStateProviding?
+    |                                `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 22 | 
+ 23 |     public init(
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:28:24: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 26 |         preconditionsValidator: PreconditionsValidator,
+ 27 |         postconditionsValidator: PostconditionsValidator,
+ 28 |         stateProvider: WorldStateProviding? = nil
+    |                        `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 29 |     ) {
+ 30 |         self.policyEngine = policyEngine
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:4:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 2 | /// Memory derived from event history — read-only.
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:5:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+ 7 |         let events = (try? await eventStore.all()) ?? []
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 4 | /// Traces derive from event history and execution outcomes — not scattered manual logs.
+ 5 | public struct EventReplay {
+ 6 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:8:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     private let eventStore: EventStore
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 9 |         self.eventStore = eventStore
+10 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/PlanningContext.swift:31:33: error: type 'AgentKind' has no member 'mixed'
+29 |         memoryInfluence: MemoryInfluence = MemoryInfluence(),
+30 |         recentFailureCount: Int = 0,
+31 |         agentKind: AgentKind = .mixed,
+   |                                 `- error: type 'AgentKind' has no member 'mixed'
+32 |         currentStrategy: SelectedStrategy? = nil,
+33 |         strategyStartStep: Int = 0,
+
+[#ExistentialAny]: <https://docs.swift.org/compiler/documentation/diagnostics/existential-any>
+[55/82] Compiling OracleOS PatternSimilarity.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Memory/UnifiedMemoryStore.swift:129:68: error: type 'AgentKind?' has no member 'mixed'
+127 |     ) -> ProjectMemoryPlanningSignals {
+128 |         guard let snapshot = context.repositorySnapshot,
+129 |               (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+    |                                                                    `- error: type 'AgentKind?' has no member 'mixed'
+130 |         else {
+131 |             return ProjectMemoryPlanningSignals()
+[56/82] Compiling OracleOS TraceCompressor.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Memory/UnifiedMemoryStore.swift:129:68: error: type 'AgentKind?' has no member 'mixed'
+127 |     ) -> ProjectMemoryPlanningSignals {
+128 |         guard let snapshot = context.repositorySnapshot,
+129 |               (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+    |                                                                    `- error: type 'AgentKind?' has no member 'mixed'
+130 |         else {
+131 |             return ProjectMemoryPlanningSignals()
+[57/82] Compiling OracleOS UnifiedMemoryStore.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Memory/UnifiedMemoryStore.swift:129:68: error: type 'AgentKind?' has no member 'mixed'
+127 |     ) -> ProjectMemoryPlanningSignals {
+128 |         guard let snapshot = context.repositorySnapshot,
+129 |               (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+    |                                                                    `- error: type 'AgentKind?' has no member 'mixed'
+130 |         else {
+131 |             return ProjectMemoryPlanningSignals()
+[58/82] Compiling OracleOS Plan.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Memory/UnifiedMemoryStore.swift:129:68: error: type 'AgentKind?' has no member 'mixed'
+127 |     ) -> ProjectMemoryPlanningSignals {
+128 |         guard let snapshot = context.repositorySnapshot,
+129 |               (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+    |                                                                    `- error: type 'AgentKind?' has no member 'mixed'
+130 |         else {
+131 |             return ProjectMemoryPlanningSignals()
+[59/82] Compiling OracleOS PlanRanker.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Memory/UnifiedMemoryStore.swift:129:68: error: type 'AgentKind?' has no member 'mixed'
+127 |     ) -> ProjectMemoryPlanningSignals {
+128 |         guard let snapshot = context.repositorySnapshot,
+129 |               (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+    |                                                                    `- error: type 'AgentKind?' has no member 'mixed'
+130 |         else {
+131 |             return ProjectMemoryPlanningSignals()
+[60/82] Compiling OracleOS MainPlanner+Planner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:357:15: error: type 'AgentKind' has no member 'mixed'
+355 |         case .code:
+356 |             return .engineering
+357 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+358 |             return .operatingSystem
+359 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:368:15: error: type 'AgentKind' has no member 'mixed'
+366 |         case .code:
+367 |             return .code
+368 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+369 |             return .mixed
+370 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:369:21: error: type 'PlannerFamily' has no member 'mixed'
+367 |             return .code
+368 |         case .mixed:
+369 |             return .mixed
+    |                     `- error: type 'PlannerFamily' has no member 'mixed'
+370 |         }
+371 |     }
+[61/82] Compiling OracleOS MainPlanner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:357:15: error: type 'AgentKind' has no member 'mixed'
+355 |         case .code:
+356 |             return .engineering
+357 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+358 |             return .operatingSystem
+359 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:368:15: error: type 'AgentKind' has no member 'mixed'
+366 |         case .code:
+367 |             return .code
+368 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+369 |             return .mixed
+370 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:369:21: error: type 'PlannerFamily' has no member 'mixed'
+367 |             return .code
+368 |         case .mixed:
+369 |             return .mixed
+    |                     `- error: type 'PlannerFamily' has no member 'mixed'
+370 |         }
+371 |     }
+[62/82] Compiling OracleOS MemoryDecayPolicy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:357:15: error: type 'AgentKind' has no member 'mixed'
+355 |         case .code:
+356 |             return .engineering
+357 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+358 |             return .operatingSystem
+359 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:368:15: error: type 'AgentKind' has no member 'mixed'
+366 |         case .code:
+367 |             return .code
+368 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+369 |             return .mixed
+370 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:369:21: error: type 'PlannerFamily' has no member 'mixed'
+367 |             return .code
+368 |         case .mixed:
+369 |             return .mixed
+    |                     `- error: type 'PlannerFamily' has no member 'mixed'
+370 |         }
+371 |     }
+[63/82] Compiling OracleOS MemoryDecisionBias.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:357:15: error: type 'AgentKind' has no member 'mixed'
+355 |         case .code:
+356 |             return .engineering
+357 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+358 |             return .operatingSystem
+359 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:368:15: error: type 'AgentKind' has no member 'mixed'
+366 |         case .code:
+367 |             return .code
+368 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+369 |             return .mixed
+370 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:369:21: error: type 'PlannerFamily' has no member 'mixed'
+367 |             return .code
+368 |         case .mixed:
+369 |             return .mixed
+    |                     `- error: type 'PlannerFamily' has no member 'mixed'
+370 |         }
+371 |     }
+[64/82] Compiling OracleOS MemoryEvidence.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:357:15: error: type 'AgentKind' has no member 'mixed'
+355 |         case .code:
+356 |             return .engineering
+357 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+358 |             return .operatingSystem
+359 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:368:15: error: type 'AgentKind' has no member 'mixed'
+366 |         case .code:
+367 |             return .code
+368 |         case .mixed:
+    |               `- error: type 'AgentKind' has no member 'mixed'
+369 |             return .mixed
+370 |         }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:369:21: error: type 'PlannerFamily' has no member 'mixed'
+367 |             return .code
+368 |         case .mixed:
+369 |             return .mixed
+    |                     `- error: type 'PlannerFamily' has no member 'mixed'
+370 |         }
+371 |     }
+[65/85] Compiling OracleOS RecoveryOperator.swift
+[66/86] Compiling OracleOS LedgerNavigator.swift
+[67/87] Compiling OracleOS PathSearch.swift
+[68/88] Compiling OracleOS LedgerScorer.swift
+[69/89] Compiling OracleOS RuntimeBootstrap.swift
+[70/90] Compiling OracleOS TaskRecordEdge.swift
+[71/91] Compiling OracleOS TaskLedgerStore.swift
+[72/92] Compiling OracleOS RuntimeInspector.swift
+[73/93] Compiling OracleOS TaskLedger.swift
+[74/94] Compiling OracleOS StateSimulator.swift
+[75/95] Compiling OracleOS SystemDashboard.swift
+[76/96] Compiling OracleOS ExplorationPolicy.swift
+[77/97] Compiling OracleOS GraphSearchDiagnostics.swift
+[78/98] Compiling OracleOS PromptEngine.swift
+[79/99] Compiling OracleOS LoopDiagnostics.swift
+[80/100] Compiling OracleOS AgentExecutionDriver.swift
+[81/101] Compiling OracleOS LoopBudget.swift
+[82/102] Compiling OracleOS MemoryDrafter.swift
+[83/103] Compiling OracleOS RuntimeExecutionDriver.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/RuntimeExecutionDriver.swift:55:35: error: type 'AgentKind' has no member 'mixed'
+ 53 |     ) -> ToolResult {
+ 54 |         let domain: IntentDomain = intent.agentKind == .code ? .code :
+ 55 |             (intent.agentKind == .mixed ? .system : .ui)
+    |                                   `- error: type 'AgentKind' has no member 'mixed'
+ 56 | 
+ 57 |         var metadata = [
+[84/104] Compiling OracleOS Actions.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Intent/Actions/Actions.swift:67:15: error: type 'AgentKind' has no member 'mixed'
+  65 |         case .os: .os
+  66 |         case .code: .code
+  67 |         case .mixed: .mixed
+     |               `- error: type 'AgentKind' has no member 'mixed'
+  68 |         }
+  69 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Intent/Actions/Actions.swift:74:20: error: type 'AgentKind' has no member 'mixed'
+  72 |         switch agentKind {
+  73 |         case .code: .engineering
+  74 |         case .os, .mixed: .operatingSystem
+     |                    `- error: type 'AgentKind' has no member 'mixed'
+  75 |         }
+  76 |     }
+[85/105] Compiling OracleOS ContextAssembler.swift
+[86/106] Compiling OracleOS SemanticMemory.swift
+[87/107] Compiling OracleOS ProjectMemory.swift
+[88/107] Compiling OracleOS EventMemory.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:4:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 2 | /// Memory derived from event history — read-only.
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:5:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+ 7 |         let events = (try? await eventStore.all()) ?? []
+
+[#ExistentialAny]: <https://docs.swift.org/compiler/documentation/diagnostics/existential-any>
+[89/109] Compiling OracleOS LoopTerminationReason.swift
+[90/110] Compiling OracleOS RuntimeContainer.swift
+[91/111] Compiling OracleOS ExecutionMemoryStore.swift
+[92/112] Compiling OracleOS RuntimeOrchestrator.swift
+[93/113] Compiling OracleOS BrowserTargetResolver.swift
+[94/113] Compiling OracleOS CodeSkillSupport.swift
+[95/113] Compiling OracleOS PatternMemoryStore.swift
+[96/113] Compiling OracleOS RecoveryStrategySelector.swift
+[97/113] Compiling OracleOS ProjectMemoryQuery.swift
+[98/113] Compiling OracleOS MCPDispatch.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:112:21: warning: capture of 'work' with non-Sendable type 'DispatchWorkItem' in a '@Sendable' closure [#SendableClosureCaptures]
+110 |                 if !resumed {
+111 |                     resumed = true
+112 |                     work.cancel()
+    |                     `- warning: capture of 'work' with non-Sendable type 'DispatchWorkItem' in a '@Sendable' closure [#SendableClosureCaptures]
+113 |                     lock.unlock()
+114 |                     continuation.resume(returning: ResultWrapper(payload: nil))
+
+Dispatch.DispatchWorkItem:2:14: note: class 'DispatchWorkItem' does not conform to the 'Sendable' protocol
+ 1 | @available(macOS 10.10, iOS 8.0, *)
+ 2 | public class DispatchWorkItem {
+   |              `- note: class 'DispatchWorkItem' does not conform to the 'Sendable' protocol
+ 3 |     public init(qos: DispatchQoS = .unspecified, flags: DispatchWorkItemFlags = [], block: @escaping @convention(block) () -> Void)
+ 4 |     @available(macOS 11.3, iOS 14.5, watchOS 7.4, tvOS 14.5, *)
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:6:1: warning: add '@preconcurrency' to treat 'Sendable'-related errors from module 'Dispatch' as warnings
+  4 | // Formats responses as MCP content arrays.
+  5 | 
+  6 | import Foundation
+    | `- warning: add '@preconcurrency' to treat 'Sendable'-related errors from module 'Dispatch' as warnings
+  7 | 
+  8 | /// Routes MCP tool calls to the appropriate module function.
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:110:21: warning: reference to captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+108 |             queue.asyncAfter(deadline: .now() + actualTimeout) {
+109 |                 lock.lock()
+110 |                 if !resumed {
+    |                     `- warning: reference to captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+111 |                     resumed = true
+112 |                     work.cancel()
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:111:21: warning: mutation of captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+109 |                 lock.lock()
+110 |                 if !resumed {
+111 |                     resumed = true
+    |                     `- warning: mutation of captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+112 |                     work.cancel()
+113 |                     lock.unlock()
+
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[99/113] Compiling OracleOS PromptPolicy.swift
+[100/113] Compiling OracleOS WorkflowSynthesizer.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowSynthesizer.swift:227:28: error: type 'PlannerFamily' has no member 'mixed'
+225 |         case PlannerFamily.code.rawValue:
+226 |             return .engineering
+227 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+228 |             return .handoff
+229 |         default:
+[101/113] Compiling OracleOS ElementMatcher.swift
+[102/113] Compiling OracleOS QueryOptimizer.swift
+[103/113] Compiling OracleOS ParameterExtractor.swift
+[104/113] Compiling OracleOS RuntimeDiagnostics.swift

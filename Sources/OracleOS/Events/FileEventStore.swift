@@ -34,6 +34,8 @@ public actor FileEventStore: EventStore {
             handle.write(Data([0x0A]))
         }
         try handle.synchronize()
+        fsync(handle.fileDescriptor)
+        fsync(handle.fileDescriptor)
     }
 
     private static func loadAll(from url: URL) throws -> [EventEnvelope] {

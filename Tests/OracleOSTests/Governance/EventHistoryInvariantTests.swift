@@ -144,6 +144,34 @@ final class EventHistoryInvariantTests: XCTestCase {
         let sorted = seqNums.sorted()
         XCTAssertEqual(seqNums, sorted, "Sequence numbers must be monotonically increasing")
     }
+
+    // MARK: - Determinism Invariant
+
+    func test_commit_determinism_same_input_identical_sequence() async throws {
+        // Phase 6: Strengthen Commit Durability (Determinism Test)
+        // Given identical input sequences on fresh stores, the resulting event logs must be perfectly identical.
+        let envelopes = [
+            EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "a", payload: Data([1])),
+            EventEnvelope(sequenceNumber: 0, commandID: nil, intentID: nil, eventType: "b", payload: Data([2]))
+        ]
+
+        let storeA = MemoryEventStore()
+        let coordA = CommitCoordinator(eventStore: storeA, reducers: [])
+        _ = try await coordA.commit(envelopes)
+        let sequenceA = await storeA.all()
+
+        let storeB = MemoryEventStore()
+        let coordB = CommitCoordinator(eventStore: storeB, reducers: [])
+        _ = try await coordB.commit(envelopes)
+        let sequenceB = await storeB.all()
+
+        XCTAssertEqual(sequenceA.count, sequenceB.count)
+        for i in 0..<sequenceA.count {
+            XCTAssertEqual(sequenceA[i].sequenceNumber, sequenceB[i].sequenceNumber)
+            XCTAssertEqual(sequenceA[i].eventType, sequenceB[i].eventType)
+            XCTAssertEqual(sequenceA[i].payload, sequenceB[i].payload)
+        }
+    }
 }
 
 // MARK: - Test Helpers

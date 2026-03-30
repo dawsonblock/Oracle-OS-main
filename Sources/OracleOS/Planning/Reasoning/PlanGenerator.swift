@@ -13,7 +13,6 @@ public final class PlanGenerator: @unchecked Sendable {
     private let operatorRegistry: OperatorRegistry
     private let osPlanner: OSPlanner
     private let codePlanner: CodePlanner
-    private let mixedTaskPlanner: MixedTaskPlanner
 
 
     public init(
@@ -22,7 +21,6 @@ public final class PlanGenerator: @unchecked Sendable {
         operatorRegistry: OperatorRegistry = .shared,
         osPlanner: OSPlanner? = nil,
         codePlanner: CodePlanner? = nil,
-        mixedTaskPlanner: MixedTaskPlanner? = nil
     ) {
         self.reasoningEngine = reasoningEngine
         self.planEvaluator = planEvaluator
@@ -44,10 +42,6 @@ public final class PlanGenerator: @unchecked Sendable {
             workflowIndex: sharedWorkflowIndex,
             workflowRetriever: sharedWorkflowRetriever,
             workflowExecutor: sharedWorkflowExecutor
-        )
-        self.mixedTaskPlanner = mixedTaskPlanner ?? MixedTaskPlanner(
-            osPlanner: self.osPlanner,
-            codePlanner: self.codePlanner
         )
     }
 
@@ -214,14 +208,7 @@ memoryStore: UnifiedMemoryStore,
                 memoryStore: memoryStore,
                 selectedStrategy: selectedStrategy
             )
-        case .mixed:
-            mixedTaskPlanner.nextStep(
-                taskContext: taskContext,
-                worldState: worldState,
-                graphStore: graphStore,
-                memoryStore: memoryStore,
-                selectedStrategy: selectedStrategy
-            )
+
         }
 
         guard let decision else { return [] }

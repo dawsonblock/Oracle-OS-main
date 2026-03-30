@@ -18,7 +18,6 @@ public final class MainPlanner: @unchecked Sendable {
     private let workflowRetriever: WorkflowRetriever
     private let osPlanner: OSPlanner
     private let codePlanner: CodePlanner
-    private let mixedTaskPlanner: MixedTaskPlanner
     private let reasoningEngine: ReasoningEngine
     private let planEvaluator: PlanEvaluator
     private let promptEngine: PromptEngine
@@ -32,7 +31,6 @@ public final class MainPlanner: @unchecked Sendable {
         workflowIndex: WorkflowIndex? = nil,
         osPlanner: OSPlanner? = nil,
         codePlanner: CodePlanner? = nil,
-        mixedTaskPlanner: MixedTaskPlanner? = nil,
         reasoningEngine: ReasoningEngine? = nil,
         planEvaluator: PlanEvaluator? = nil,
         promptEngine: PromptEngine = PromptEngine(),
@@ -52,21 +50,17 @@ public final class MainPlanner: @unchecked Sendable {
             workflowRetriever: sharedWorkflowRetriever,
             promptEngine: promptEngine
         )
-        let resolvedMixedTaskPlanner = mixedTaskPlanner
-            ?? MixedTaskPlanner(osPlanner: resolvedOSPlanner, codePlanner: resolvedCodePlanner)
         
         self.planGenerator = PlanGenerator(
             reasoningEngine: reasoningEngine ?? ReasoningEngine(),
             planEvaluator: sharedPlanEvaluator,
             osPlanner: resolvedOSPlanner,
             codePlanner: resolvedCodePlanner,
-            mixedTaskPlanner: resolvedMixedTaskPlanner
         )
         self.workflowIndex = resolvedWorkflowIndex
         self.workflowRetriever = sharedWorkflowRetriever
         self.osPlanner = resolvedOSPlanner
         self.codePlanner = resolvedCodePlanner
-        self.mixedTaskPlanner = resolvedMixedTaskPlanner
         self.reasoningEngine = reasoningEngine ?? ReasoningEngine()
         self.planEvaluator = sharedPlanEvaluator
         self.promptEngine = promptEngine
@@ -180,14 +174,6 @@ public final class MainPlanner: @unchecked Sendable {
             )
         case .code:
             return codePlanner.nextStep(
-                taskContext: taskContext,
-                worldState: worldState,
-                graphStore: graphStore,
-                memoryStore: memoryStore,
-                selectedStrategy: selectedStrategy
-            )
-        case .mixed:
-            return mixedTaskPlanner.nextStep(
                 taskContext: taskContext,
                 worldState: worldState,
                 graphStore: graphStore,

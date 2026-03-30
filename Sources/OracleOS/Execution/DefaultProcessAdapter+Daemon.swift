@@ -4,13 +4,13 @@ import Foundation
 /// used specifically for the XPC Host connection and Copilot CLI inference.
 /// Placed here to ensure `Process()` allocations are localized to the execution boundary layer.
 public final class DaemonProcess: @unchecked Sendable {
-    private let process: Process
+    private let process: Foundation.Process
     public let stdinHandle: FileHandle
     public let stdoutHandle: FileHandle
     public let stderrHandle: FileHandle
 
     public init(executableURL: URL, arguments: [String] = [], currentDirectoryURL: URL? = nil, environment: [String: String]? = nil) throws {
-        let p = Process()
+        let p = Foundation.Process()
         p.executableURL = executableURL
         if let currentDirectoryURL = currentDirectoryURL {
             p.currentDirectoryURL = currentDirectoryURL

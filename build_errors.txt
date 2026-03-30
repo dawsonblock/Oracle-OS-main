@@ -1,0 +1,651 @@
+[#ExistentialAny]: <https://docs.swift.org/compiler/documentation/diagnostics/existential-any>
+[78/362] Compiling OracleOS PlanGenerator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[79/362] Compiling OracleOS PlanScore.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[80/362] Compiling OracleOS PlanSimulator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[81/362] Compiling OracleOS ProposalEngine.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[82/362] Compiling OracleOS ReasoningEngine.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[83/362] Compiling OracleOS ReasoningParser.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[84/362] Compiling OracleOS ReasoningPlanningState.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[85/362] Compiling OracleOS CodePlanningStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[86/362] Compiling OracleOS ConstraintStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[87/362] Compiling OracleOS GraphPathStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[88/362] Compiling OracleOS LedgerStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[89/362] Compiling OracleOS OSPlanningStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[90/362] Compiling OracleOS OperatorFamily.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[91/362] Compiling OracleOS ReasoningStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[92/362] Compiling OracleOS SelectedStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[93/362] Compiling OracleOS StrategyEvaluator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[94/362] Compiling OracleOS StrategyKind.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[95/362] Compiling OracleOS StrategyLibrary.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[96/362] Compiling OracleOS StrategySelector.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[97/362] Compiling OracleOS WorkflowStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[98/362] Compiling OracleOS TraceClusterer.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[99/362] Compiling OracleOS WorkflowConfidenceModel.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[100/362] Compiling OracleOS WorkflowDecayPolicy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[101/362] Compiling OracleOS WorkflowExecutor.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+198 |                 worldState: worldState,
+[102/362] Compiling OracleOS WorkflowIndex.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:212:13: error: cannot find 'mixedTaskPlanner' in scope
+210 |             )
+211 |         case .mixed:
+212 |             mixedTaskPlanner.nextStep(
+    |             `- error: cannot find 'mixedTaskPlanner' in scope
+213 |                 taskContext: taskContext,
+214 |                 worldState: worldState,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Reasoning/PlanGenerator.swift:196:23: error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+194 |         let decision: PlannerDecision? = switch taskContext.agentKind {
+195 |         case .os:
+196 |             osPlanner.nextStep(
+    |                       |- error: value of optional type 'PlannerDecision?' must be unwrapped to a value of type 'PlannerDecision'
+    |                       |- note: coalesce using '??' to provide a default when the optional value contains 'nil'
+    |                       `- note: force-unwrap using '!' to abort execution if the optional value contains 'nil'
+--
+[203/411] Compiling OracleOS GitSpec.swift
+[204/459] Compiling OracleOS MainPlanner+Planner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[205/459] Compiling OracleOS MainPlanner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[206/459] Compiling OracleOS MemoryDecayPolicy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[207/459] Compiling OracleOS MemoryDecisionBias.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[208/459] Compiling OracleOS MemoryEvidence.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[209/459] Compiling OracleOS MemoryInfluence.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[210/459] Compiling OracleOS MemoryPromotionPolicy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[211/459] Compiling OracleOS MemoryQueryContext.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[212/459] Compiling OracleOS MemoryRouter.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[213/459] Compiling OracleOS MemoryScorer.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[214/459] Compiling OracleOS PatternSimilarity.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[215/459] Compiling OracleOS TraceCompressor.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[216/459] Compiling OracleOS UnifiedMemoryStore.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[217/459] Compiling OracleOS Plan.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[218/459] Compiling OracleOS PlanRanker.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[219/459] Compiling OracleOS PlanSelection.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[220/459] Compiling OracleOS Planner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[221/459] Compiling OracleOS PlannerDecision.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[222/459] Compiling OracleOS LLMClient.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[223/459] Compiling OracleOS OpenAIProvider.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[224/459] Compiling OracleOS Operator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[225/459] Compiling OracleOS OperatorRegistry.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[226/459] Compiling OracleOS PlanCandidate.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[227/459] Compiling OracleOS PlanDiagnostics.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
+[228/459] Compiling OracleOS PlanEvaluator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/MainPlanner.swift:184:20: error: cannot find 'mixedTaskPlanner' in scope
+182 |             )
+183 |         case .mixed:
+184 |             return mixedTaskPlanner.nextStep(
+    |                    `- error: cannot find 'mixedTaskPlanner' in scope
+185 |                 taskContext: taskContext,
+186 |                 worldState: worldState,
