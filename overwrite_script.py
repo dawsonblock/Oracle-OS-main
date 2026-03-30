@@ -1,4 +1,6 @@
-import Foundation
+import os
+
+content = """import Foundation
 
 /// The single entry point for runtime cycle execution.
 /// Coordinates: decide → execute → commit → evaluate
@@ -98,7 +100,7 @@ extension RuntimeOrchestrator {
             return IntentResponse(
                 intentID: intent.id,
                 outcome: .failed,
-                summary: "Planning failed: \(error.localizedDescription)",
+                summary: "Planning failed: \\(error.localizedDescription)",
                 cycleID: cycleID,
                 snapshotID: nil,
                 timestamp: Date()
@@ -123,7 +125,7 @@ extension RuntimeOrchestrator {
             return IntentResponse(
                 intentID: intent.id,
                 outcome: .partialSuccess,
-                summary: "Execution completed but commit failed: \(error.localizedDescription)",
+                summary: "Execution completed but commit failed: \\(error.localizedDescription)",
                 cycleID: cycleID,
                 snapshotID: nil,
                 timestamp: Date()
@@ -143,7 +145,7 @@ extension RuntimeOrchestrator {
         return IntentResponse(
             intentID: intent.id,
             outcome: outcome,
-            summary: "Intent completed: \(intent.objective) - \(executionOutcome.status.rawValue), critic=\(evaluation.criticOutcome.rawValue)",
+            summary: "Intent completed: \\(intent.objective) - \\(executionOutcome.status.rawValue), critic=\\(evaluation.criticOutcome.rawValue)",
             cycleID: cycleID,
             snapshotID: receipt.snapshotID,
             timestamp: receipt.timestamp
@@ -168,7 +170,12 @@ extension RuntimeOrchestrator {
             lastIntentID: lastIntentID,
             lastCommandKind: lastCommandKind,
             status: .idle,
-            summary: "Runtime state: \(snapshot.visibleElementCount) visible elements, app: \(snapshot.activeApplication ?? \"none\"), notes: \(snapshot.notes.suffix(3).joined(separator: \" | \"))"
+            summary: "Runtime state: \\(snapshot.visibleElementCount) visible elements, app: \\(snapshot.activeApplication ?? \\"none\\"), notes: \\(snapshot.notes.suffix(3).joined(separator: \\" | \\"))"
         )
     }
 }
+"""
+
+os.makedirs('Sources/OracleOS/Runtime', exist_ok=True)
+with open('Sources/OracleOS/Runtime/RuntimeOrchestrator.swift', 'w') as f:
+    f.write(content)

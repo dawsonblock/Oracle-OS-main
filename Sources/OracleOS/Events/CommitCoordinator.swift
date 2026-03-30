@@ -13,8 +13,10 @@ public actor CommitCoordinator {
         self.currentState = initialState
     }
 
-    public func commit(_ envelopes: [EventEnvelope]) async throws {
-        guard !envelopes.isEmpty else { return }
+    public func commit(_ envelopes: [EventEnvelope]) async throws -> CommitReceipt {
+        guard !envelopes.isEmpty else {
+            throw CommitError.emptyCommit
+        }
 
         // Assign sequence numbers to envelopes before appending
         var numberedEnvelopes = envelopes
@@ -37,6 +39,14 @@ public actor CommitCoordinator {
         for reducer in reducers {
             reducer.apply(events: numberedEnvelopes, to: &currentState)
         }
+
+        return CommitReceipt(
+            firstSequenceNumber: numberedEnvelopes.first?.sequenceNumber ?? 0,
+            lastSequenceNumber: numberedEnvelopes.last?.sequenceNumber ?? 0,
+            eventIDs: numberedEnvelopes.map(\.id),
+            snapshotID: UUID(),
+            summary: "Committed \(numberedEnvelopes.count) event(s)"
+        )
     }
 
     /// Returns a copy of the current state to prevent direct mutation.

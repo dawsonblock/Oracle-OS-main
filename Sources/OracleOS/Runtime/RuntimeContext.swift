@@ -1,30 +1,43 @@
 import Foundation
 
+/// RuntimeContext provides peripheral services and adapters for the runtime environment.
+/// NOTE: This is NOT the authoritative execution kernel. RuntimeKernel owns execution truth.
+/// RuntimeContext provides integration services like tracing, memory, browser control, etc.
 @MainActor
 public final class RuntimeContext {
+    // MARK: - Configuration
     public let config: RuntimeConfig
+
+    // MARK: - Tracing & Observability
     public let traceRecorder: TraceRecorder
     public let traceStore: ExperienceStore
     public let artifactWriter: FailureArtifactWriter
-    public let policyEngine: PolicyEngine
+    public let metricsRecorder: MetricsRecorder
+    public private(set) lazy var telemetry: RuntimeTelemetry = RuntimeTelemetry(context: self)
+
+    // MARK: - Peripheral Services (not execution-critical)
     public let approvalStore: ApprovalStore
     public let graphStore: GraphStore
     public let memoryStore: UnifiedMemoryStore
     public let stateAbstraction: StateAbstraction
     public let recoveryEngine: RecoveryEngine
-    public let workspaceRunner: WorkspaceRunner
-    public let repositoryIndexer: RepositoryIndexer
     public let architectureEngine: ArchitectureEngine
     public let experimentManager: ExperimentManager
+    public let stateMemoryIndex: StateMemoryIndex
+    public let searchController: SearchController
+    public let criticLoop: CriticLoop
+    public let stateAbstractionEngine: StateAbstractionEngine
+
+    // MARK: - External Adapters (browser, automation)
     public let automationHost: AutomationHost
     public let browserController: BrowserController
     public let browserPageStateBuilder: BrowserPageStateBuilder
-    public let stateMemoryIndex: StateMemoryIndex
-    public let searchController: SearchController
-    public let metricsRecorder: MetricsRecorder
-    public private(set) lazy var telemetry: RuntimeTelemetry = RuntimeTelemetry(context: self)
-    public let criticLoop: CriticLoop
-    public let stateAbstractionEngine: StateAbstractionEngine
+
+    // MARK: - Execution Adapters (injected into kernel, not owned here)
+    /// These are passed through to RuntimeKernel but not used directly by RuntimeContext.
+    public let policyEngine: PolicyEngine
+    public let workspaceRunner: WorkspaceRunner
+    public let repositoryIndexer: RepositoryIndexer
 
     public init(
         config: RuntimeConfig = .live(),

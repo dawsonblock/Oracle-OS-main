@@ -70,6 +70,16 @@ public final class WorldStateModel: @unchecked Sendable {
         }
         current = WorldModelSnapshot(from: worldState)
     }
+    
+    public func update(_ transform: (WorldModelSnapshot) -> WorldModelSnapshot) {
+        lock.lock()
+        defer { lock.unlock() }
+        history.append(current)
+        if history.count > maxHistory {
+            history.removeFirst()
+        }
+        current = transform(current)
+    }
 
     /// Returns the N most recent snapshots in chronological order (oldest first).
     public func recentHistory(limit: Int = 5) -> [WorldModelSnapshot] {
@@ -158,6 +168,7 @@ public struct WorldModelSnapshot: Sendable {
 
     /// Returns a copy with the specified fields overridden.
     public func copy(
+        cycleCount: Int? = nil,
         activeApplication: String?? = nil,
         windowTitle: String?? = nil,
         url: String?? = nil,
@@ -177,7 +188,7 @@ public struct WorldModelSnapshot: Sendable {
     ) -> WorldModelSnapshot {
         WorldModelSnapshot(
             timestamp: Date(),
-            cycleCount: self.cycleCount,
+            cycleCount: cycleCount ?? self.cycleCount,
             activeApplication: activeApplication ?? self.activeApplication,
             windowTitle: windowTitle ?? self.windowTitle,
             url: url ?? self.url,
