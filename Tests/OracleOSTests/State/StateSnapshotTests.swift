@@ -62,7 +62,7 @@ struct StateSnapshotTests {
 
     @Test func mutatingLiveModelDoesNotChangeSnapshot() {
         // Create a live model
-        var liveModel = WorldStateModel()
+        let liveModel = WorldStateModel()
 
         // Take a snapshot of its current state
         let capturedSnapshot = liveModel.snapshot

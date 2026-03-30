@@ -90,7 +90,7 @@ public final class WorldStateModel: @unchecked Sendable {
 }
 
 /// An immutable snapshot of the world model at a point in time.
-public struct WorldModelSnapshot: Sendable {
+public struct WorldModelSnapshot: Sendable, Codable {
     public let timestamp: Date
     public let cycleCount: Int
     public let activeApplication: String?

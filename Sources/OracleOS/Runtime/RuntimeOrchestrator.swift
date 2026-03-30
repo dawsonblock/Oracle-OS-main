@@ -61,7 +61,7 @@ public actor RuntimeOrchestrator: IntentAPI {
             intentID: intentID,
             eventType: "plan.generated",
             payload: try encodePayload(
-                PlanGeneratedEvent(intentID: intentID, commandKind: command.kind.rawValue)
+                PlanGeneratedEvent(intentID: intentID, commandKind: command.kind)
             )
         )
     }
@@ -161,6 +161,9 @@ extension RuntimeOrchestrator {
             .last(where: { $0.hasPrefix("lastCommandKind=") })
             .map { String($0.dropFirst("lastCommandKind=".count)) }
 
+        let appName = snapshot.activeApplication ?? "none"
+        let recentNotes = snapshot.notes.suffix(3).joined(separator: " | ")
+
         return RuntimeSnapshot(
             id: UUID(),
             timestamp: snapshot.timestamp,
@@ -168,7 +171,7 @@ extension RuntimeOrchestrator {
             lastIntentID: lastIntentID,
             lastCommandKind: lastCommandKind,
             status: .idle,
-            summary: "Runtime state: \(snapshot.visibleElementCount) visible elements, app: \(snapshot.activeApplication ?? \"none\"), notes: \(snapshot.notes.suffix(3).joined(separator: \" | \"))"
+            summary: "Runtime state: \(snapshot.visibleElementCount) visible elements, app: \(appName), notes: \(recentNotes)"
         )
     }
 }

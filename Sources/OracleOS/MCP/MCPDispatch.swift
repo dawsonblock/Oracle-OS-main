@@ -21,16 +21,16 @@ public enum MCPDispatch {
         traceStore: traceStore,
         artifactWriter: failureArtifactWriter
     )
-    private static let eventStore = MemoryEventStore()
-    private static let commitCoordinator = CommitCoordinator(eventStore: eventStore, reducers: [])
-    private static let runtime = RuntimeOrchestrator(
-        eventStore: eventStore,
-        commitCoordinator: commitCoordinator,
-        policyEngine: runtimeContext.policyEngine,
-        automationHost: runtimeContext.automationHost,
-        workspaceRunner: runtimeContext.workspaceRunner,
-        repositoryIndexer: runtimeContext.repositoryIndexer
-    )
+
+    private static let runtimeContainer: RuntimeContainer = {
+        do {
+            return try RuntimeBootstrap.makeDefault(configuration: .live())
+        } catch {
+            fatalError("Failed to bootstrap runtime kernel: \(error)")
+        }
+    }()
+
+    private static let runtime: RuntimeOrchestrator = RuntimeOrchestrator(container: runtimeContainer)
 
     /// Handle a tools/call request. Returns MCP-formatted result.
     /// Wraps every tool call in a timeout so no single tool can block

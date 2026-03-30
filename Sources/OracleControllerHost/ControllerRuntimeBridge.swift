@@ -26,16 +26,15 @@ final class ControllerRuntimeBridge {
             artifactWriter: artifactWriter
         )
         self.diagnosticsBuilder = RuntimeDiagnosticsBuilder()
-        let eventStore = try! FileEventStore(root: OracleProductPaths.dataRootDirectory)
-        let commitCoordinator = CommitCoordinator(eventStore: eventStore, reducers: [])
-        self.oracleRuntime = RuntimeOrchestrator(
-            eventStore: eventStore,
-            commitCoordinator: commitCoordinator,
-            policyEngine: runtimeContext.policyEngine,
-            automationHost: runtimeContext.automationHost,
-            workspaceRunner: runtimeContext.workspaceRunner,
-            repositoryIndexer: runtimeContext.repositoryIndexer
-        )
+
+        let runtimeContainer: RuntimeContainer
+        do {
+            runtimeContainer = try RuntimeBootstrap.makeDefault(configuration: .live())
+        } catch {
+            fatalError("Failed to bootstrap runtime kernel: \(error)")
+        }
+
+        self.oracleRuntime = RuntimeOrchestrator(container: runtimeContainer)
         self.runtimeLifecycle = RuntimeLifecycle(approvalStore: runtimeContext.approvalStore)
         self.sessionID = traceRecorder.sessionID
         self.sessionStartedAt = Date()
