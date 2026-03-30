@@ -29,7 +29,7 @@ actor HostProcessClient {
     private let decoder: JSONDecoder
     private let eventHandler: EventHandler
 
-    private var process: Process?
+    private var process: DaemonProcess?
     private var stdinHandle: FileHandle?
     private var stdoutHandle: FileHandle?
     private var readTask: Task<Void, Never>?
@@ -83,25 +83,17 @@ actor HostProcessClient {
         }
 
         let hostURL = try resolveHostURL()
-        let inputPipe = Pipe()
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
 
-        let process = Process()
-        process.executableURL = hostURL
-        process.currentDirectoryURL = OracleProductPaths.runningFromAppBundle
+        let currentDir = OracleProductPaths.runningFromAppBundle
             ? OracleProductPaths.dataRootDirectory
             : URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-        process.standardInput = inputPipe
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
 
-        try process.run()
+        let process = try DaemonProcess(executableURL: hostURL, currentDirectoryURL: currentDir)
 
         self.process = process
-        self.stdinHandle = inputPipe.fileHandleForWriting
-        self.stdoutHandle = outputPipe.fileHandleForReading
-        startReadLoop(outputPipe.fileHandleForReading)
+        self.stdinHandle = process.stdinHandle
+        self.stdoutHandle = process.stdoutHandle
+        startReadLoop(process.stdoutHandle)
     }
 
     private func resolveHostURL() throws -> URL {

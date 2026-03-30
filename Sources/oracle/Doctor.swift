@@ -376,25 +376,19 @@ struct Doctor {
     }
 
     private func runShell(_ command: String) async -> ShellResult {
-        let process = Process()
-        let pipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-c", command]
-        process.standardOutput = pipe
-        process.standardError = pipe
-        var env = ProcessInfo.processInfo.environment
-        env.removeValue(forKey: "CLAUDE_CODE")
-        env.removeValue(forKey: "CLAUDECODE")
-        process.environment = env
-
+        let executor = VerifiedExecutor()
+        let spec = DiagnosticSpec(command: command)
+        let cmd = Command(type: .system, payload: .diagnostic(spec), metadata: CommandMetadata(intentID: UUID(), source: "doctor"))
         do {
-            try process.run()
-            // Read pipe BEFORE waitUntilExit to avoid deadlock if output exceeds pipe buffer
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-            return ShellResult(output: String(data: data, encoding: .utf8) ?? "", exitCode: process.terminationStatus)
+            let outcome = try await executor.execute(cmd)
+            if outcome.status == .success {
+                let output = outcome.observations.map { $0.content }.joined(separator: "\n")
+                return ShellResult(output: output, exitCode: 0)
+            } else {
+                return ShellResult(output: outcome.verifierReport.notes.first ?? outcome.status.rawValue, exitCode: 1)
+            }
         } catch {
-            return ShellResult(output: "", exitCode: -1)
+            return ShellResult(output: "\(error)", exitCode: -1)
         }
     }
 }

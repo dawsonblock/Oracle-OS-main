@@ -107,7 +107,7 @@ class TransitionalArtifactRemovalTests: XCTestCase {
         //   grep -r "RuntimeContainer(" Sources/OracleOS/Runtime --include="*.swift"
         //   → Should only appear in RuntimeBootstrap
 
-        let config = RuntimeConfig()
+        let config = RuntimeConfig.test()
         XCTAssertNotNil(config)
     }
 
@@ -118,11 +118,8 @@ class TransitionalArtifactRemovalTests: XCTestCase {
         // Verify there's only one way to configure the runtime
         // RuntimeConfig should have sensible defaults or explicit configuration
 
-        let liveConfig = RuntimeConfig()
-        let testConfig = RuntimeConfig(
-            approvalsDirectory: "/tmp/approvals",
-            traceDirectory: "/tmp/traces"
-        )
+        let liveConfig = RuntimeConfig.live()
+        let testConfig = RuntimeConfig.test()
 
         XCTAssertNotNil(liveConfig)
         XCTAssertNotNil(testConfig)

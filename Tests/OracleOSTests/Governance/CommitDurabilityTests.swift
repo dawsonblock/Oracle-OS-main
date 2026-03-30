@@ -173,31 +173,15 @@ class CommitDurabilityTests: XCTestCase {
 
 // MARK: - Test Helpers
 
-private final class InMemoryEventStore: EventStore {
+private actor InMemoryEventStore: EventStore {
     private var events: [EventEnvelope] = []
     private var nextSeq: Int = 1
 
-    func append(contentsOf: [EventEnvelope]) async throws {
-        events.append(contentsOf: contentsOf)
-    }
-
-    func read(sequenceRange: Range<Int>) async throws -> [EventEnvelope] {
-        return events
-    }
-
-    func nextSequenceNumber() async throws -> Int {
-        let seq = nextSeq
-        nextSeq += 1
-        return seq
-    }
-
-    func sequenceCount() async throws -> Int {
-        return events.count
-    }
-}
-
-private final class TestEventReducer: EventReducer {
-    func apply(events: [EventEnvelope], to state: inout WorldStateModel) {
-        // No-op for testing
-    }
+    func append(_ envelope: EventEnvelope) { events.append(envelope) }
+    func append(contentsOf newEnvelopes: [EventEnvelope]) { events.append(contentsOf: newEnvelopes) }
+    func all() -> [EventEnvelope] { events }
+    func events(forCommandID id: CommandID) -> [EventEnvelope] { events.filter { $0.commandID == id } }
+    func events(after sequenceNumber: Int) -> [EventEnvelope] { events.filter { $0.sequenceNumber > sequenceNumber } }
+    func nextSequenceNumber() -> Int { let seq = nextSeq; nextSeq += 1; return seq }
+    func sequenceCount() -> Int { return events.count }
 }

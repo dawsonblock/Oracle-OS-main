@@ -98,9 +98,8 @@ enum ClaudeLocalCopilot {
             return setupGuidance(for: status)
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: command)
-        process.currentDirectoryURL = OracleProductPaths.developerProjectRoot
+        let executableURL = URL(fileURLWithPath: command)
+        let currentDirectoryURL = OracleProductPaths.developerProjectRoot
 
         var arguments = [
             "-p",
@@ -117,16 +116,18 @@ enum ClaudeLocalCopilot {
             arguments.append(contentsOf: ["--cwd", cwd])
         }
 
-        process.arguments = arguments
+        let process = try DaemonProcess(
+            executableURL: executableURL,
+            arguments: arguments,
+            currentDirectoryURL: currentDirectoryURL
+        )
 
-        let stdout = Pipe()
-        let stderr = Pipe()
-        process.standardOutput = stdout
-        process.standardError = stderr
+        let stdout = process.stdoutHandle
+        let stderr = process.stderrHandle
 
         let accumulated = LockedDataBuffer()
 
-        stdout.fileHandleForReading.readabilityHandler = { handle in
+        stdout.readabilityHandler = { handle in
             let data = handle.availableData
             guard !data.isEmpty else { return }
 
@@ -139,14 +140,12 @@ enum ClaudeLocalCopilot {
             }
         }
 
-        try process.run()
-
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 process.terminationHandler = { task in
-                    stdout.fileHandleForReading.readabilityHandler = nil
+                    stdout.readabilityHandler = nil
 
-                    let errorData = stderr.fileHandleForReading.readDataToEndOfFile()
+                    let errorData = stderr.readDataToEndOfFile()
                     let outputData = accumulated.snapshot()
 
                     let text = String(data: outputData, encoding: .utf8)?
