@@ -13,6 +13,10 @@ but not bypassed, duplicated, or replaced without updating this document:
 | Module | Role |
 |--------|------|
 | `VerifiedExecutor` | Only path for environment-changing actions (`execute(_:)` trust boundary) |
+| `CommitCoordinator` | Only path for committed state writes (returns `CommitReceipt`) |
+| `RuntimeBootstrap` | Canonical kernel factory (`makeDefault()` wires all dependencies) |
+| `DomainEvent` | Typed event contract for reducer-safe decoding |
+| `StateSnapshot` | Immutable state capture (holds `WorldModelSnapshot` value type) |
 | `CriticLoop` | Post-action evaluation and failure classification |
 | `PlanSimulator` | Simulates plans before commitment |
 | `ProgramKnowledgeGraph` | Canonical code model (all code graphs are views over it) |
@@ -38,7 +42,7 @@ executor acts
 ↓
 verifier judges
 ↓
-runtime commits
+runtime commits (returns CommitReceipt with snapshotID)
 ↓
 trace records
 ↓

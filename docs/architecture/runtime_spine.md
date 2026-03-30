@@ -13,9 +13,11 @@ Intent
   → DomainRouter (SystemRouter / UIRouter / CodeRouter)
   → Execution
   → ExecutionOutcome(events)
-  → CommitCoordinator.commit(_:)
+  → CommitCoordinator.commit(_:) -> CommitReceipt
+  → DomainEventCodec decodes typed events
   → Reducers apply events to WorldStateModel
-  → snapshot / evaluation
+  → StateSnapshot (immutable WorldModelSnapshot)
+  → evaluation
 ```
 
 `RuntimeExecutionDriver` is an adapter that translates `ActionIntent` inputs into
@@ -24,27 +26,51 @@ typed `Intent` values and forwards them to `IntentAPI.submitIntent(_:)`.
 ## Runtime invariants
 
 1. `VerifiedExecutor.execute(_:)` is the only execution boundary for side effects.
-2. `CommitCoordinator.commit(_:)` is the only committed-state write path.
-3. Reducers are pure event-to-state derivation functions.
-4. `ExecutionOutcome` must include events on success and failure paths.
-5. `RuntimeOrchestrator` coordinates planning, execution, commit, and evaluation.
+2. `CommitCoordinator.commit(_:)` returns `CommitReceipt` with `snapshotID`.
+3. Empty commits throw `CommitError.emptyCommit`.
+4. Reducers are pure, idempotent event-to-state derivation functions.
+5. `ExecutionOutcome` must include events on success and failure paths.
+6. `RuntimeOrchestrator` coordinates planning, execution, commit, and evaluation.
+7. `RuntimeBootstrap.makeDefault()` is the canonical kernel factory.
+
+## Event typing
+
+`DomainEvent` defines the typed event contract:
+
+| Event | Payload | Reducer |
+|-------|---------|--------|
+| `intentReceived` | intentID | RuntimeStateReducer |
+| `planGenerated` | commandKind | RuntimeStateReducer |
+| `commandExecuted` | status, notes | RuntimeStateReducer |
+| `commandFailed` | error, commandKind | RuntimeStateReducer |
+| `evaluationCompleted` | criticOutcome | RuntimeStateReducer |
+| `uiObserved` | app, window, url, elementCount | UIStateReducer |
+| `memoryRecorded` | category, key | MemoryStateReducer |
+
+`DomainEventCodec.decode(from:)` maps raw `EventEnvelope` to typed events.
+Legacy event types (`CommandSucceeded`, `CommandFailed`) are mapped automatically.
 
 ## Key modules
 
 | Module | File | Responsibility |
 |--------|------|---------------|
 | API | `Sources/OracleOS/API/IntentAPI.swift` | Runtime intake boundary |
+| Bootstrap | `Sources/OracleOS/Runtime/RuntimeBootstrap.swift` | Canonical kernel factory |
 | Orchestration | `Sources/OracleOS/Runtime/RuntimeOrchestrator.swift` | Linear runtime coordination |
 | Planning | `Sources/OracleOS/Planning/MainPlanner+Planner.swift` | Intent -> Command planning |
 | Execution | `Sources/OracleOS/Execution/VerifiedExecutor.swift` | Policy + routed command execution |
 | Routing | `Sources/OracleOS/Execution/Routing/*.swift` | CommandRouter + domain router boundaries |
 | Events | `Sources/OracleOS/Events/EventStore.swift` | Append-only event history |
+| DomainEvent | `Sources/OracleOS/Events/DomainEvent.swift` | Typed event contract + codec |
+| CommitReceipt | `Sources/OracleOS/Events/CommitReceipt.swift` | Immutable commit proof |
 | Commit | `Sources/OracleOS/Events/CommitCoordinator.swift` | Number/append/reduce commit flow |
-| Reducers | `Sources/OracleOS/State/Reducers/*.swift` | Pure state derivation |
+| Reducers | `Sources/OracleOS/State/Reducers/*.swift` | Pure, idempotent state derivation |
+| Snapshot | `Sources/OracleOS/State/StateSnapshot.swift` | Immutable state capture |
+| SnapshotStore | `Sources/OracleOS/State/Stores/SnapshotStore.swift` | Append-only snapshot history |
 
 ## Remaining hardening focus
 
 - Keep `AgentLoop` intake-only and free of planning/execution logic.
 - Keep all user-facing entrypoints (controller/CLI/MCP/recipes) on the same
-  `IntentAPI -> RuntimeOrchestrator` path.
+  `IntentAPI -> RuntimeOrchestrator` path via `RuntimeBootstrap.makeDefault()`.
 - Continue expanding architecture integrity tests that guard bypass regressions.

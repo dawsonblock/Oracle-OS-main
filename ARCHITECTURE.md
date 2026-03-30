@@ -38,6 +38,7 @@ Everything else is supporting infrastructure.
 Primary files:
 
 - `Sources/OracleOS/Runtime/RuntimeOrchestrator.swift`
+- `Sources/OracleOS/Runtime/RuntimeBootstrap.swift`
 - `Sources/OracleOS/Runtime/RuntimeContext.swift`
 - `Sources/OracleOS/Runtime/RuntimeExecutionDriver.swift`
 - `Sources/OracleOS/Runtime/TaskContext.swift`
@@ -47,8 +48,14 @@ Responsibilities:
 - route task/surface context
 - evaluate policy
 - call verified execution
+- emit typed `DomainEvent` through `CommitCoordinator`
+- receive `CommitReceipt` with `snapshotID` on commit
 - own post-execution graph/memory/recovery updates
 - fail closed on policy ambiguity
+
+`RuntimeBootstrap.makeDefault(configuration:)` is the canonical kernel factory.
+All entry points (MCP, Controller Host, CLI) must use this factory to obtain
+a fully-wired `RuntimeContainer` with real reducers.
 
 ### Observation and Planning State
 
@@ -180,11 +187,46 @@ Responsibilities:
 This is the execution truth boundary. Every side effect must flow through
 ``VerifiedExecutor`` — the only layer allowed to produce side effects.
 ``VerifiedExecutor`` returns ``ExecutionOutcome`` with events and artifacts;
-``CommitCoordinator`` is the only entity that writes committed state.
+``CommitCoordinator`` is the only entity that writes committed state, returning
+``CommitReceipt`` as immutable proof of the commit.
 
 > **Note:** ``VerifiedActionExecutor`` is removed from the runtime execution
 > path. All new code must use ``VerifiedExecutor`` routed through
 > ``RuntimeOrchestrator.submitIntent(_:)``.
+
+### Event Typing and Commit Flow
+
+Primary files:
+
+- `Sources/OracleOS/Events/DomainEvent.swift`
+- `Sources/OracleOS/Events/CommitReceipt.swift`
+- `Sources/OracleOS/Events/CommitCoordinator.swift`
+
+Responsibilities:
+
+- `DomainEvent` defines the typed event contract with seven event types:
+  `intentReceived`, `planGenerated`, `commandExecuted`, `commandFailed`,
+  `evaluationCompleted`, `uiObserved`, `memoryRecorded`
+- `DomainEventCodec.decode(from:)` maps `EventEnvelope` to strongly-typed events
+- `CommitCoordinator.commit(_:)` returns `CommitReceipt` containing `snapshotID`
+- Empty commits throw `CommitError.emptyCommit` (no-op commits are forbidden)
+- Reducers decode events via `DomainEventCodec` and apply idempotent state mutations
+
+### State Snapshots
+
+Primary files:
+
+- `Sources/OracleOS/State/StateSnapshot.swift`
+- `Sources/OracleOS/State/Stores/SnapshotStore.swift`
+- `Sources/OracleOS/WorldModel/WorldStateModel.swift`
+
+Responsibilities:
+
+- `StateSnapshot` holds `WorldModelSnapshot` (immutable value type), not a reference
+- `StateSnapshot` is `Codable` and `Sendable` for safe cross-boundary transfer
+- `SnapshotStore` provides append-only snapshot history with `append`, `latest`, `all`
+- `WorldStateModel.snapshot` returns a frozen `WorldModelSnapshot` value
+- Mutating the live `WorldStateModel` does not affect existing snapshots
 
 ### Critic (Self-Evaluation Loop)
 
@@ -409,7 +451,7 @@ the structural understanding required for autonomous software engineering.
 ```
 OracleCore
 ├── Core                    (execution, policy, trace, observation, world)
-├── Runtime                 (agent loop, coordinators)
+├── Runtime                 (agent loop, coordinators, RuntimeBootstrap)
 ├── Agent                   (planning, recovery, skills)
 ├── Search                  (candidate generation, search-centric selection)
 ├── StateAbstraction        (compressed semantic UI state)
@@ -424,6 +466,8 @@ OracleCore
 ├── BrowserAutomation       (browser control, BrowserBridge)
 ├── CodeExecution            (safe command execution)
 ├── CodeIntelligence         (repository indexing, ProgramKnowledgeGraph)
+├── Events                  (EventStore, CommitCoordinator, DomainEvent, CommitReceipt)
+├── State                   (StateSnapshot, SnapshotStore, Reducers)
 ├── Graph                   (long-term knowledge)
 ├── TaskGraph               (runtime task tracking)
 ├── Memory                  (session memory)
@@ -511,6 +555,13 @@ Only reusable knowledge is eligible for canonical long-term storage.
 - runtime owns post-execution updates
 - all side effects flow through `VerifiedExecutor` — the single execution gate
 - `CommitCoordinator` is the only entity that writes committed state
+- `CommitCoordinator.commit(_:)` returns `CommitReceipt` with `snapshotID`
+- empty commits throw `CommitError.emptyCommit` (no-op commits forbidden)
+- `DomainEvent` is the typed event contract; `DomainEventCodec` decodes events
+- reducers are idempotent — applying same events twice yields same state
+- `StateSnapshot` holds `WorldModelSnapshot` (immutable value type)
+- `RuntimeBootstrap.makeDefault()` is the canonical kernel factory
+- MCP and Controller Host use `RuntimeBootstrap`, not manual coordinator construction
 - `RuntimeOrchestrator` follows four phases: decide → execute → commit → evaluate
 - legacy `performAction` bridges and `VerifiedActionExecutor` paths are removed from runtime flow
 - graph promotion blocks experiment and recovery evidence from stable promotion
