@@ -23,8 +23,14 @@ public struct Command: Sendable, Codable {
     // Backward-compatible command kind string used by legacy validators/telemetry.
     public var kind: String {
         switch payload {
-        case .shell(let spec):
-            return spec.category.rawValue
+        case .build(_):
+            return "build"
+        case .test(_):
+            return "test"
+        case .git(_):
+            return "git"
+        case .file(_):
+            return "file"
         case .ui(let action):
             return action.name
         case .code(let action):
@@ -40,7 +46,10 @@ public enum CommandType: String, Sendable, Codable {
 }
 
 public enum CommandPayload: Sendable, Codable {
-    case shell(CommandSpec)
+    case build(BuildSpec)
+    case test(TestSpec)
+    case git(GitSpec)
+    case file(FileMutationSpec)
     case ui(UIAction)
     case code(CodeAction)
 }

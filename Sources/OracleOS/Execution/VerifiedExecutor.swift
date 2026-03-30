@@ -6,6 +6,13 @@ import Foundation
 ///   - Executor observes and acts, but does NOT commit state
 ///   - Executor returns ExecutionOutcome with events and artifacts only
 ///   - CommitCoordinator is the ONLY entity that writes committed state
+///   - All side effects MUST route through this actor's execute() method
+///   - No other component may call Process(), FileManager.write(), or mutate state
+///
+/// ENFORCEMENT:
+///   - All CLI tools, planners, routers MUST use RuntimeOrchestrator.submitIntent()
+///   - Bypassing this path is an architectural violation
+///   - Governance tests verify all side effects route through here
 public actor VerifiedExecutor {
     private let policyEngine: PolicyEngine
     private let commandRouter: CommandRouter
@@ -28,8 +35,27 @@ public actor VerifiedExecutor {
     }
 
     /// Execute a validated command and return outcome with events.
+    ///
+    /// This is the ONLY public method allowed to execute commands.
     /// IMPORTANT: This does NOT commit state — only returns events for CommitCoordinator.
+    ///
+    /// ENFORCEMENT: All side effects MUST route through this method:
+    ///   - Process execution → WorkspaceRunner → DefaultProcessAdapter
+    ///   - File mutations → FileMutationSpec → WorkspaceRunner.applyFile()
+    ///   - UI interactions → UIRouter → AutomationHost
+    ///
+    /// Bypassing this method is an architectural violation and will be caught by:
+    ///   - Governance tests (ExecutionBoundaryTests)
+    ///   - Type system (no alternate execute() paths)
+    ///   - Static analysis (grep for Process(), .write(to:), FileManager outside this actor)
     public func execute(_ command: Command) async throws -> ExecutionOutcome {
+        // GUARD: Verify command is typed (no shell escape hatch)
+        switch command.payload {
+        case .build, .test, .git, .file, .ui, .code:
+            // Typed command OK — proceed
+            break
+        }
+
         // Check preconditions against current world state
         if let provider = stateProvider {
             let snapshot = await provider.snapshot()
@@ -64,7 +90,7 @@ public actor VerifiedExecutor {
                 )
             }
 
-            // Ensure we have at least one normalized event
+            // GUARD: Ensure events are present (every execution must produce audit trail)
             if outcome.events.isEmpty {
                 let event = DomainEventFactory.commandExecuted(
                     command: command,

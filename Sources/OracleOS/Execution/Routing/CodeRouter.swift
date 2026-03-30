@@ -28,7 +28,7 @@ public struct CodeRouter: @unchecked Sendable {
         }
 
         switch command.payload {
-        case .shell(let spec):
+        case .build(let spec):
             guard let workspaceRunner else {
                 return CommandRouter.failureOutcome(
                     command: command,
@@ -38,17 +38,10 @@ public struct CodeRouter: @unchecked Sendable {
                 )
             }
 
-            let result = try await workspaceRunner.execute(spec: spec)
-            let maxLogLength = 2000
-            let truncatedStdout = truncated(result.stdout, limit: maxLogLength)
-            let truncatedStderr = truncated(result.stderr, limit: maxLogLength)
-            let observations = [
-                ObservationPayload(
-                    kind: "code.shell",
-                    content: "\(result.summary)\nstdout:\n\(truncatedStdout)\nstderr:\n\(truncatedStderr)"
-                ),
-            ]
-            if result.succeeded {
+            let result = try await workspaceRunner.runBuild(spec)
+            let observations = buildObservations(result)
+            
+            if result.exitCode == 0 {
                 return CommandRouter.successOutcome(
                     command: command,
                     observations: observations,
@@ -56,16 +49,98 @@ public struct CodeRouter: @unchecked Sendable {
                     policyDecision: policyDecision,
                     router: "code"
                 )
+            } else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: truncated(result.stderr, limit: 2000),
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
             }
 
-            let failureOutput = result.stderr.isEmpty ? result.stdout : result.stderr
-            let truncatedFailureOutput = truncated(failureOutput, limit: maxLogLength)
-            return CommandRouter.failureOutcome(
-                command: command,
-                reason: truncatedFailureOutput,
-                policyDecision: policyDecision,
-                router: "code"
-            )
+        case .test(let spec):
+            guard let workspaceRunner else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: "Workspace runner unavailable",
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
+
+            let result = try await workspaceRunner.runTest(spec)
+            let observations = buildObservations(result)
+            
+            if result.exitCode == 0 {
+                return CommandRouter.successOutcome(
+                    command: command,
+                    observations: observations,
+                    artifacts: [],
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            } else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: truncated(result.stderr, limit: 2000),
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
+
+        case .git(let spec):
+            guard let workspaceRunner else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: "Workspace runner unavailable",
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
+
+            let result = try await workspaceRunner.runGit(spec)
+            let observations = buildObservations(result)
+            
+            if result.exitCode == 0 {
+                return CommandRouter.successOutcome(
+                    command: command,
+                    observations: observations,
+                    artifacts: [],
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            } else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: truncated(result.stderr, limit: 2000),
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
+
+        case .file(let spec):
+            do {
+                try await workspaceRunner?.applyFile(spec)
+                return CommandRouter.successOutcome(
+                    command: command,
+                    observations: [
+                        ObservationPayload(
+                            kind: "fileModified",
+                            content: "File operation: \(spec.operation.rawValue) on \(spec.path)"
+                        )
+                    ],
+                    artifacts: [],
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            } catch {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: "File operation failed: \(error.localizedDescription)",
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
 
         case .code(let action):
             return try executeCodeAction(
@@ -82,6 +157,19 @@ public struct CodeRouter: @unchecked Sendable {
                 router: "code"
             )
         }
+    }
+
+    private func buildObservations(_ result: ProcessResult) -> [ObservationPayload] {
+        let maxLogLength = 2000
+        let truncatedStdout = truncated(result.stdout, limit: maxLogLength)
+        let truncatedStderr = truncated(result.stderr, limit: maxLogLength)
+        
+        return [
+            ObservationPayload(
+                kind: "code.execution",
+                content: "Exit code: \(result.exitCode), Duration: \(Int(result.durationMs))ms\nStdout:\n\(truncatedStdout)\nStderr:\n\(truncatedStderr)"
+            )
+        ]
     }
 
     private func executeCodeAction(

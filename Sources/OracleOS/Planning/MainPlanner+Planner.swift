@@ -112,32 +112,24 @@ extension MainPlanner: Planner {
             let workspacePath = intent.metadata["workspacePath"]
                 ?? context.repositorySnapshot?.workspaceRoot
                 ?? FileManager.default.currentDirectoryPath
-            let spec = CommandSpec(
-                category: .build,
-                executable: "/usr/bin/env",
-                arguments: ["swift", "build"],
+            let spec = BuildSpec(
                 workspaceRoot: workspacePath,
-                summary: "swift build"
+                scheme: intent.metadata["scheme"],
+                configuration: intent.metadata["configuration"] ?? "Debug"
             )
-            return Command(type: .code, payload: .shell(spec), metadata: metadata)
+            return Command(type: .code, payload: .build(spec), metadata: metadata)
         }
 
         if objective.contains("test") || objective.contains("run test") {
             let workspacePath = intent.metadata["workspacePath"]
                 ?? context.repositorySnapshot?.workspaceRoot
                 ?? FileManager.default.currentDirectoryPath
-            var arguments = ["swift", "test"]
-            if let filter = intent.metadata["filter"], !filter.isEmpty {
-                arguments += ["--filter", filter]
-            }
-            let spec = CommandSpec(
-                category: .test,
-                executable: "/usr/bin/env",
-                arguments: arguments,
+            let spec = TestSpec(
                 workspaceRoot: workspacePath,
-                summary: arguments.joined(separator: " ")
+                scheme: intent.metadata["scheme"],
+                filter: intent.metadata["filter"]
             )
-            return Command(type: .code, payload: .shell(spec), metadata: metadata)
+            return Command(type: .code, payload: .test(spec), metadata: metadata)
         }
 
         return Command(
@@ -207,8 +199,16 @@ extension MainPlanner: Planner {
             return trimmed
         }()
 
+        // Note: actionIntent.codeCommand is a deprecated field. New code should use typed specs.
+        // For backward compatibility with existing ActionIntent usage, convert to typed spec if present.
         if let codeCommand = actionIntent.codeCommand {
-            return Command(type: .code, payload: .shell(codeCommand), metadata: metadata)
+            // This path is legacy. Eventually, codeCommand should be removed.
+            // For now, treat it as a search fallback.
+            return Command(
+                type: .code,
+                payload: .code(CodeAction(name: "searchRepository", query: codeCommand.summary)),
+                metadata: metadata
+            )
         }
 
         let modifiers: [String]? = {

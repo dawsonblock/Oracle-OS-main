@@ -73,22 +73,8 @@ public final class PolicyEngine: @unchecked Sendable {
     }
 
     /// Canonical command-level policy validation used by VerifiedExecutor.
+    /// No executable path validation — only typed command validation.
     public func validate(_ command: Command) throws -> PolicyDecision {
-        // Keep shell execution rules and runner policy in sync.
-        if case .shell(let spec) = command.payload, spec.executable != "/usr/bin/env" && spec.executable != "/usr/bin/git" {
-            return PolicyDecision(
-                allowed: false,
-                riskLevel: .blocked,
-                protectedOperation: .workspaceWrite,
-                appProtectionProfile: .lowRiskAllowed,
-                blockedByPolicy: true,
-                surface: surface(from: command.metadata.source),
-                policyMode: mode,
-                requiresApproval: false,
-                reason: "Executable '\(spec.executable)' is not in the allowed executable set"
-            )
-        }
-
         let intent = actionIntent(from: command)
         let context = PolicyEvaluationContext(
             surface: surface(from: command.metadata.source),
@@ -104,11 +90,42 @@ public final class PolicyEngine: @unchecked Sendable {
 
     private func actionIntent(from command: Command) -> ActionIntent {
         switch command.payload {
-        case .shell(let spec):
-            return ActionIntent.code(
-                name: command.kind,
-                command: spec,
-                workspaceRelativePath: spec.workspaceRelativePath
+        case .build(let spec):
+            return ActionIntent(
+                agentKind: .code,
+                app: "Workspace",
+                name: "build",
+                action: "build",
+                workspaceRoot: spec.workspaceRoot,
+                postconditions: []
+            )
+        case .test(let spec):
+            return ActionIntent(
+                agentKind: .code,
+                app: "Workspace",
+                name: "test",
+                action: "test",
+                workspaceRoot: spec.workspaceRoot,
+                postconditions: []
+            )
+        case .git(let spec):
+            return ActionIntent(
+                agentKind: .code,
+                app: "Workspace",
+                name: "git-\(spec.operation.rawValue)",
+                action: "git",
+                workspaceRoot: spec.workspaceRoot,
+                postconditions: []
+            )
+        case .file(let spec):
+            return ActionIntent(
+                agentKind: .code,
+                app: "Workspace",
+                name: "file-\(spec.operation.rawValue)",
+                action: "file-mutation",
+                workspaceRoot: spec.workspaceRoot,
+                workspaceRelativePath: spec.path,
+                postconditions: []
             )
         case .ui(let action):
             return ActionIntent(
