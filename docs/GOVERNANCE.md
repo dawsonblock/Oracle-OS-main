@@ -29,25 +29,30 @@ These documents were accurate at specific points in development but may not refl
 The following rules are enforced by `scripts/architecture_guard.py`:
 
 ### 1. Single Commit Authority
+
 - Only `CommitCoordinator` may append events to the event store
 - Only `CommitCoordinator` may mutate `WorldStateModel` via reducers
 - Bypassing this path breaks replay determinism
 
 ### 2. Event Normalization
+
 - All runtime event producers MUST use `DomainEventFactory`
 - Events MUST include `commandKind`, `status`, and `notes` fields
 - Raw `EventEnvelope` construction outside the factory is forbidden
 
 ### 3. Execution Boundary
+
 - `VerifiedExecutor` is the ONLY layer that may produce side effects
 - `VerifiedExecutor` MUST check preconditions before execution
 - `VerifiedExecutor` MUST NOT commit state — only emit events
 
 ### 4. State Immutability
+
 - `WorldModelSnapshot` is a value type — callers cannot mutate runtime state
 - Direct access to `WorldStateModel` is forbidden outside runtime assembly
 
 ### 5. WAL Protocol
+
 - `CommitWAL.writePending()` MUST be called before `EventStore.append()`
 - `CommitWAL.clear()` MUST be called after successful append
 - `CommitCoordinator.recoverIfNeeded()` MUST be called at startup
@@ -70,6 +75,7 @@ swift build --product oracle
 ### CI Requirements
 
 All PRs must pass:
+
 1. `swift build --product oracle` completes offline
 2. `swift test` — all tests pass
 3. `scripts/architecture_guard.py` — no violations

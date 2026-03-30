@@ -4,7 +4,7 @@
 
 All side effects are expected to flow through this spine:
 
-```
+```text
 Intent
   → RuntimeOrchestrator.submitIntent(_:)
   → Planner.plan(...) -> Command

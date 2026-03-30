@@ -28,6 +28,7 @@ Legacy event types (`CommandSucceeded`, `CommandFailed`) are mapped automaticall
 
 `CommitCoordinator.commit(_:)` now returns `CommitReceipt` instead of void.
 The receipt is an immutable proof of commit containing:
+
 - `commitID` (UUID)
 - `timestamp`
 - `firstSequenceNumber` / `lastSequenceNumber`
@@ -52,6 +53,7 @@ and cross-actor transfer.
 All entry points (MCP, Controller Host, CLI) must use this factory.
 
 The bootstrap wires real reducers:
+
 - `RuntimeStateReducer` — increments cycleCount, tracks lastIntentID, lastCommandKind
 - `UIStateReducer` — updates activeApplication, windowTitle, url, elementCount
 - `ProjectStateReducer` — tracks buildSucceeded, failingTestCount
@@ -77,6 +79,7 @@ some with empty reducer arrays. This made it impossible to know if state
 was "real" (actually derived from events) or just placeholder zeros.
 
 By consolidating to one canonical path:
+
 1. Every commit produces auditable proof (`CommitReceipt`)
 2. Reducers always run and produce real state
 3. Snapshots are truly immutable

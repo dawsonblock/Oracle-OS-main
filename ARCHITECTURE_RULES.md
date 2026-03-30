@@ -33,7 +33,7 @@ but not bypassed, duplicated, or replaced without updating this document:
 
 Every environment mutation follows this exact sequence:
 
-```
+```text
 planner proposes
 ↓
 policy authorizes
@@ -99,6 +99,7 @@ The executor returns `ExecutionOutcome` with events and artifacts;
 > `RuntimeOrchestrator.submitIntent(_:)`.
 
 Forbidden outside the executor and its commit flow:
+
 - Direct writes to `worldState`, `taskGraph`, or runtime memory stores
   that bypass the verified execution pipeline
 - Spawning processes, writing files, or mutating UI state without
@@ -191,6 +192,7 @@ These rules are enforced by governance tests under
 merge.
 
 Governance test suites:
+
 - `ArchitectureFreezeTests` — R1, R3, R4, R5, protected modules
 - `ExecutionBoundaryTests` — R4, R5, R7
 - `MemoryBoundaryTests` — R2
@@ -206,6 +208,7 @@ Governance test suites:
 ## Freeze Policy
 
 During active refactoring phases:
+
 - No new subsystem directories under `Sources/OracleOS/`
 - All new work routes into existing modules
 - Architecture expansion requires matching eval coverage
