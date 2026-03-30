@@ -36,7 +36,19 @@ class ExecutionBoundaryEnforcementTests: XCTestCase {
 
     @MainActor
     func testExecutorIsOnlyExecutionPath() {
-        let executor = VerifiedExecutor()
+        let policyEngine = PolicyEngine.shared
+        let processAdapter = DefaultProcessAdapter(policyEngine: policyEngine)
+        let commandRouter = CommandRouter(
+            automationHost: nil,
+            workspaceRunner: WorkspaceRunner(processAdapter: processAdapter),
+            repositoryIndexer: RepositoryIndexer(processAdapter: processAdapter)
+        )
+        let executor = VerifiedExecutor(
+            policyEngine: policyEngine,
+            commandRouter: commandRouter,
+            preconditionsValidator: PreconditionsValidator(),
+            postconditionsValidator: PostconditionsValidator()
+        )
 
         // Verify executor has execute() as the only public entry point for side effects
         XCTAssertNotNil(executor, "Executor must be instantiable")
