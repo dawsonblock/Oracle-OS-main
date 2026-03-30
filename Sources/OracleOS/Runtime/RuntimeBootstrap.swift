@@ -28,7 +28,7 @@ public enum RuntimeBootstrap {
 
     /// Synchronous bootstrap for contexts that cannot await.
     /// Recovery will be run on first use. Prefer async version.
-    @available(*, deprecated, message: "Use async makeBootstrappedRuntime() instead")
+    @available(*, unavailable, message: "Use async makeBootstrappedRuntime() instead across all surfaces")
     public static func makeDefault(configuration: RuntimeConfig) throws -> RuntimeContainer {
         return try makeContainer(configuration: configuration)
     }
@@ -65,10 +65,13 @@ public enum RuntimeBootstrap {
         let policyEngine = PolicyEngine.shared
         let processAdapter = DefaultProcessAdapter(policyEngine: policyEngine)
 
+        let workspaceRunner = WorkspaceRunner(processAdapter: processAdapter)
+        let repositoryIndexer = RepositoryIndexer(processAdapter: processAdapter)
+
         let commandRouter = CommandRouter(
             automationHost: nil,
-            workspaceRunner: WorkspaceRunner(processAdapter: processAdapter),
-            repositoryIndexer: RepositoryIndexer(processAdapter: processAdapter)
+            workspaceRunner: workspaceRunner,
+            repositoryIndexer: repositoryIndexer
         )
 
         // Create executor with state provider and preconditions
@@ -109,6 +112,8 @@ public enum RuntimeBootstrap {
             policyEngine: policyEngine,
             processAdapter: processAdapter,
             commandRouter: commandRouter,
+            workspaceRunner: workspaceRunner,
+            repositoryIndexer: repositoryIndexer,
             config: configuration,
             traceRecorder: traceRecorder,
             traceStore: traceStore,

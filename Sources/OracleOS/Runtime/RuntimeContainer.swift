@@ -14,6 +14,8 @@ public final class RuntimeContainer: @unchecked Sendable {
     public let policyEngine: PolicyEngine
     public let processAdapter: any ProcessAdapter
     public let commandRouter: CommandRouter
+    public let workspaceRunner: WorkspaceRunner
+    public let repositoryIndexer: RepositoryIndexer
 
     // MARK: - Configuration
     public let config: RuntimeConfig
@@ -43,6 +45,8 @@ public final class RuntimeContainer: @unchecked Sendable {
         policyEngine: PolicyEngine,
         processAdapter: any ProcessAdapter,
         commandRouter: CommandRouter,
+        workspaceRunner: WorkspaceRunner,
+        repositoryIndexer: RepositoryIndexer,
         config: RuntimeConfig,
         traceRecorder: TraceRecorder,
         traceStore: ExperienceStore,
@@ -62,6 +66,8 @@ public final class RuntimeContainer: @unchecked Sendable {
         self.policyEngine = policyEngine
         self.processAdapter = processAdapter
         self.commandRouter = commandRouter
+        self.workspaceRunner = workspaceRunner
+        self.repositoryIndexer = repositoryIndexer
         self.config = config
         self.traceRecorder = traceRecorder
         self.traceStore = traceStore

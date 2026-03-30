@@ -23,71 +23,48 @@ public enum MCPDispatch {
     
     /// Lazily bootstrap the unified runtime with recovery.
     /// Returns the BootstrappedRuntime containing container, orchestrator, and recovery report.
-    /// NOTE: This uses the deprecated sync path since MCPDispatch.handle() is synchronous.
-    /// The async recovery will run on first CommitCoordinator access.
-    private static func getBootstrappedRuntime() -> BootstrappedRuntime {
+    private static func getBootstrappedRuntime() async throws -> BootstrappedRuntime {
         if let existing = _bootstrappedRuntime {
             return existing
         }
         
-        // Use deprecated sync bootstrap since MCPDispatch.handle() is sync.
-        // Cannot use async bootstrap here without deadlocking MainActor.
-        // Recovery will run lazily on first CommitCoordinator.recoverIfNeeded() call.
-        do {
-            let container = try RuntimeBootstrap.makeDefault(configuration: .live())
-            let orchestrator = RuntimeOrchestrator(container: container)
-            let result = BootstrappedRuntime(
-                container: container,
-                orchestrator: orchestrator,
-                recoveryReport: .noRecoveryNeeded  // Will be populated on first coordinator access
-            )
-            _bootstrappedRuntime = result
-            
-            // Trigger recovery asynchronously (fire and forget)
-            Task { @MainActor in
-                do {
-                    let report = try await container.commitCoordinator.recoverIfNeeded()
-                    if report.didRecover {
-                        Log.info("Runtime recovery: replayed \(report.eventsReplayed) events from \(report.walEntriesRecovered) WAL entries")
-                    }
-                    container.recordRecovery(report)
-                } catch {
-                    Log.error("Runtime recovery failed: \(error)")
-                }
-            }
-            
-            return result
-        } catch {
-            fatalError("Failed to bootstrap runtime kernel: \(error)")
+        let built = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: .live())
+        _bootstrappedRuntime = built
+        
+        if built.recoveryReport.didRecover {
+            Log.info("Runtime recovery: replayed \(built.recoveryReport.eventsReplayed) events from \(built.recoveryReport.walEntriesRecovered) WAL entries")
         }
+        
+        return built
     }
     
     /// RuntimeContext with services pulled from the unified container.
-    private static var runtimeContext: RuntimeContext {
+    private static func getRuntimeContext() async throws -> RuntimeContext {
         if let existing = _runtimeContext {
             return existing
         }
-        let bootstrapped = getBootstrappedRuntime()
+        let bootstrapped = try await getBootstrappedRuntime()
         let ctx = RuntimeContext(container: bootstrapped.container)
         _runtimeContext = ctx
         return ctx
     }
     
-    /// The authoritative runtime orchestrator.
-    private static var runtime: RuntimeOrchestrator {
-        getBootstrappedRuntime().orchestrator
-    }
-    
-    /// The runtime container with all shared services.
-    private static var runtimeContainer: RuntimeContainer {
-        getBootstrappedRuntime().container
-    }
+    /// Properties that are safe to access ONCE bootstrap has finished.
+    private static var runtimeContext: RuntimeContext { _runtimeContext! }
+    private static var runtime: RuntimeOrchestrator { _bootstrappedRuntime!.orchestrator }
+    private static var runtimeContainer: RuntimeContainer { _bootstrappedRuntime!.container }
 
     /// Handle a tools/call request. Returns MCP-formatted result.
     /// Wraps every tool call in a timeout so no single tool can block
     /// the MCP server indefinitely (the #1 user-reported issue).
-    public static func handle(_ params: [String: Any]) -> [String: Any] {
-        runtimeContext.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
+    public static func handle(_ params: [String: Any]) async -> [String: Any] {
+        do {
+            let ctx = try await getRuntimeContext()
+            ctx.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
+        } catch {
+            return errorContent("Failed to bootstrap runtime kernel: \(error)")
+        }
+        
         guard let toolName = params["name"] as? String else {
             return errorContent("Missing tool name")
         }
