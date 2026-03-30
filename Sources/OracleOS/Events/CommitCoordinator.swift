@@ -8,6 +8,14 @@ public actor CommitCoordinator {
     private let wal: CommitWAL?
     private(set) var currentState: WorldStateModel
 
+    /// Recovery state to ensure idempotent startup
+    private enum RecoveryState {
+        case notStarted
+        case running
+        case completed(RecoveryReport)
+    }
+    private var recoveryState: RecoveryState = .notStarted
+
     public init(
         eventStore: EventStore,
         reducers: [any EventReducer],
@@ -22,14 +30,44 @@ public actor CommitCoordinator {
 
     /// Recover any pending commits from WAL after crash.
     /// MUST be called at startup before accepting new commits.
-    public func recoverIfNeeded() async throws {
-        guard let wal = wal, let pending = try wal.readPending() else { return }
+    /// Idempotent: subsequent calls return the same report.
+    @discardableResult
+    public func recoverIfNeeded() async throws -> RecoveryReport {
+        // Return cached result if already completed
+        if case .completed(let report) = recoveryState {
+            return report
+        }
+
+        // Guard against concurrent recovery
+        guard case .notStarted = recoveryState else {
+            // Wait for ongoing recovery - return no-op report
+            return .noRecoveryNeeded
+        }
+
+        recoveryState = .running
+
+        guard let wal = wal, let pending = try wal.readPending() else {
+            let report = RecoveryReport.noRecoveryNeeded
+            recoveryState = .completed(report)
+            return report
+        }
+
         // Replay pending events to event store
         try await eventStore.append(contentsOf: pending)
         for reducer in reducers {
             reducer.apply(events: pending, to: &currentState)
         }
         try wal.clear()
+
+        let report = RecoveryReport(
+            didRecover: true,
+            walEntriesRecovered: pending.count,
+            eventsReplayed: pending.count,
+            rebuiltSnapshotID: UUID(),
+            completedAt: Date()
+        )
+        recoveryState = .completed(report)
+        return report
     }
 
     public func commit(_ envelopes: [EventEnvelope]) async throws -> CommitReceipt {

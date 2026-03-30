@@ -3,6 +3,9 @@ import Foundation
 /// RuntimeContext provides peripheral services and adapters for the runtime environment.
 /// NOTE: This is NOT the authoritative execution kernel. RuntimeKernel owns execution truth.
 /// RuntimeContext provides integration services like tracing, memory, browser control, etc.
+///
+/// IMPORTANT: RuntimeContext must receive services from RuntimeContainer.
+/// Do NOT create services here that should be shared across the runtime.
 @MainActor
 public final class RuntimeContext {
     // MARK: - Configuration
@@ -33,12 +36,59 @@ public final class RuntimeContext {
     public let browserController: BrowserController
     public let browserPageStateBuilder: BrowserPageStateBuilder
 
-    // MARK: - Execution Adapters (injected into kernel, not owned here)
-    /// These are passed through to RuntimeKernel but not used directly by RuntimeContext.
+    // MARK: - Execution Adapters (from kernel, not owned here)
     public let policyEngine: PolicyEngine
     public let workspaceRunner: WorkspaceRunner
     public let repositoryIndexer: RepositoryIndexer
 
+    /// Primary initializer: creates RuntimeContext from a RuntimeContainer.
+    /// This ensures all shared services come from the same authority.
+    public init(
+        container: RuntimeContainer,
+        automationHost: AutomationHost = .live(),
+        browserController: BrowserController = BrowserController(),
+        browserPageStateBuilder: BrowserPageStateBuilder = BrowserPageStateBuilder(),
+        stateAbstraction: StateAbstraction = StateAbstraction(),
+        recoveryEngine: RecoveryEngine = RecoveryEngine(),
+        architectureEngine: ArchitectureEngine = ArchitectureEngine(),
+        experimentManager: ExperimentManager = ExperimentManager(),
+        criticLoop: CriticLoop = CriticLoop(),
+        stateAbstractionEngine: StateAbstractionEngine = StateAbstractionEngine()
+    ) {
+        // Pull shared services from container - single source of truth
+        self.config = container.config
+        self.traceRecorder = container.traceRecorder
+        self.traceStore = container.traceStore
+        self.artifactWriter = container.artifactWriter
+        self.metricsRecorder = container.metricsRecorder
+        self.approvalStore = container.approvalStore
+        self.graphStore = container.graphStore
+        self.memoryStore = container.memoryStore
+        self.stateMemoryIndex = container.stateMemoryIndex
+        self.searchController = container.searchController
+        self.policyEngine = container.policyEngine
+
+        // WorkspaceRunner and RepositoryIndexer come from CommandRouter
+        // Create compatible instances using container's process adapter
+        let processAdapter = container.processAdapter
+        self.workspaceRunner = WorkspaceRunner(processAdapter: processAdapter)
+        self.repositoryIndexer = RepositoryIndexer(processAdapter: processAdapter)
+
+        // Peripheral services that don't need sharing
+        self.stateAbstraction = stateAbstraction
+        self.recoveryEngine = recoveryEngine
+        self.architectureEngine = architectureEngine
+        self.experimentManager = experimentManager
+        self.criticLoop = criticLoop
+        self.stateAbstractionEngine = stateAbstractionEngine
+
+        // External adapters
+        self.automationHost = automationHost
+        self.browserController = browserController
+        self.browserPageStateBuilder = browserPageStateBuilder
+    }
+
+    @available(*, deprecated, message: "Use init(container:) with RuntimeBootstrap.makeBootstrappedRuntime()")
     public init(
         config: RuntimeConfig = .live(),
         traceRecorder: TraceRecorder,
@@ -90,6 +140,7 @@ public final class RuntimeContext {
         self.stateAbstractionEngine = StateAbstractionEngine()
     }
 
+    @available(*, unavailable, message: "Use RuntimeBootstrap.makeBootstrappedRuntime() and init(container:)")
     public static func live(
         config: RuntimeConfig = .live(),
         traceRecorder: TraceRecorder,
@@ -99,41 +150,6 @@ public final class RuntimeContext {
         workspaceRunner: WorkspaceRunner? = nil,
         repositoryIndexer: RepositoryIndexer? = nil
     ) -> RuntimeContext {
-        let policy = policyEngine ?? PolicyEngine(mode: config.policyMode)
-        let approvalStore = ApprovalStore(rootDirectory: config.approvalsDirectory)
-        let graphStore = GraphStore()
-        let stateMemoryIndex = StateMemoryIndex()
-        
-        // Use injected adapters or create defaults
-        let workspace = workspaceRunner ?? WorkspaceRunner()
-        let repoIndexer = repositoryIndexer ?? RepositoryIndexer()
-
-        return RuntimeContext(
-            config: config,
-            traceRecorder: traceRecorder,
-            traceStore: traceStore,
-            artifactWriter: artifactWriter,
-            policyEngine: policy,
-            approvalStore: approvalStore,
-            graphStore: graphStore,
-            memoryStore: UnifiedMemoryStore(),
-            stateAbstraction: StateAbstraction(),
-            recoveryEngine: RecoveryEngine(),
-            workspaceRunner: workspace,
-            repositoryIndexer: repoIndexer,
-            architectureEngine: ArchitectureEngine(),
-            experimentManager: ExperimentManager(),
-            automationHost: .live(),
-            browserController: BrowserController(),
-            browserPageStateBuilder: BrowserPageStateBuilder(),
-            stateMemoryIndex: stateMemoryIndex,
-            searchController: SearchController(
-                generator: CandidateGenerator(
-                    stateMemoryIndex: stateMemoryIndex,
-                    graphStore: graphStore
-                )
-            ),
-            metricsRecorder: MetricsRecorder()
-        )
+        fatalError("RuntimeContext.live() is no longer available. Use RuntimeBootstrap.makeBootstrappedRuntime()")
     }
 }

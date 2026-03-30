@@ -13,24 +13,69 @@ public enum MCPDispatch {
     /// can take 10-20s for Chrome. 60s is the absolute ceiling — if a tool takes
     /// longer than this, the MCP server was effectively stuck.
     private static let toolTimeoutSeconds: TimeInterval = 60
-    private static let traceRecorder = TraceRecorder()
-    private static let traceStore = ExperienceStore()
-    private static let failureArtifactWriter = FailureArtifactWriter()
-    private static let runtimeContext = RuntimeContext.live(
-        traceRecorder: traceRecorder,
-        traceStore: traceStore,
-        artifactWriter: failureArtifactWriter
-    )
 
-    private static let runtimeContainer: RuntimeContainer = {
-        do {
-            return try RuntimeBootstrap.makeDefault(configuration: .live())
-        } catch {
-            fatalError("Failed to bootstrap runtime kernel: \(error)")
+    // MARK: - Unified Runtime Bootstrap
+    // Single source of truth: RuntimeBootstrap creates all shared services.
+    // Previous split (separate runtimeContext + runtimeContainer) eliminated.
+    
+    private static var _bootstrappedRuntime: BootstrappedRuntime?
+    private static var _runtimeContext: RuntimeContext?
+    
+    /// Lazily bootstrap the unified runtime with recovery.
+    /// Returns the BootstrappedRuntime containing container, orchestrator, and recovery report.
+    private static func getBootstrappedRuntime() -> BootstrappedRuntime {
+        if let existing = _bootstrappedRuntime {
+            return existing
         }
-    }()
-
-    private static let runtime: RuntimeOrchestrator = RuntimeOrchestrator(container: runtimeContainer)
+        
+        // Bootstrap synchronously for now - async bootstrap requires refactoring callers
+        // TODO: Move to async initialization in MCP server startup
+        var bootstrapped: BootstrappedRuntime?
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        Task { @MainActor in
+            do {
+                bootstrapped = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: .live())
+                if let report = bootstrapped?.recoveryReport, report.didRecover {
+                    Log.info("Runtime recovery: replayed \(report.eventsReplayed) events from \(report.walEntriesRecovered) WAL entries")
+                }
+            } catch {
+                Log.error("Failed to bootstrap runtime: \(error)")
+            }
+            semaphore.signal()
+        }
+        
+        // Wait for async bootstrap (timeout 30s for recovery)
+        _ = semaphore.wait(timeout: .now() + 30)
+        
+        guard let result = bootstrapped else {
+            fatalError("Failed to bootstrap runtime kernel")
+        }
+        
+        _bootstrappedRuntime = result
+        return result
+    }
+    
+    /// RuntimeContext with services pulled from the unified container.
+    private static var runtimeContext: RuntimeContext {
+        if let existing = _runtimeContext {
+            return existing
+        }
+        let bootstrapped = getBootstrappedRuntime()
+        let ctx = RuntimeContext(container: bootstrapped.container)
+        _runtimeContext = ctx
+        return ctx
+    }
+    
+    /// The authoritative runtime orchestrator.
+    private static var runtime: RuntimeOrchestrator {
+        getBootstrappedRuntime().orchestrator
+    }
+    
+    /// The runtime container with all shared services.
+    private static var runtimeContainer: RuntimeContainer {
+        getBootstrappedRuntime().container
+    }
 
     /// Handle a tools/call request. Returns MCP-formatted result.
     /// Wraps every tool call in a timeout so no single tool can block
@@ -343,7 +388,7 @@ public enum MCPDispatch {
                     resumeToken: resumeToken,
                     approvalRequestID: str(args, "approval_request_id"),
                     runtime: runtime,
-                    taskID: traceRecorder.sessionID
+                    taskID: runtimeContainer.traceRecorder.sessionID
                 )
             }
 
@@ -371,7 +416,7 @@ public enum MCPDispatch {
                 recipe: recipe,
                 params: recipeParams,
                 runtime: runtime,
-                taskID: traceRecorder.sessionID
+                taskID: runtimeContainer.traceRecorder.sessionID
             )
 
         case "oracle_recipe_show":

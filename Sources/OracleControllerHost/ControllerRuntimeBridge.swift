@@ -8,37 +8,75 @@ import OracleOS
 final class ControllerRuntimeBridge {
     let sessionID: String
     let sessionStartedAt: Date
-    let traceRecorder: TraceRecorder
-    let traceStore: ExperienceStore
-    let artifactWriter: FailureArtifactWriter
     let runtimeContext: RuntimeContext
     let oracleRuntime: RuntimeOrchestrator
     let runtimeLifecycle: RuntimeLifecycle
     let diagnosticsBuilder: RuntimeDiagnosticsBuilder
+    
+    /// The bootstrapped runtime bundle containing container, orchestrator, and recovery report.
+    private let bootstrappedRuntime: BootstrappedRuntime
+    
+    /// Convenience accessors for tracing services (from unified container)
+    var traceRecorder: TraceRecorder { bootstrappedRuntime.container.traceRecorder }
+    var traceStore: ExperienceStore { bootstrappedRuntime.container.traceStore }
+    var artifactWriter: FailureArtifactWriter { bootstrappedRuntime.container.artifactWriter }
 
-    init() {
-        self.traceRecorder = TraceRecorder()
-        self.traceStore = ExperienceStore()
-        self.artifactWriter = FailureArtifactWriter()
-        self.runtimeContext = RuntimeContext.live(
-            traceRecorder: traceRecorder,
-            traceStore: traceStore,
-            artifactWriter: artifactWriter
-        )
-        self.diagnosticsBuilder = RuntimeDiagnosticsBuilder()
-
-        let runtimeContainer: RuntimeContainer
-        do {
-            runtimeContainer = try RuntimeBootstrap.makeDefault(configuration: .live())
-        } catch {
-            fatalError("Failed to bootstrap runtime kernel: \(error)")
+    init() async throws {
+        // Single source of truth: RuntimeBootstrap creates all shared services with recovery
+        let bootstrapped = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: .live())
+        self.bootstrappedRuntime = bootstrapped
+        
+        // Log recovery status
+        if bootstrapped.recoveryReport.didRecover {
+            Log.info("Controller runtime recovered: replayed \(bootstrapped.recoveryReport.eventsReplayed) events")
         }
-
-        self.oracleRuntime = RuntimeOrchestrator(container: runtimeContainer)
+        
+        // Pull context from the unified container
+        self.runtimeContext = RuntimeContext(container: bootstrapped.container)
+        self.oracleRuntime = bootstrapped.orchestrator
+        self.diagnosticsBuilder = RuntimeDiagnosticsBuilder()
+        
         self.runtimeLifecycle = RuntimeLifecycle(approvalStore: runtimeContext.approvalStore)
-        self.sessionID = traceRecorder.sessionID
+        self.sessionID = bootstrapped.container.traceRecorder.sessionID
         self.sessionStartedAt = Date()
         self.runtimeLifecycle.startControllerHeartbeat(sessionID: sessionID)
+    }
+    
+    /// Synchronous initializer for backward compatibility.
+    /// Blocks on async bootstrap - prefer async init() where possible.
+    @available(*, deprecated, message: "Use async init() for proper recovery handling")
+    convenience init(synchronous: Void) {
+        var bridge: ControllerRuntimeBridge?
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        Task { @MainActor in
+            do {
+                bridge = try await ControllerRuntimeBridge()
+            } catch {
+                fatalError("Failed to bootstrap controller runtime: \(error)")
+            }
+            semaphore.signal()
+        }
+        
+        _ = semaphore.wait(timeout: .now() + 30)
+        guard let result = bridge else {
+            fatalError("Controller runtime bootstrap timed out")
+        }
+        
+        // Copy all properties from the async-initialized instance
+        // This is a workaround for Swift's lack of async convenience init
+        self.init(copying: result)
+    }
+    
+    /// Internal initializer for copying from async result
+    private init(copying other: ControllerRuntimeBridge) {
+        self.bootstrappedRuntime = other.bootstrappedRuntime
+        self.runtimeContext = other.runtimeContext
+        self.oracleRuntime = other.oracleRuntime
+        self.runtimeLifecycle = other.runtimeLifecycle
+        self.diagnosticsBuilder = other.diagnosticsBuilder
+        self.sessionID = other.sessionID
+        self.sessionStartedAt = other.sessionStartedAt
     }
 
     func currentSession(autoRefreshEnabled: Bool, appName: String?) -> ControllerSession {

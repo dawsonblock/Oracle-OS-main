@@ -5,7 +5,21 @@ import OracleControllerShared
 struct OracleControllerHostMain {
     static func main() async {
         let output = HostOutput()
-        let bridge = await MainActor.run { ControllerRuntimeBridge() }
+        
+        // Use async bootstrap for proper recovery handling
+        let bridge: ControllerRuntimeBridge
+        do {
+            bridge = try await MainActor.run { try await ControllerRuntimeBridge() }
+        } catch {
+            await output.send(response: ControllerHostResponse(
+                requestID: UUID().uuidString,
+                command: .ping,
+                acknowledged: false,
+                errorMessage: "Failed to bootstrap runtime: \(error.localizedDescription)"
+            ))
+            return
+        }
+        
         let server = ControllerHostServer(output: output, bridge: bridge)
         let decoder = ControllerJSONCoding.makeDecoder()
 
