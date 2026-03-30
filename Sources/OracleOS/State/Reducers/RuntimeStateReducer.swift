@@ -10,32 +10,46 @@ public struct RuntimeStateReducer: EventReducer {
             state.update { snapshot in
                 switch event {
                 case .intentReceived(let payload):
+                    let newNote = "lastIntentID=\(payload.intentID.uuidString)"
+                    guard !snapshot.notes.contains(newNote) else { return snapshot }
                     return snapshot.copy(
                         cycleCount: snapshot.cycleCount + 1,
-                        notes: Array((snapshot.notes + ["lastIntentID=\(payload.intentID.uuidString)"]).suffix(25))
+                        notes: Array((snapshot.notes + [newNote]).suffix(25))
                     )
 
                 case .planGenerated(let payload):
+                    let newNote = "lastCommandKind=\(payload.commandKind)"
+                    guard !snapshot.notes.contains(newNote) else { return snapshot }
                     return snapshot.copy(
-                        notes: Array((snapshot.notes + ["lastCommandKind=\(payload.commandKind)"]).suffix(25))
+                        notes: Array((snapshot.notes + [newNote]).suffix(25))
                     )
 
                 case .commandExecuted(let payload):
+                    let newNote = "lastExecutionStatus=\(payload.status)"
+                    guard !snapshot.notes.contains(newNote) else { return snapshot }
                     return snapshot.copy(
-                        notes: Array((snapshot.notes + ["lastExecutionStatus=\(payload.status)"] + payload.notes.prefix(3)).suffix(25))
+                        notes: Array((snapshot.notes + [newNote] + payload.notes.prefix(3)).suffix(25))
                     )
 
                 case .commandFailed(let payload):
                     var notes = snapshot.notes
-                    notes.append("lastFailure=\(payload.error)")
+                    let failureNote = "lastFailure=\(payload.error)"
+                    if !notes.contains(failureNote) {
+                        notes.append(failureNote)
+                    }
                     if let kind = payload.commandKind {
-                        notes.append("lastCommandKind=\(kind)")
+                        let kindNote = "lastCommandKind=\(kind)"
+                        if !notes.contains(kindNote) {
+                            notes.append(kindNote)
+                        }
                     }
                     return snapshot.copy(notes: Array(notes.suffix(25)))
 
                 case .evaluationCompleted(let payload):
+                    let newNote = "criticOutcome=\(payload.criticOutcome)"
+                    guard !snapshot.notes.contains(newNote) else { return snapshot }
                     return snapshot.copy(
-                        notes: Array((snapshot.notes + ["criticOutcome=\(payload.criticOutcome)"]).suffix(25))
+                        notes: Array((snapshot.notes + [newNote]).suffix(25))
                     )
 
                 default:
