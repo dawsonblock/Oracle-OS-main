@@ -228,3 +228,11 @@ Common wait conditions:
 | oracle_recipe_delete | Delete recipe | No |
 | oracle_parse_screen | Experimental full-screen parsing via the vision sidecar | No |
 | oracle_ground | Find element coordinates via VLM | No |
+| oracle_memory_query | Query project memory (architecture, risks, patterns) | No |
+| oracle_memory_draft | Draft a new project memory record | No |
+| oracle_experiment_search | Run bounded parallel patch experiments | No |
+| oracle_architecture_review | Review planned changes for invariants/risks | No |
+| oracle_candidate_review | Deep architecture review of a patch candidate | No |
+| oracle_workflow_mine | Synthesize reusable workflows from telemetry | No |
+| oracle_workflow_list | List synthesized workflows | No |
+| oracle_workflow_execute | Execute a synthesized workflow | No |

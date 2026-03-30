@@ -66,7 +66,7 @@ final class RuntimeInvariantTests: XCTestCase {
         XCTAssertFalse(orchestrator.contains("public func evaluate"))
         XCTAssertTrue(orchestrator.contains("try await container.executor.execute(command)"))
         XCTAssertFalse(orchestrator.contains("_legacyContext"))
-        XCTAssertTrue(orchestrator.contains("try await container.commitCoordinator.commit(executionOutcome.events)"))
+        XCTAssertTrue(orchestrator.contains("try await container.commitCoordinator.commit(pendingEvents)"))
     }
 
     func test_runtime_spine_avoids_direct_process_usage_outside_workspace_runner() throws {

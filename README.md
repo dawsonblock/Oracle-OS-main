@@ -161,7 +161,7 @@ See [docs/GOVERNANCE.md](docs/GOVERNANCE.md) for the full normative contract.
 
 ## 🔌 MCP Tool Surface
 
-Oracle OS exposes **22 stable public MCP tools** under `oracle_*` names:
+Oracle OS exposes **30 stable public MCP tools** under `oracle_*` names:
 
 | Category | Tools |
 | --- | --- |
@@ -170,6 +170,10 @@ Oracle OS exposes **22 stable public MCP tools** under `oracle_*` names:
 | **Vision** | `oracle_ground` · `oracle_parse_screen` |
 | **Diagnostics** | `oracle_wait` · `oracle_permissions` · `oracle_doctor` |
 | **Recipes** | `oracle_recipes` · `oracle_run` · `oracle_recipe_show` · `oracle_recipe_save` · `oracle_recipe_delete` |
+| **Knowledge** | `oracle_memory_query` · `oracle_memory_draft` |
+| **Experiments** | `oracle_experiment_search` |
+| **Architecture** | `oracle_architecture_review` · `oracle_candidate_review` |
+| **Workflows** | `oracle_workflow_mine` · `oracle_workflow_list` · `oracle_workflow_execute` |
 
 ## 🎛 Oracle Controller
 

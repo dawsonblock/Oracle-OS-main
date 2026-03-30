@@ -1,6 +1,6 @@
 // MCPTools.swift - MCP tool definitions (names, descriptions, parameter schemas)
 //
-// All 22 tools defined here. Agent sees these descriptions and schemas.
+// All 30 tools defined here. Agent sees these descriptions and schemas.
 // Make them excellent - they're the contract between Oracle OS and the agent.
 
 import Foundation
