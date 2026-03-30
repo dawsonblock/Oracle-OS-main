@@ -43,8 +43,6 @@ public struct TaskContext: Sendable, Codable, Equatable {
             [.operatingSystem]
         case .code:
             [.engineering]
-        case .mixed:
-            [.handoff, .engineering]
         }
 
         return TaskContext(

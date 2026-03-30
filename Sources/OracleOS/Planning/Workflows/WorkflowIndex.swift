@@ -79,8 +79,7 @@ public final class WorkflowIndex: @unchecked Sendable {
                 && !decayPolicy.isStale(plan)
                 && (
                 agentKind == nil
-                    || agentKind == .mixed
-                    || plan.agentKind == agentKind
+                                        || plan.agentKind == agentKind
             )
         }
     }

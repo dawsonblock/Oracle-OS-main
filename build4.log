@@ -1,0 +1,112 @@
+Building for debugging...
+[0/11] Write sources
+[1/11] Write swift-version--58304C5D6DBC2206.txt
+[3/40] Compiling OracleOS RefocusAppStrategy.swift
+[4/40] Compiling OracleOS RefreshIndexStrategy.swift
+[5/40] Compiling OracleOS RefreshObservationStrategy.swift
+[6/40] Emitting module OracleOS
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:34:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 32 | 
+ 33 | public final class WorkspaceRunner: @unchecked Sendable {
+ 34 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:36:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 34 |     private let processAdapter: ProcessAdapter
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 37 |         self.processAdapter = processAdapter
+ 38 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:4:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  2 | 
+  3 | public final class RepositoryIndexer: @unchecked Sendable {
+  4 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  5 | 
+  6 |     private struct ParsedFile {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:18:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 16 |     }
+ 17 | 
+ 18 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |         self.processAdapter = processAdapter
+ 20 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  4 | /// INVARIANT: No state write may bypass CommitCoordinator.
+  5 | public actor CommitCoordinator {
+  6 |     private let eventStore: EventStore
+    |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  7 |     private let reducers: [any EventReducer]
+  8 |     private let wal: CommitWAL?
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:14:43: warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 12 |     private enum RecoveryState {
+ 13 |         case notStarted
+ 14 |         case running(Task<RecoveryReport, Error>)
+    |                                           `- warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 15 |         case completed(RecoveryReport)
+ 16 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:20:21: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 18 | 
+ 19 |     public init(
+ 20 |         eventStore: EventStore,
+    |                     `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 21 |         reducers: [any EventReducer],
+ 22 |         wal: CommitWAL? = nil,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:21:32: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |     private let preconditionsValidator: PreconditionsValidator
+ 20 |     private let postconditionsValidator: PostconditionsValidator
+ 21 |     private let stateProvider: WorldStateProviding?
+    |                                `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 22 | 
+ 23 |     public init(
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:28:24: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 26 |         preconditionsValidator: PreconditionsValidator,
+ 27 |         postconditionsValidator: PostconditionsValidator,
+ 28 |         stateProvider: WorldStateProviding? = nil
+    |                        `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 29 |     ) {
+ 30 |         self.policyEngine = policyEngine
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:4:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 2 | /// Memory derived from event history — read-only.
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:5:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+ 7 |         let events = (try? await eventStore.all()) ?? []
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 4 | /// Traces derive from event history and execution outcomes — not scattered manual logs.
+ 5 | public struct EventReplay {
+ 6 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:8:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     private let eventStore: EventStore
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 9 |         self.eventStore = eventStore
+10 |     }
+
+[#ExistentialAny]: <https://docs.swift.org/compiler/documentation/diagnostics/existential-any>

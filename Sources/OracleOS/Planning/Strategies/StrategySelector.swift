@@ -169,7 +169,7 @@ public final class StrategySelector: @unchecked Sendable {
         }
 
         // Priority 6: Code agent with repo → diagnosticAnalysis or repoRepair.
-        if (agentKind == .code || agentKind == .mixed),
+        if agentKind == .code,
            conditions.contains(.repositoryOpen) {
             return .repoRepair
         }
@@ -319,28 +319,28 @@ public final class StrategySelector: @unchecked Sendable {
             TaskStrategy(
                 kind: .codeRepair,
                 description: "Repair failing code using fault localization and patching",
-                applicableAgentKinds: [.code, .mixed],
+                applicableAgentKinds: [.code],
                 requiredConditions: [.repositoryOpen],
                 priorityScore: 0.7
             ),
             TaskStrategy(
                 kind: .testFix,
                 description: "Fix failing tests by analyzing stack traces and applying targeted patches",
-                applicableAgentKinds: [.code, .mixed],
+                applicableAgentKinds: [.code],
                 requiredConditions: [.repositoryOpen, .testsFailing],
                 priorityScore: 0.75
             ),
             TaskStrategy(
                 kind: .buildFix,
                 description: "Fix build failures by analyzing compiler errors",
-                applicableAgentKinds: [.code, .mixed],
+                applicableAgentKinds: [.code],
                 requiredConditions: [.repositoryOpen, .buildFailing],
                 priorityScore: 0.75
             ),
             TaskStrategy(
                 kind: .dependencyRepair,
                 description: "Repair dependency issues in the project",
-                applicableAgentKinds: [.code, .mixed],
+                applicableAgentKinds: [.code],
                 requiredConditions: [.repositoryOpen],
                 priorityScore: 0.6
             ),
@@ -354,13 +354,13 @@ public final class StrategySelector: @unchecked Sendable {
             TaskStrategy(
                 kind: .navigation,
                 description: "Navigate to a target application or page",
-                applicableAgentKinds: [.os, .mixed],
+                applicableAgentKinds: [.os],
                 priorityScore: 0.5
             ),
             TaskStrategy(
                 kind: .uiExploration,
                 description: "Explore the UI to discover available actions",
-                applicableAgentKinds: [.os, .mixed],
+                applicableAgentKinds: [.os],
                 priorityScore: 0.3,
                 notes: ["Lowest priority — used when other strategies don't apply"]
             ),

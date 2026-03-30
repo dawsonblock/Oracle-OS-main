@@ -28,7 +28,7 @@ public struct PlanningContext: Sendable {
         workflowMatches: [WorkflowMatcher.Match] = [],
         memoryInfluence: MemoryInfluence = MemoryInfluence(),
         recentFailureCount: Int = 0,
-        agentKind: AgentKind = .mixed,
+        agentKind: AgentKind = .code,
         currentStrategy: SelectedStrategy? = nil,
         strategyStartStep: Int = 0,
         stepsSinceSelection: Int = 0

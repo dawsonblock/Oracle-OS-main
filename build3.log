@@ -1,0 +1,596 @@
+Building for debugging...
+[0/11] Write sources
+[1/11] Write swift-version--58304C5D6DBC2206.txt
+[3/33] Compiling OracleOS WorkflowConfidenceModel.swift
+[4/33] Compiling OracleOS WorkflowDecayPolicy.swift
+[5/33] Compiling OracleOS WorkflowSynthesizer.swift
+[6/33] Compiling OracleOS AgentKind.swift
+[7/35] Compiling OracleOS RuntimeExecutionDriver.swift
+[8/36] Compiling OracleOS RecipeValidator.swift
+[9/37] Compiling OracleOS RuntimeDiagnostics.swift
+[10/38] Compiling OracleOS PlanRanker.swift
+[11/38] Compiling OracleOS StrategySelector.swift
+[12/38] Compiling OracleOS MemoryDecisionBias.swift
+[13/38] Compiling OracleOS MemoryEvidence.swift
+[14/38] Compiling OracleOS PlanningContext.swift
+[15/38] Compiling OracleOS PatternSimilarity.swift
+[16/38] Compiling OracleOS TraceCompressor.swift
+[17/38] Compiling OracleOS WorkflowExecutor.swift
+[18/38] Compiling OracleOS WorkflowIndex.swift
+[19/38] Emitting module OracleOS
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:34:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 32 | 
+ 33 | public final class WorkspaceRunner: @unchecked Sendable {
+ 34 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Execution/WorkspaceRunner.swift:36:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 34 |     private let processAdapter: ProcessAdapter
+ 35 | 
+ 36 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 37 |         self.processAdapter = processAdapter
+ 38 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:4:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  2 | 
+  3 | public final class RepositoryIndexer: @unchecked Sendable {
+  4 |     private let processAdapter: ProcessAdapter
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+  5 | 
+  6 |     private struct ParsedFile {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Code/Intelligence/RepositoryIndexer.swift:18:33: warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 16 |     }
+ 17 | 
+ 18 |     public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    |                                 `- warning: use of protocol 'ProcessAdapter' as a type must be written 'any ProcessAdapter'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |         self.processAdapter = processAdapter
+ 20 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  4 | /// INVARIANT: No state write may bypass CommitCoordinator.
+  5 | public actor CommitCoordinator {
+  6 |     private let eventStore: EventStore
+    |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+  7 |     private let reducers: [any EventReducer]
+  8 |     private let wal: CommitWAL?
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:14:43: warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 12 |     private enum RecoveryState {
+ 13 |         case notStarted
+ 14 |         case running(Task<RecoveryReport, Error>)
+    |                                           `- warning: use of protocol 'Error' as a type must be written 'any Error'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 15 |         case completed(RecoveryReport)
+ 16 |     }
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Events/CommitCoordinator.swift:20:21: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 18 | 
+ 19 |     public init(
+ 20 |         eventStore: EventStore,
+    |                     `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 21 |         reducers: [any EventReducer],
+ 22 |         wal: CommitWAL? = nil,
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:21:32: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 19 |     private let preconditionsValidator: PreconditionsValidator
+ 20 |     private let postconditionsValidator: PostconditionsValidator
+ 21 |     private let stateProvider: WorldStateProviding?
+    |                                `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 22 | 
+ 23 |     public init(
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Execution/VerifiedExecutor.swift:28:24: warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 26 |         preconditionsValidator: PreconditionsValidator,
+ 27 |         postconditionsValidator: PostconditionsValidator,
+ 28 |         stateProvider: WorldStateProviding? = nil
+    |                        `- warning: use of protocol 'WorldStateProviding' as a type must be written 'any WorldStateProviding'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 29 |     ) {
+ 30 |         self.policyEngine = policyEngine
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:4:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 2 | /// Memory derived from event history — read-only.
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Memory/EventMemory.swift:5:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 3 | public actor EventMemory {
+ 4 |     private let eventStore: EventStore
+ 5 |     public init(eventStore: EventStore) { self.eventStore = eventStore }
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     public func query(pattern: String) async -> [MemoryCandidate] {
+ 7 |         let events = (try? await eventStore.all()) ?? []
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:6:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 4 | /// Traces derive from event history and execution outcomes — not scattered manual logs.
+ 5 | public struct EventReplay {
+ 6 |     private let eventStore: EventStore
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Observability/EventReplay.swift:8:29: warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 6 |     private let eventStore: EventStore
+ 7 | 
+ 8 |     public init(eventStore: EventStore) {
+   |                             `- warning: use of protocol 'EventStore' as a type must be written 'any EventStore'; this will be an error in a future Swift language mode [#ExistentialAny]
+ 9 |         self.eventStore = eventStore
+10 |     }
+
+[#ExistentialAny]: <https://docs.swift.org/compiler/documentation/diagnostics/existential-any>
+[20/38] Compiling OracleOS Actions.swift
+[21/38] Compiling OracleOS MainPlanner+Planner.swift
+[22/38] Compiling OracleOS WorkflowStrategy.swift
+[23/38] Compiling OracleOS TraceClusterer.swift
+[24/38] Compiling OracleOS UnifiedMemoryStore.swift
+[25/38] Compiling OracleOS Plan.swift
+[26/38] Compiling OracleOS MainPlanner.swift
+[27/38] Compiling OracleOS MemoryDecayPolicy.swift
+[28/120] Compiling OracleOS MCPDispatch.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:112:21: warning: capture of 'work' with non-Sendable type 'DispatchWorkItem' in a '@Sendable' closure [#SendableClosureCaptures]
+110 |                 if !resumed {
+111 |                     resumed = true
+112 |                     work.cancel()
+    |                     `- warning: capture of 'work' with non-Sendable type 'DispatchWorkItem' in a '@Sendable' closure [#SendableClosureCaptures]
+113 |                     lock.unlock()
+114 |                     continuation.resume(returning: ResultWrapper(payload: nil))
+
+Dispatch.DispatchWorkItem:2:14: note: class 'DispatchWorkItem' does not conform to the 'Sendable' protocol
+ 1 | @available(macOS 10.10, iOS 8.0, *)
+ 2 | public class DispatchWorkItem {
+   |              `- note: class 'DispatchWorkItem' does not conform to the 'Sendable' protocol
+ 3 |     public init(qos: DispatchQoS = .unspecified, flags: DispatchWorkItemFlags = [], block: @escaping @convention(block) () -> Void)
+ 4 |     @available(macOS 11.3, iOS 14.5, watchOS 7.4, tvOS 14.5, *)
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:6:1: warning: add '@preconcurrency' to treat 'Sendable'-related errors from module 'Dispatch' as warnings
+  4 | // Formats responses as MCP content arrays.
+  5 | 
+  6 | import Foundation
+    | `- warning: add '@preconcurrency' to treat 'Sendable'-related errors from module 'Dispatch' as warnings
+  7 | 
+  8 | /// Routes MCP tool calls to the appropriate module function.
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:110:21: warning: reference to captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+108 |             queue.asyncAfter(deadline: .now() + actualTimeout) {
+109 |                 lock.lock()
+110 |                 if !resumed {
+    |                     `- warning: reference to captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+111 |                     resumed = true
+112 |                     work.cancel()
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/MCP/MCPDispatch.swift:111:21: warning: mutation of captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+109 |                 lock.lock()
+110 |                 if !resumed {
+111 |                     resumed = true
+    |                     `- warning: mutation of captured var 'resumed' in concurrently-executing code [#SendableClosureCaptures]
+112 |                     work.cancel()
+113 |                     lock.unlock()
+
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[29/130] Compiling OracleOS AlternateElementStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[30/130] Compiling OracleOS DismissModalStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[31/130] Compiling OracleOS RefocusAppStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[32/130] Compiling OracleOS RefreshIndexStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[33/130] Compiling OracleOS RefreshObservationStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[34/130] Compiling OracleOS RerunFocusedTestsStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[35/130] Compiling OracleOS RetryStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[36/130] Compiling OracleOS RevertPatchStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[37/130] Compiling OracleOS StallRecoveryStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[38/130] Compiling OracleOS GoalClassifier.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:44:21: error: type 'AgentKind' has no member 'mixed'
+42 | 
+43 |         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
+44 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/GoalClassifier.swift:47:21: error: type 'AgentKind' has no member 'mixed'
+45 |         }
+46 |         if codeMatches > 0 && osMatches > 0 {
+47 |             return .mixed
+   |                     `- error: type 'AgentKind' has no member 'mixed'
+48 |         }
+49 |         if codeMatches > 0 {
+[39/140] Compiling OracleOS PlanGenerator.swift
+[40/149] Compiling OracleOS OSPlanningStrategy.swift
+[41/158] Compiling OracleOS LoopBudget.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[42/158] Compiling OracleOS LoopTerminationReason.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[43/158] Compiling OracleOS RuntimeBootstrap.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[44/158] Compiling OracleOS RuntimeTelemetry.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[45/158] Compiling OracleOS TaskContext.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[46/158] Compiling OracleOS CandidateGenerator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[47/158] Compiling OracleOS ElementMatcher.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[48/158] Compiling OracleOS ElementRanker.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[49/158] Compiling OracleOS ClickSkill.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[50/158] Compiling OracleOS FillFormSkill.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Runtime/TaskContext.swift:46:15: error: type 'AgentKind' has no member 'mixed'
+44 |         case .code:
+45 |             [.engineering]
+46 |         case .mixed:
+   |               `- error: type 'AgentKind' has no member 'mixed'
+47 |             [.handoff, .engineering]
+48 |         }
+[51/159] Compiling OracleOS CodePlanningStrategy.swift
+[52/160] Compiling OracleOS OSTargetResolver.swift
+[53/160] Compiling OracleOS OpenAppSkill.swift
+[54/160] Compiling OracleOS ReadFileSkill.swift
+[55/160] Compiling OracleOS ScrollSkill.swift
+[56/160] Compiling OracleOS SwitchWindowSkill.swift
+[57/160] Compiling OracleOS TypeSkill.swift
+[58/160] Compiling OracleOS Skill.swift
+[59/160] Compiling OracleOS LedgerNavigator.swift
+[60/160] Compiling OracleOS LedgerScorer.swift
+[61/160] Compiling OracleOS TaskLedgerStore.swift
+[62/161] Compiling OracleOS MemoryInfluence.swift
+[63/162] Compiling OracleOS StateAbstractor.swift
+[64/162] Compiling OracleOS StateDiffEngine.swift
+[65/162] Compiling OracleOS StateEstimator.swift
+[66/162] Compiling OracleOS StateSimulator.swift
+[67/162] Compiling OracleOS StateUpdater.swift
+[68/162] Compiling OracleOS WorldQuery.swift
+[69/162] Compiling OracleOS WorldReducer.swift
+[70/162] Compiling OracleOS WorldState.swift
+[71/162] Compiling OracleOS WorldStateModel.swift
+[72/162] Compiling OracleOS LLMRepairAdvisor.swift
+[73/164] Compiling OracleOS MemoryUpdater.swift
+[74/164] Compiling OracleOS SessionMemory.swift
+[75/164] Compiling OracleOS ParameterExtractor.swift
+[76/164] Compiling OracleOS TraceSegmenter.swift
+[77/164] Compiling OracleOS WorkflowPatternMiner.swift
+[78/164] Compiling OracleOS CommandAssembler.swift
+[79/164] Compiling OracleOS ExplorationPolicy.swift
+[80/164] Compiling OracleOS Goal.swift
+[81/164] Compiling OracleOS GraphSearchDiagnostics.swift
+[82/164] Compiling OracleOS PathScorer.swift
+[83/165] Compiling OracleOS PathSearch.swift
+[84/165] Compiling OracleOS MemoryQueryContext.swift
+[85/165] Compiling OracleOS MemoryRouter.swift
+[86/165] Compiling OracleOS PlanSelection.swift
+[87/165] Compiling OracleOS PlannerDecision.swift
+[88/165] Compiling OracleOS Operator.swift
+[89/165] Compiling OracleOS OperatorRegistry.swift
+[90/165] Compiling OracleOS PlanCandidate.swift
+[91/165] Compiling OracleOS PlanEvaluator.swift
+[92/165] Compiling OracleOS PlanSimulator.swift
+[93/165] Compiling OracleOS ParseBuildFailureSkill.swift
+[94/165] Compiling OracleOS ParseTestFailureSkill.swift
+[95/165] Compiling OracleOS ReadRepositorySkill.swift
+[96/165] Compiling OracleOS RunBuildSkill.swift
+[97/165] Compiling OracleOS RunFormatterSkill.swift
+[98/165] Compiling OracleOS RunLinterSkill.swift
+[99/165] Compiling OracleOS RunTestsSkill.swift
+[100/165] Compiling OracleOS SearchCodeSkill.swift
+[101/165] Compiling OracleOS WriteFileSkill.swift
+[102/165] Compiling OracleOS RuntimeInspector.swift
+[103/167] Compiling OracleOS LLMRecoveryAdvisor.swift
+[104/168] Compiling OracleOS BrowserTargetResolver.swift
+[105/169] Compiling OracleOS BrowserActionAdapter.swift
+[106/169] Compiling OracleOS NavigateURLSkill.swift
+[107/169] Compiling OracleOS CodeSkillSupport.swift
+[108/169] Compiling OracleOS EditFileSkill.swift
+[109/169] Compiling OracleOS GeneratePatchSkill.swift
+[110/169] Compiling OracleOS GitBranchSkill.swift
+[111/169] Compiling OracleOS GitCommitSkill.swift
+[112/169] Compiling OracleOS GitPushSkill.swift
+[113/169] Compiling OracleOS GitStatusSkill.swift
+[114/169] Compiling OracleOS OpenFileSkill.swift
+[115/169] Compiling OracleOS ProposalEngine.swift
+[116/169] Compiling OracleOS ReasoningEngine.swift
+[117/169] Compiling OracleOS ReasoningParser.swift
+[118/169] Compiling OracleOS ReasoningPlanningState.swift
+[119/169] Compiling OracleOS GraphPathStrategy.swift
+[120/169] Compiling OracleOS StrategyLibrary.swift
+[121/169] Compiling OracleOS WorkflowMatcher.swift
+[122/169] Compiling OracleOS WorkflowParameterizer.swift
+[123/169] Compiling OracleOS WorkflowPlan.swift
+[124/169] Compiling OracleOS WorkflowPromotionPolicy.swift
+[125/169] Compiling OracleOS ActionIntent.swift
+[126/169] Compiling OracleOS CriticLoop.swift
+[127/169] Compiling OracleOS LoopDiagnostics.swift
+[128/169] Compiling OracleOS PostconditionVerifier.swift
+[129/169] Compiling OracleOS TargetResolver.swift
+[130/169] Compiling OracleOS PolicyEngine.swift
+[131/169] Compiling OracleOS PolicyRules.swift
+[132/169] Compiling OracleOS ActionContract.swift
+[133/169] Compiling OracleOS ExecutionSemanticsEncoder.swift
+[134/169] Compiling OracleOS VerifiedTransition.swift
+[135/169] Compiling OracleOS WorkflowReplayValidator.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[136/169] Compiling OracleOS WorkflowRetriever.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[137/169] Compiling OracleOS ContextAssembler.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[138/169] Compiling OracleOS PromptEngine.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[139/169] Compiling OracleOS CodeRecoveryEngine.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[140/169] Compiling OracleOS FailureClassifier.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[141/169] Compiling OracleOS RecoveryEngine.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[142/169] Compiling OracleOS RecoveryPlanner.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[143/169] Compiling OracleOS RecoveryStrategy.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[144/169] Compiling OracleOS RecoveryStrategySelector.swift
+/Users/dawsonblock/Downloads/Oracle-OS-main/Sources/OracleOS/Planning/Workflows/WorkflowReplayValidator.swift:79:28: error: type 'PlannerFamily' has no member 'mixed'
+ 77 |         case PlannerFamily.code.rawValue:
+ 78 |             return .engineering
+ 79 |         case PlannerFamily.mixed.rawValue:
+    |                            `- error: type 'PlannerFamily' has no member 'mixed'
+ 80 |             return .handoff
+ 81 |         default:
+[145/169] Compiling OracleOS MemoryQuery.swift
+[146/169] Compiling OracleOS PatchExperimentRunner.swift
+[147/169] Compiling OracleOS RuntimeContainer.swift
+[148/169] Compiling OracleOS EnvironmentMonitor.swift
+[149/169] Compiling OracleOS CandidateGraph.swift
+[150/169] Compiling OracleOS EdgeTransition.swift
+[151/169] Compiling OracleOS GraphMaintenance.swift
+[152/169] Compiling OracleOS GraphPersistence.swift
+[153/169] Compiling OracleOS GraphPromotionPolicy.swift
+[154/169] Compiling OracleOS GraphPruner.swift
+[155/169] Compiling OracleOS GraphStore.swift
+[156/169] Compiling OracleOS StableGraph.swift
+[157/169] Compiling OracleOS RuntimeContext.swift
+[158/169] Compiling OracleOS RuntimeOrchestrator.swift
+[159/169] Compiling OracleOS MemoryScorer.swift
+[160/169] Compiling OracleOS PlanScore.swift

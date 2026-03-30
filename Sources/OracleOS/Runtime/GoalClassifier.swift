@@ -41,10 +41,10 @@ public enum GoalClassifier {
         let osMatches = osSignals.filter(lowercased.contains).count
 
         if workspaceRoot != nil && codeMatches > 0 && osMatches > 0 {
-            return .mixed
+            return .os
         }
         if codeMatches > 0 && osMatches > 0 {
-            return .mixed
+            return .os
         }
         if codeMatches > 0 {
             return .code

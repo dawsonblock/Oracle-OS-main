@@ -76,8 +76,6 @@ public struct WorkflowReplayValidator: Sendable {
         switch event.plannerFamily {
         case PlannerFamily.code.rawValue:
             return .engineering
-        case PlannerFamily.mixed.rawValue:
-            return .handoff
         default:
             return .operatingSystem
         }

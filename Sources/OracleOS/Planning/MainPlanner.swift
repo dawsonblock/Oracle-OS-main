@@ -354,8 +354,6 @@ public final class MainPlanner: @unchecked Sendable {
             return .operatingSystem
         case .code:
             return .engineering
-        case .mixed:
-            return .operatingSystem
         }
     }
 
@@ -365,8 +363,6 @@ public final class MainPlanner: @unchecked Sendable {
             return .os
         case .code:
             return .code
-        case .mixed:
-            return .mixed
         }
     }
 

@@ -126,7 +126,7 @@ public final class UnifiedMemoryStore: @unchecked Sendable {
         for context: MemoryQueryContext
     ) -> ProjectMemoryPlanningSignals {
         guard let snapshot = context.repositorySnapshot,
-              (context.agentKind == .code || context.agentKind == .mixed || context.agentKind == nil)
+              (context.agentKind == .code || context.agentKind == nil)
         else {
             return ProjectMemoryPlanningSignals()
         }

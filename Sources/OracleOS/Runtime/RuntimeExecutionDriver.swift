@@ -52,7 +52,7 @@ public final class RuntimeExecutionDriver: AgentExecutionDriver {
         selectedCandidate: ElementCandidate?
     ) -> ToolResult {
         let domain: IntentDomain = intent.agentKind == .code ? .code :
-            (intent.agentKind == .mixed ? .system : .ui)
+            .ui
 
         var metadata = [
             "query": intent.query ?? intent.text ?? intent.name,

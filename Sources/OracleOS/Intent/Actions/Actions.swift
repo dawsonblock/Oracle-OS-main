@@ -64,14 +64,13 @@ public enum Actions {
         switch agentKind {
         case .os: .os
         case .code: .code
-        case .mixed: .mixed
         }
     }
 
     private static func stepPhase(for agentKind: AgentKind) -> TaskStepPhase {
         switch agentKind {
         case .code: .engineering
-        case .os, .mixed: .operatingSystem
+        case .os: .operatingSystem
         }
     }
 
