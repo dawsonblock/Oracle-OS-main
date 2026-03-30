@@ -44,16 +44,7 @@ public final class RuntimeContext {
     /// Primary initializer: creates RuntimeContext from a RuntimeContainer.
     /// This ensures all shared services come from the same authority.
     public init(
-        container: RuntimeContainer,
-        automationHost: AutomationHost = .live(),
-        browserController: BrowserController = BrowserController(),
-        browserPageStateBuilder: BrowserPageStateBuilder = BrowserPageStateBuilder(),
-        stateAbstraction: StateAbstraction = StateAbstraction(),
-        recoveryEngine: RecoveryEngine = RecoveryEngine(),
-        architectureEngine: ArchitectureEngine = ArchitectureEngine(),
-        experimentManager: ExperimentManager = ExperimentManager(),
-        criticLoop: CriticLoop = CriticLoop(),
-        stateAbstractionEngine: StateAbstractionEngine = StateAbstractionEngine()
+        container: RuntimeContainer
     ) {
         // Pull shared services from container - single source of truth
         self.config = container.config
@@ -71,17 +62,17 @@ public final class RuntimeContext {
         self.repositoryIndexer = container.repositoryIndexer
 
         // Peripheral services that don't need sharing
-        self.stateAbstraction = stateAbstraction
-        self.recoveryEngine = recoveryEngine
-        self.architectureEngine = architectureEngine
-        self.experimentManager = experimentManager
-        self.criticLoop = criticLoop
-        self.stateAbstractionEngine = stateAbstractionEngine
+        self.stateAbstraction = container.stateAbstraction
+        self.recoveryEngine = container.recoveryEngine
+        self.architectureEngine = container.architectureEngine
+        self.experimentManager = container.experimentManager
+        self.criticLoop = container.criticLoop
+        self.stateAbstractionEngine = container.stateAbstractionEngine
 
         // External adapters
-        self.automationHost = automationHost
-        self.browserController = browserController
-        self.browserPageStateBuilder = browserPageStateBuilder
+        self.automationHost = container.automationHost
+        self.browserController = container.browserController
+        self.browserPageStateBuilder = container.browserPageStateBuilder
     }
 
     @available(*, unavailable, message: "Use init(container:) with RuntimeBootstrap.makeBootstrappedRuntime()")

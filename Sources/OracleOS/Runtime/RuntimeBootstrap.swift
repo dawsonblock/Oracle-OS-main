@@ -102,6 +102,17 @@ public enum RuntimeBootstrap {
                 graphStore: graphStore
             )
         )
+        
+        let stateAbstraction = StateAbstraction()
+        let recoveryEngine = RecoveryEngine()
+        let architectureEngine = ArchitectureEngine()
+        let experimentManager = ExperimentManager()
+        let criticLoop = CriticLoop()
+        let stateAbstractionEngine = StateAbstractionEngine()
+        
+        let automationHost = AutomationHost.live()
+        let browserController = BrowserController()
+        let browserPageStateBuilder = BrowserPageStateBuilder()
 
         return RuntimeContainer(
             planner: planner,
@@ -123,7 +134,16 @@ public enum RuntimeBootstrap {
             graphStore: graphStore,
             memoryStore: memoryStore,
             stateMemoryIndex: stateMemoryIndex,
-            searchController: searchController
+            searchController: searchController,
+            stateAbstraction: stateAbstraction,
+            recoveryEngine: recoveryEngine,
+            architectureEngine: architectureEngine,
+            experimentManager: experimentManager,
+            criticLoop: criticLoop,
+            stateAbstractionEngine: stateAbstractionEngine,
+            automationHost: automationHost,
+            browserController: browserController,
+            browserPageStateBuilder: browserPageStateBuilder
         )
     }
 }

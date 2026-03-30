@@ -33,6 +33,19 @@ public final class RuntimeContainer: @unchecked Sendable {
     public let stateMemoryIndex: StateMemoryIndex
     public let searchController: SearchController
 
+    // MARK: - Peripheral Services
+    public let stateAbstraction: StateAbstraction
+    public let recoveryEngine: RecoveryEngine
+    public let architectureEngine: ArchitectureEngine
+    public let experimentManager: ExperimentManager
+    public let criticLoop: CriticLoop
+    public let stateAbstractionEngine: StateAbstractionEngine
+    
+    // MARK: - External Adapters
+    public let automationHost: AutomationHost
+    public let browserController: BrowserController
+    public let browserPageStateBuilder: BrowserPageStateBuilder
+    
     // MARK: - Recovery State
     public private(set) var recoveryReport: RecoveryReport?
 
@@ -56,7 +69,16 @@ public final class RuntimeContainer: @unchecked Sendable {
         graphStore: GraphStore,
         memoryStore: UnifiedMemoryStore,
         stateMemoryIndex: StateMemoryIndex,
-        searchController: SearchController
+        searchController: SearchController,
+        stateAbstraction: StateAbstraction,
+        recoveryEngine: RecoveryEngine,
+        architectureEngine: ArchitectureEngine,
+        experimentManager: ExperimentManager,
+        criticLoop: CriticLoop,
+        stateAbstractionEngine: StateAbstractionEngine,
+        automationHost: AutomationHost,
+        browserController: BrowserController,
+        browserPageStateBuilder: BrowserPageStateBuilder
     ) {
         self.planner = planner
         self.executor = executor
@@ -78,6 +100,15 @@ public final class RuntimeContainer: @unchecked Sendable {
         self.memoryStore = memoryStore
         self.stateMemoryIndex = stateMemoryIndex
         self.searchController = searchController
+        self.stateAbstraction = stateAbstraction
+        self.recoveryEngine = recoveryEngine
+        self.architectureEngine = architectureEngine
+        self.experimentManager = experimentManager
+        self.criticLoop = criticLoop
+        self.stateAbstractionEngine = stateAbstractionEngine
+        self.automationHost = automationHost
+        self.browserController = browserController
+        self.browserPageStateBuilder = browserPageStateBuilder
     }
 
     /// Records the recovery report after startup recovery completes.

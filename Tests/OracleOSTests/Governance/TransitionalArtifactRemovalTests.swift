@@ -43,7 +43,19 @@ class TransitionalArtifactRemovalTests: XCTestCase {
         // The executor should be created ONCE by RuntimeBootstrap
         // and passed via RuntimeContainer to all other components
 
-        let executor = VerifiedExecutor()
+        let policyEngine = PolicyEngine.shared
+        let processAdapter = DefaultProcessAdapter(policyEngine: policyEngine)
+        let commandRouter = CommandRouter(
+            automationHost: nil,
+            workspaceRunner: WorkspaceRunner(processAdapter: processAdapter),
+            repositoryIndexer: RepositoryIndexer(processAdapter: processAdapter)
+        )
+        let executor = VerifiedExecutor(
+            policyEngine: policyEngine,
+            commandRouter: commandRouter,
+            preconditionsValidator: PreconditionsValidator(),
+            postconditionsValidator: PostconditionsValidator()
+        )
         XCTAssertNotNil(executor)
     }
 

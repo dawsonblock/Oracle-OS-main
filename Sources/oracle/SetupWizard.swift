@@ -20,6 +20,11 @@ import OracleOS
 
 @MainActor
 struct SetupWizard {
+    let executor: VerifiedExecutor
+
+    init(executor: VerifiedExecutor) {
+        self.executor = executor
+    }
 
     func run() async {
         printBanner()
@@ -748,7 +753,7 @@ struct SetupWizard {
     }
 
     private func runShell(_ command: String) async -> ShellResult {
-        let executor = VerifiedExecutor()
+        // removed local executor
         let spec = EnvSetupSpec(script: "/bin/zsh", arguments: ["-c", command])
         let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {
@@ -767,7 +772,7 @@ struct SetupWizard {
     /// Run a command with live stdout/stderr output (for progress display).
     /// Returns the exit code.
     private func runShellLive(_ executable: String, args: [String]) async -> Int32 {
-        let executor = VerifiedExecutor()
+        // removed local executor
         let spec = EnvSetupSpec(script: executable, arguments: args)
         let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {

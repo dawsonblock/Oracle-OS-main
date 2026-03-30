@@ -7,7 +7,7 @@ import Foundation
 ///   - Executor returns ExecutionOutcome with events and artifacts only
 ///   - CommitCoordinator is the ONLY entity that writes committed state
 ///   - All side effects MUST route through this actor's execute() method
-///   - No other component may call Process(), FileManager.write(), or mutate state
+///   - No other component may call shell escapes, FileManager.write(), or mutate state
 ///
 /// ENFORCEMENT:
 ///   - All CLI tools, planners, routers MUST use RuntimeOrchestrator.submitIntent()
@@ -21,10 +21,10 @@ public actor VerifiedExecutor {
     private let stateProvider: WorldStateProviding?
 
     public init(
-        policyEngine: PolicyEngine = .shared,
-        commandRouter: CommandRouter = CommandRouter(),
-        preconditionsValidator: PreconditionsValidator = PreconditionsValidator(),
-        postconditionsValidator: PostconditionsValidator = PostconditionsValidator(),
+        policyEngine: PolicyEngine,
+        commandRouter: CommandRouter,
+        preconditionsValidator: PreconditionsValidator,
+        postconditionsValidator: PostconditionsValidator,
         stateProvider: WorldStateProviding? = nil
     ) {
         self.policyEngine = policyEngine
@@ -47,7 +47,7 @@ public actor VerifiedExecutor {
     /// Bypassing this method is an architectural violation and will be caught by:
     ///   - Governance tests (ExecutionBoundaryTests)
     ///   - Type system (no alternate execute() paths)
-    ///   - Static analysis (grep for Process(), .write(to:), FileManager outside this actor)
+    ///   - Static analysis (grep for shell escapes, .write(to:), FileManager outside this actor)
     public func execute(_ command: Command) async throws -> ExecutionOutcome {
         // GUARD: Verify command is typed (no shell escape hatch)
         switch command.payload {
