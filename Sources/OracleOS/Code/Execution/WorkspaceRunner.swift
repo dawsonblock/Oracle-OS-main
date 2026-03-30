@@ -37,6 +37,20 @@ public final class WorkspaceRunner: @unchecked Sendable {
         self.processAdapter = processAdapter
     }
 
+    private func policy(for category: CodeCommandCategory) -> CommandExecutionPolicy {
+        switch category {
+        case .build, .test, .gitPush:
+            // High timeout, high output byte limit for intensive commands
+            return CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 100 * 1024 * 1024)
+        case .indexRepository, .searchCode, .generatePatch, .formatter, .linter, .parseBuildFailure, .parseTestFailure:
+            // Medium timeout for tooling
+            return CommandExecutionPolicy(timeoutSeconds: 60, maxOutputBytes: 10 * 1024 * 1024)
+        case .openFile, .editFile, .writeFile, .gitStatus, .gitBranch, .gitCommit:
+            // Quick local operations
+            return CommandExecutionPolicy(timeoutSeconds: 15, maxOutputBytes: 1 * 1024 * 1024)
+        }
+    }
+
     public func execute(spec: CommandSpec) async throws -> CommandResult {
         guard isAllowed(spec) else {
             throw WorkspaceRunnerError.unsupportedCommand(spec.summary)
@@ -58,7 +72,8 @@ public final class WorkspaceRunner: @unchecked Sendable {
         let start = Date()
         let systemCommand = SystemCommand(executable: spec.executable, arguments: spec.arguments)
         let workspaceContext = WorkspaceContext(rootURL: scope.rootURL)
-        let processResult = try await processAdapter.run(systemCommand, in: workspaceContext)
+        let execPolicy = policy(for: spec.category)
+        let processResult = try await processAdapter.run(systemCommand, in: workspaceContext, policy: execPolicy)
 
         return CommandResult(
             succeeded: processResult.exitCode == 0,

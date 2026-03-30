@@ -670,9 +670,10 @@ public final class RepositoryIndexer: @unchecked Sendable {
     private func currentBranch(workspaceRoot: URL) -> String? {
         let command = SystemCommand(executable: "/usr/bin/env", arguments: ["git", "branch", "--show-current"])
         do {
-            let result = try processAdapter.runSync(command, in: WorkspaceContext(rootURL: workspaceRoot))
+            let policy = CommandExecutionPolicy(timeoutSeconds: 10, maxOutputBytes: 1024 * 1024)
+            let result = try processAdapter.runSync(command, in: WorkspaceContext(rootURL: workspaceRoot), policy: policy)
             guard result.exitCode == 0 else { return nil }
-            return result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+            return result.stdout.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         } catch {
             return nil
         }
@@ -681,8 +682,9 @@ public final class RepositoryIndexer: @unchecked Sendable {
     private func gitDirty(workspaceRoot: URL) -> Bool {
         let command = SystemCommand(executable: "/usr/bin/env", arguments: ["git", "status", "--porcelain"])
         do {
-            let result = try processAdapter.runSync(command, in: WorkspaceContext(rootURL: workspaceRoot))
-            return !result.stdout.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            let policy = CommandExecutionPolicy(timeoutSeconds: 15, maxOutputBytes: 1024 * 1024)
+            let result = try processAdapter.runSync(command, in: WorkspaceContext(rootURL: workspaceRoot), policy: policy)
+            return !result.stdout.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty
         } catch {
             return false
         }
