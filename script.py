@@ -1,0 +1,10 @@
+import re
+with open('Sources/oracle/SetupWizard.swift', 'r') as f: text = f.read()
+text = text.replace('func run() {', 'func run() async {')
+text = text.replace('configureMCP()', 'await configureMCP()')
+text = text.replace('let hasVision = setupVision()', 'let hasVision = await setupVision()')
+text = text.replace('let verified = selfTest(', 'let verified = await selfTest(')
+text = text.replace('private func configureMCP() {', 'private func configureMCP() async {')
+text = text.replace('private func setupVision() -> Bool {', 'private func setupVision() async -> Bool {')
+text = text.replace('private func checkPythonWithMLX() -> Bool {', 'private func checkPythonWithMLX() async -> Bool {')
+text = text.replace('private func setupPythonVenv() -> Bool {', 'private func setupPythonVenv() async -> Bool {')

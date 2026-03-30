@@ -146,7 +146,7 @@ public final class WorkspaceRunner: @unchecked Sendable {
     }
 
     // MARK: - Legacy CommandSpec-based execution (for backwards compatibility)
-
+    private func policy(for category: CodeCommandCategory) -> CommandExecutionPolicy {
         switch category {
         case .build, .test, .gitPush:
             // High timeout, high output byte limit for intensive commands

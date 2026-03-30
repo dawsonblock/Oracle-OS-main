@@ -35,6 +35,14 @@ public struct Command: Sendable, Codable {
             return action.name
         case .code(let action):
             return action.name
+        case .diagnostic(_):
+            return "diagnostic"
+        case .envSetup(_):
+            return "envSetup"
+        case .hostService(_):
+            return "hostService"
+        case .inference(_):
+            return "inference"
         }
     }
 }
@@ -52,6 +60,49 @@ public enum CommandPayload: Sendable, Codable {
     case file(FileMutationSpec)
     case ui(UIAction)
     case code(CodeAction)
+    case diagnostic(DiagnosticSpec)
+    case envSetup(EnvSetupSpec)
+    case hostService(HostServiceSpec)
+    case inference(InferenceSpec)
+
+}
+
+
+
+public struct DiagnosticSpec: Sendable, Codable {
+    public let command: String
+    public init(command: String) { self.command = command }
+}
+
+public struct EnvSetupSpec: Sendable, Codable {
+    public let script: String
+    public let arguments: [String]
+    public let isBackground: Bool
+    public init(script: String, arguments: [String] = [], isBackground: Bool = false) {
+        self.script = script
+        self.arguments = arguments
+        self.isBackground = isBackground
+    }
+}
+
+public struct HostServiceSpec: Sendable, Codable {
+    public let executableURL: URL
+    public let currentDirectoryURL: URL?
+    public init(executableURL: URL, currentDirectoryURL: URL? = nil) {
+        self.executableURL = executableURL
+        self.currentDirectoryURL = currentDirectoryURL
+    }
+}
+
+public struct InferenceSpec: Sendable, Codable {
+    public let command: String
+    public let arguments: [String]
+    public let cwd: String?
+    public init(command: String, arguments: [String], cwd: String? = nil) {
+        self.command = command
+        self.arguments = arguments
+        self.cwd = cwd
+    }
 }
 
 public struct CommandMetadata: Sendable, Codable {

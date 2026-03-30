@@ -28,11 +28,11 @@ func main() async {
 
     case "setup":
         let wizard = SetupWizard()
-        wizard.run()
+        await wizard.run()
 
     case "doctor":
         var doctor = Doctor()
-        doctor.run()
+        await doctor.run()
 
     case "dashboard":
         let dash = Dashboard()

@@ -139,7 +139,42 @@ public struct SystemRouter: @unchecked Sendable {
                 )
             }
 
-        case .ui:
+        
+        case .diagnostic(let spec):
+            let cmd = SystemCommand(executable: "/bin/zsh", arguments: ["-c", spec.command])
+            do {
+                let policy = CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 10 * 1024 * 1024)
+                let result = try await DefaultProcessAdapter().run(cmd, in: nil, policy: policy)
+                return CommandRouter.successOutcome(command: command, observations: [ObservationPayload(kind: "diagnostic", content: result.stdout)], artifacts: [], policyDecision: policyDecision, router: "system")
+            } catch {
+                return CommandRouter.failureOutcome(command: command, reason: "Failed: \(error)", policyDecision: policyDecision, router: "system")
+            }
+            
+        case .envSetup(let spec):
+            let cmd = SystemCommand(executable: spec.script, arguments: spec.arguments)
+            do {
+                let policy = CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 10 * 1024 * 1024)
+                let result = try await DefaultProcessAdapter().run(cmd, in: nil, policy: policy)
+                return CommandRouter.successOutcome(command: command, observations: [ObservationPayload(kind: "setup", content: result.stdout)], artifacts: [], policyDecision: policyDecision, router: "system")
+            } catch {
+                return CommandRouter.failureOutcome(command: command, reason: "Failed: \(error)", policyDecision: policyDecision, router: "system")
+            }
+            
+        case .hostService(let spec):
+            return CommandRouter.successOutcome(command: command, observations: [], artifacts: [], policyDecision: policyDecision, router: "system")
+            
+        case .inference(let spec):
+            let cmd = SystemCommand(executable: spec.command, arguments: spec.arguments)
+            let ctx = WorkspaceContext(rootURL: URL(fileURLWithPath: spec.cwd ?? "/"))
+            do {
+                let policy = CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 10 * 1024 * 1024)
+                let result = try await DefaultProcessAdapter().run(cmd, in: ctx, policy: policy)
+                return CommandRouter.successOutcome(command: command, observations: [ObservationPayload(kind: "inference", content: result.stdout)], artifacts: [], policyDecision: policyDecision, router: "system")
+            } catch {
+                return CommandRouter.failureOutcome(command: command, reason: "Failed: \(error)", policyDecision: policyDecision, router: "system")
+            }
+
+case .ui:
             return CommandRouter.failureOutcome(
                 command: command,
                 reason: "Invalid system payload: received UI action for system command",

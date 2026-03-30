@@ -16,11 +16,12 @@ import ApplicationServices
 import AXorcist
 import Foundation
 import OracleOS
+import OracleOS
 
 @MainActor
 struct SetupWizard {
 
-    func run() {
+    func run() async {
         printBanner()
 
         // Step 1: Detect host app
@@ -37,16 +38,16 @@ struct SetupWizard {
         let hasScreenRecording = checkScreenRecording(hostApp: hostApp)
 
         // Step 4: MCP configuration
-        configureMCP()
+        await configureMCP()
 
         // Step 5: Install recipes
         installRecipes()
 
         // Step 6: Vision setup (venv + model)
-        let hasVision = setupVision()
+        let hasVision = await setupVision()
 
         // Step 7: Self-test
-        let verified = selfTest(
+        let verified = await selfTest(
             hasAccess: hasAccess,
             hasScreenRecording: hasScreenRecording,
             hasVision: hasVision
@@ -186,15 +187,16 @@ struct SetupWizard {
 
     // MARK: - Step 4: MCP Configuration
 
-    private func configureMCP() {
+    private func configureMCP() async {
         printStep(4, "MCP Configuration")
 
         let binaryPath = resolveBinaryPath()
 
         // Check if claude CLI exists
+        let claudeInPath = await runShell("which claude 2>/dev/null").exitCode == 0
         let claudeExists = FileManager.default.isExecutableFile(atPath: "/usr/local/bin/claude")
             || FileManager.default.isExecutableFile(atPath: "/opt/homebrew/bin/claude")
-            || runShell("which claude 2>/dev/null").exitCode == 0
+            || claudeInPath
 
         if !claudeExists {
             print("  Claude Code CLI not found.")
@@ -325,12 +327,12 @@ struct SetupWizard {
 
     // MARK: - Step 6: Vision Setup
 
-    private func setupVision() -> Bool {
+    private func setupVision() async -> Bool {
         printStep(6, "Vision (ShowUI-2B)")
 
         // Check if oracle-vision is available
         let hasLauncher = findOracleVisionBinary() != nil
-        let hasPython = checkPythonWithMLX()
+        let hasPython = await checkPythonWithMLX()
 
         // Check for model
         let modelPath = findModelPath()
@@ -343,7 +345,7 @@ struct SetupWizard {
         // Step 6a: Ensure Python environment
         if !hasPython && !hasLauncher {
             print("  Setting up Python environment...")
-            if !setupPythonVenv() {
+            if await !setupPythonVenv() {
                 printFail("Python venv setup failed")
                 print("  Vision grounding (oracle_ground) will not be available.")
                 print("  You can set it up manually later:")
@@ -375,7 +377,7 @@ struct SetupWizard {
             }
 
             print("")
-            if !downloadModel() {
+            if await !downloadModel() {
                 printFail("Model download failed")
                 print("  You can download manually:")
                 print("    pip3 install huggingface-hub")
@@ -397,21 +399,21 @@ struct SetupWizard {
     }
 
     /// Check if system Python has mlx_vlm
-    private func checkPythonWithMLX() -> Bool {
+    private func checkPythonWithMLX() async -> Bool {
         // Check venv first
         let venvPython = NSHomeDirectory() + "/.oracle-os/venv/bin/python3"
         if FileManager.default.isExecutableFile(atPath: venvPython) {
-            let result = runShell("\(venvPython) -c 'import mlx_vlm' 2>/dev/null")
+            let result = await runShell("\(venvPython) -c 'import mlx_vlm' 2>/dev/null")
             if result.exitCode == 0 { return true }
         }
 
         // Check system Python
-        let result = runShell("python3 -c 'import mlx_vlm' 2>/dev/null")
+        let result = await runShell("python3 -c 'import mlx_vlm' 2>/dev/null")
         return result.exitCode == 0
     }
 
     /// Set up a Python virtual environment at ~/.oracle-os/venv/
-    private func setupPythonVenv() -> Bool {
+    private func setupPythonVenv() async -> Bool {
         let venvPath = NSHomeDirectory() + "/.oracle-os/venv"
 
         // Find system Python
@@ -420,7 +422,7 @@ struct SetupWizard {
         if let found = candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }) {
             pythonPath = found
         } else {
-            let which = runShell("which python3 2>/dev/null")
+            let which = await runShell("which python3 2>/dev/null")
             guard which.exitCode == 0, !which.output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 print("  ERROR: python3 not found. Install Python 3.9+ first.")
                 return false
@@ -432,7 +434,7 @@ struct SetupWizard {
         let venvPip = venvPath + "/bin/pip"
         if !FileManager.default.isExecutableFile(atPath: venvPip) {
             print("  Creating virtual environment...")
-            let createResult = runShell("\(pythonPath) -m venv \"\(venvPath)\" 2>&1")
+            let createResult = await runShell("\(pythonPath) -m venv \"\(venvPath)\" 2>&1")
             if createResult.exitCode != 0 {
                 print("  ERROR: venv creation failed: \(createResult.output)")
                 return false
@@ -442,7 +444,7 @@ struct SetupWizard {
         // Install dependencies
         print("  Installing mlx, mlx-vlm, transformers, Pillow...")
         print("  (This may take a minute on first install)")
-        let pipResult = runShell(
+        let pipResult = await runShell(
             "\"\(venvPath)/bin/pip\" install --quiet mlx mlx-vlm transformers Pillow 2>&1"
         )
         if pipResult.exitCode != 0 {
@@ -456,7 +458,7 @@ struct SetupWizard {
         }
 
         // Verify
-        let verifyResult = runShell("\"\(venvPath)/bin/python3\" -c 'import mlx_vlm; print(\"ok\")' 2>&1")
+        let verifyResult = await runShell("\"\(venvPath)/bin/python3\" -c 'import mlx_vlm; print(\"ok\")' 2>&1")
         if verifyResult.exitCode != 0 || !verifyResult.output.contains("ok") {
             print("  ERROR: mlx_vlm verification failed")
             return false
@@ -471,7 +473,7 @@ struct SetupWizard {
     }
 
     /// Download ShowUI-2B model from HuggingFace
-    private func downloadModel() -> Bool {
+    private func downloadModel() async -> Bool {
         let destDir = NSHomeDirectory() + "/.oracle-os/models/ShowUI-2B"
 
         // Create directory
@@ -522,7 +524,7 @@ struct SetupWizard {
         let tmpScript = NSTemporaryDirectory() + "oracle_download_model_\(UUID().uuidString).py"
         try? downloadScript.write(toFile: tmpScript, atomically: true, encoding: .utf8)
 
-        let result = runShellLive(python, args: [tmpScript, destDir])
+        let result = await runShellLive(python, args: [tmpScript, destDir])
 
         try? FileManager.default.removeItem(atPath: tmpScript)
 
@@ -581,7 +583,7 @@ struct SetupWizard {
 
     // MARK: - Step 7: Self-Test
 
-    private func selfTest(hasAccess: Bool, hasScreenRecording: Bool, hasVision: Bool) -> Bool {
+    private func selfTest(hasAccess: Bool, hasScreenRecording: Bool, hasVision: Bool) async -> Bool {
         printStep(7, "Self-Test")
 
         guard hasAccess else {
@@ -745,49 +747,39 @@ struct SetupWizard {
         let exitCode: Int32
     }
 
-    private func runShell(_ command: String) -> ShellResult {
-        let process = Process()
-        let pipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-c", command]
-        process.standardOutput = pipe
-        process.standardError = pipe
-        // Unset CLAUDECODE to avoid nested session error
-        var env = ProcessInfo.processInfo.environment
-        env.removeValue(forKey: "CLAUDE_CODE")
-        env.removeValue(forKey: "CLAUDECODE")
-        process.environment = env
-
+    private func runShell(_ command: String) async -> ShellResult {
+        let executor = VerifiedExecutor()
+        let spec = EnvSetupSpec(script: "/bin/zsh", arguments: ["-c", command])
+        let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {
-            try process.run()
-            // Read pipe BEFORE waitUntilExit to avoid deadlock if output exceeds pipe buffer
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-            let output = String(data: data, encoding: .utf8) ?? ""
-            return ShellResult(output: output, exitCode: process.terminationStatus)
+            let outcome = try await executor.execute(cmd)
+            if outcome.status == .success {
+                let output = outcome.observations.map { $0.content }.joined(separator: "\n")
+                return ShellResult(output: output, exitCode: 0)
+            } else {
+                return ShellResult(output: outcome.verifierReport.notes.first ?? outcome.status.rawValue, exitCode: 1)
+            }
         } catch {
-            return ShellResult(output: "", exitCode: -1)
+            return ShellResult(output: "\(error)", exitCode: -1)
         }
     }
 
     /// Run a command with live stdout/stderr output (for progress display).
     /// Returns the exit code.
-    private func runShellLive(_ executable: String, args: [String]) -> Int32 {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
-        process.arguments = args
-        // Inherit stdout/stderr so the user sees download progress
-        process.standardOutput = FileHandle.standardOutput
-        process.standardError = FileHandle.standardError
-        var env = ProcessInfo.processInfo.environment
-        env.removeValue(forKey: "CLAUDE_CODE")
-        env.removeValue(forKey: "CLAUDECODE")
-        process.environment = env
-
+    private func runShellLive(_ executable: String, args: [String]) async -> Int32 {
+        let executor = VerifiedExecutor()
+        let spec = EnvSetupSpec(script: executable, arguments: args)
+        let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {
-            try process.run()
-            process.waitUntilExit()
-            return process.terminationStatus
+            let outcome = try await executor.execute(cmd)
+            if outcome.status == .success {
+                let output = outcome.observations.map { $0.content }.joined(separator: "\n")
+                print(output)
+                return 0
+            } else {
+                print("  ERROR: \(outcome.verifierReport.notes.first ?? outcome.status.rawValue)")
+                return 1
+            }
         } catch {
             print("  ERROR: Failed to run \(executable): \(error)")
             return -1

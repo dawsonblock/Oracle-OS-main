@@ -51,7 +51,7 @@ public actor VerifiedExecutor {
     public func execute(_ command: Command) async throws -> ExecutionOutcome {
         // GUARD: Verify command is typed (no shell escape hatch)
         switch command.payload {
-        case .build, .test, .git, .file, .ui, .code:
+        case .build, .test, .git, .file, .ui, .code, .diagnostic, .envSetup, .hostService, .inference:
             // Typed command OK — proceed
             break
         }

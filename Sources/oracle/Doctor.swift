@@ -17,7 +17,7 @@ struct Doctor {
     private var issueCount = 0
     private var warningCount = 0
 
-    mutating func run() {
+    mutating func run() async {
         print("")
         print("  Oracle OS Doctor")
         print("  ======================================")
@@ -26,11 +26,11 @@ struct Doctor {
         checkBinary()
         checkAccessibility()
         checkScreenRecording()
-        checkProcesses()
-        checkMCPConfig()
+        await checkProcesses()
+        await checkMCPConfig()
         checkRecipes()
         checkAXTree()
-        checkVisionBinary()
+        await checkVisionBinary()
         checkShowUIModel()
         checkVisionSidecar()
 
@@ -74,8 +74,8 @@ struct Doctor {
 
     // MARK: - Oracle Processes
 
-    private mutating func checkProcesses() {
-        let result = runShell("ps aux | grep '[g]host mcp' | awk '{print $2, $11, $12}'")
+    private mutating func checkProcesses() async {
+        let result = await runShell("ps aux | grep '[g]host mcp' | awk '{print $2, $11, $12}'")
         let lines = result.output.split(separator: "\n").map(String.init)
 
         if lines.isEmpty {
@@ -101,8 +101,8 @@ struct Doctor {
 
     // MARK: - MCP Config
 
-    private mutating func checkMCPConfig() {
-        let result = runShell("which claude 2>/dev/null")
+    private mutating func checkMCPConfig() async {
+        let result = await runShell("which claude 2>/dev/null")
         if result.exitCode != 0 {
             print("  [!] Claude Code CLI: not found")
             print("    Install from: https://claude.ai/download")
@@ -206,7 +206,7 @@ struct Doctor {
 
     // MARK: - Vision Binary
 
-    private mutating func checkVisionBinary() {
+    private mutating func checkVisionBinary() async {
         let candidates = [
             "/opt/homebrew/bin/oracle-vision",
             "/usr/local/bin/oracle-vision",
@@ -227,7 +227,7 @@ struct Doctor {
             // Check venv fallback
             let venvPython = NSHomeDirectory() + "/.oracle-os/venv/bin/python3"
             if FileManager.default.isExecutableFile(atPath: venvPython) {
-                let result = runShell("\(venvPython) -c 'import mlx_vlm; print(\"ok\")' 2>/dev/null")
+                let result = await runShell("\(venvPython) -c 'import mlx_vlm; print(\"ok\")' 2>/dev/null")
                 if result.exitCode == 0 && result.output.contains("ok") {
                     print("  [ok] Vision Python: ~/.oracle-os/venv/ (mlx_vlm available)")
                     found = true
@@ -236,7 +236,7 @@ struct Doctor {
 
             if !found {
                 // Check system Python
-                let result = runShell("python3 -c 'import mlx_vlm; print(\"ok\")' 2>/dev/null")
+                let result = await runShell("python3 -c 'import mlx_vlm; print(\"ok\")' 2>/dev/null")
                 if result.exitCode == 0 && result.output.contains("ok") {
                     print("  [ok] Vision Python: system python3 (mlx_vlm available)")
                     found = true
@@ -375,7 +375,7 @@ struct Doctor {
         let exitCode: Int32
     }
 
-    private func runShell(_ command: String) -> ShellResult {
+    private func runShell(_ command: String) async -> ShellResult {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
