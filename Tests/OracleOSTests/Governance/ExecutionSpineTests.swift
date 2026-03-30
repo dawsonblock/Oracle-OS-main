@@ -55,7 +55,7 @@ struct ExecutionSpineTests {
         )
     }
 
-    @Test("Build and test commands still use /usr/bin/env")
+    @Test("Build and test commands construct typed specs instead of using /usr/bin/env")
     func buildTestCommandsUseEnv() throws {
         let plannerPath = sourcesRoot()
             .appendingPathComponent("Planning")
@@ -63,8 +63,8 @@ struct ExecutionSpineTests {
         let plannerContent = try String(contentsOf: plannerPath, encoding: .utf8)
 
         #expect(
-            plannerContent.contains("executable: \"/usr/bin/env\""),
-            "MainPlanner should construct build/test commands with /usr/bin/env"
+            plannerContent.contains("payload: .build(spec)"),
+            "MainPlanner should construct structured build/test payload objects"
         )
     }
 

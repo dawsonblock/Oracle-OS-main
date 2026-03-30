@@ -54,13 +54,13 @@ class CommitDurabilityTests: XCTestCase {
 
             // Create test envelopes
             let envelope = EventEnvelope(
-                id: UUID().uuidString,
+                id: UUID(),
                 sequenceNumber: 1,
                 commandID: UUID(),
                 intentID: UUID(),
                 timestamp: Date(),
                 eventType: "test",
-                payload: [:]
+                payload: Data()
             )
 
             try wal.writePending([envelope])
@@ -103,19 +103,19 @@ class CommitDurabilityTests: XCTestCase {
     func testEventEnvelopeIsImmutable() {
         // EventEnvelope should be a struct (value type), not a class
         let envelope1 = EventEnvelope(
-            id: "test-1",
+            id: UUID(),
             sequenceNumber: 1,
             commandID: UUID(),
             intentID: UUID(),
             timestamp: Date(),
             eventType: "test",
-            payload: ["key": "value"]
+            payload: Data()
         )
 
         var envelope2 = envelope1
         // Modify copy (should not affect original)
         envelope2 = EventEnvelope(
-            id: "test-2",
+            id: UUID(),
             sequenceNumber: 2,
             commandID: envelope1.commandID,
             intentID: envelope1.intentID,
@@ -184,4 +184,7 @@ private actor InMemoryEventStore: EventStore {
     func events(after sequenceNumber: Int) -> [EventEnvelope] { events.filter { $0.sequenceNumber > sequenceNumber } }
     func nextSequenceNumber() -> Int { let seq = nextSeq; nextSeq += 1; return seq }
     func sequenceCount() -> Int { return events.count }
+}
+private struct TestEventReducer: EventReducer {
+    func apply(events: [EventEnvelope], to state: inout WorldStateModel) {}
 }
