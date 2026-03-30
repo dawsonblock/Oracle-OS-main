@@ -53,9 +53,18 @@ Responsibilities:
 - own post-execution graph/memory/recovery updates
 - fail closed on policy ambiguity
 
-`RuntimeBootstrap.makeDefault(configuration:)` is the canonical kernel factory.
-All entry points (MCP, Controller Host, CLI) must use this factory to obtain
-a fully-wired `RuntimeContainer` with real reducers.
+`RuntimeBootstrap.makeBootstrappedRuntime()` is the canonical kernel factory.
+All entry points (MCP, Controller Host, CLI) must use this async factory to obtain
+a fully-wired `BootstrappedRuntime` with recovery already completed.
+
+The `BootstrappedRuntime` bundle contains:
+
+- `RuntimeContainer`: All 18+ shared services (kernel + observability + memory)
+- `RuntimeOrchestrator`: Linear runtime coordination
+- `RecoveryReport`: Proof of startup recovery (WAL entries replayed, events recovered)
+
+`RuntimeContext.init(container:)` is the only authorized way to create a context.
+`RuntimeContext.live()` is marked `@unavailable` to prevent split authority.
 
 ### Observation and Planning State
 
