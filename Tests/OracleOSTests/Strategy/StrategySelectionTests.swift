@@ -159,7 +159,7 @@ struct StrategySelectionTests {
     @Test("Strategy selector returns recovery for repeated failures")
     func strategySelectorRecoveryForFailures() {
         let selector = StrategySelector()
-        let goal = Goal(description: "do something", preferredAgentKind: .mixed)
+        let goal = Goal(description: "do something", preferredAgentKind: .os)
         let worldState = makeWorldState(app: "App")
 
         let strategy = selector.selectStrategy(
@@ -167,7 +167,7 @@ struct StrategySelectionTests {
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
             workflowIndex: WorkflowIndex(),
-            agentKind: .mixed,
+            agentKind: .os,
             recentFailureCount: 5
         )
 
