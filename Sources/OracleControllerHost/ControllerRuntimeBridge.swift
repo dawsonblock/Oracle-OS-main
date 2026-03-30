@@ -41,43 +41,6 @@ final class ControllerRuntimeBridge {
         self.sessionStartedAt = Date()
         self.runtimeLifecycle.startControllerHeartbeat(sessionID: sessionID)
     }
-    
-    /// Synchronous initializer for backward compatibility.
-    /// Blocks on async bootstrap - prefer async init() where possible.
-    @available(*, deprecated, message: "Use async init() for proper recovery handling")
-    convenience init(synchronous: Void) {
-        var bridge: ControllerRuntimeBridge?
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        Task { @MainActor in
-            do {
-                bridge = try await ControllerRuntimeBridge()
-            } catch {
-                fatalError("Failed to bootstrap controller runtime: \(error)")
-            }
-            semaphore.signal()
-        }
-        
-        _ = semaphore.wait(timeout: .now() + 30)
-        guard let result = bridge else {
-            fatalError("Controller runtime bootstrap timed out")
-        }
-        
-        // Copy all properties from the async-initialized instance
-        // This is a workaround for Swift's lack of async convenience init
-        self.init(copying: result)
-    }
-    
-    /// Internal initializer for copying from async result
-    private init(copying other: ControllerRuntimeBridge) {
-        self.bootstrappedRuntime = other.bootstrappedRuntime
-        self.runtimeContext = other.runtimeContext
-        self.oracleRuntime = other.oracleRuntime
-        self.runtimeLifecycle = other.runtimeLifecycle
-        self.diagnosticsBuilder = other.diagnosticsBuilder
-        self.sessionID = other.sessionID
-        self.sessionStartedAt = other.sessionStartedAt
-    }
 
     func currentSession(autoRefreshEnabled: Bool, appName: String?) -> ControllerSession {
         ControllerSession(

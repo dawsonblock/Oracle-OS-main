@@ -83,7 +83,11 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         process.standardError = stderr
         process.environment = sanitizedEnvironment()
 
+        // Start process FIRST, then drain pipes concurrently
+        try process.run()
+        
         // Concurrent pipe draining using dispatch queues
+        // IMPORTANT: Pipes must be drained WHILE process runs to prevent buffer deadlock
         var stdoutData = Data()
         var stderrData = Data()
         let maxBytes = Self.defaultMaxOutputBytes
@@ -103,11 +107,9 @@ public final class DefaultProcessAdapter: ProcessAdapter {
             stderrData = self.drainPipeSync(stderr, maxBytes: maxBytes)
             group.leave()
         }
-
-        try process.run()
         
-        // Wait for pipes to drain AND process to exit (in either order)
-        // The pipes will close when the process exits
+        // Wait for pipes to drain (they close when process exits)
+        // Then wait for process to fully terminate
         group.wait()
         process.waitUntilExit()
 

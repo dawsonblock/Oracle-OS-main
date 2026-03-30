@@ -23,37 +23,43 @@ public enum MCPDispatch {
     
     /// Lazily bootstrap the unified runtime with recovery.
     /// Returns the BootstrappedRuntime containing container, orchestrator, and recovery report.
+    /// NOTE: This uses the deprecated sync path since MCPDispatch.handle() is synchronous.
+    /// The async recovery will run on first CommitCoordinator access.
     private static func getBootstrappedRuntime() -> BootstrappedRuntime {
         if let existing = _bootstrappedRuntime {
             return existing
         }
         
-        // Bootstrap synchronously for now - async bootstrap requires refactoring callers
-        // TODO: Move to async initialization in MCP server startup
-        var bootstrapped: BootstrappedRuntime?
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        Task { @MainActor in
-            do {
-                bootstrapped = try await RuntimeBootstrap.makeBootstrappedRuntime(configuration: .live())
-                if let report = bootstrapped?.recoveryReport, report.didRecover {
-                    Log.info("Runtime recovery: replayed \(report.eventsReplayed) events from \(report.walEntriesRecovered) WAL entries")
+        // Use deprecated sync bootstrap since MCPDispatch.handle() is sync.
+        // Cannot use async bootstrap here without deadlocking MainActor.
+        // Recovery will run lazily on first CommitCoordinator.recoverIfNeeded() call.
+        do {
+            let container = try RuntimeBootstrap.makeDefault(configuration: .live())
+            let orchestrator = RuntimeOrchestrator(container: container)
+            let result = BootstrappedRuntime(
+                container: container,
+                orchestrator: orchestrator,
+                recoveryReport: .noRecoveryNeeded  // Will be populated on first coordinator access
+            )
+            _bootstrappedRuntime = result
+            
+            // Trigger recovery asynchronously (fire and forget)
+            Task { @MainActor in
+                do {
+                    let report = try await container.commitCoordinator.recoverIfNeeded()
+                    if report.didRecover {
+                        Log.info("Runtime recovery: replayed \(report.eventsReplayed) events from \(report.walEntriesRecovered) WAL entries")
+                    }
+                    container.recordRecovery(report)
+                } catch {
+                    Log.error("Runtime recovery failed: \(error)")
                 }
-            } catch {
-                Log.error("Failed to bootstrap runtime: \(error)")
             }
-            semaphore.signal()
+            
+            return result
+        } catch {
+            fatalError("Failed to bootstrap runtime kernel: \(error)")
         }
-        
-        // Wait for async bootstrap (timeout 30s for recovery)
-        _ = semaphore.wait(timeout: .now() + 30)
-        
-        guard let result = bootstrapped else {
-            fatalError("Failed to bootstrap runtime kernel")
-        }
-        
-        _bootstrappedRuntime = result
-        return result
     }
     
     /// RuntimeContext with services pulled from the unified container.
