@@ -120,7 +120,7 @@ struct DigitalEngineerLayerTests {
             body: "Prefer Sources/Example/Calculator.swift when calculator repair is requested."
         )
 
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         memoryStore.setWorkspaceRoot(workspace.root.path)
         for _ in 0..<3 {
             memoryStore.recordFixPattern(
@@ -149,7 +149,7 @@ struct DigitalEngineerLayerTests {
 
     @Test("Execution memory biases target ranking after repeated success")
     func executionMemoryBiasesTargetRanking() {
-        let store = UnifiedMemoryStore()
+        let store = UnifiedMemoryStore(appMemory: StrategyMemory())
         for _ in 0..<3 {
             store.recordControl(
                 KnownControl(
@@ -174,7 +174,7 @@ struct DigitalEngineerLayerTests {
     func recoverySelectorPrefersRememberedSuccessfulStrategy() {
         let registry = RecoveryRegistry.live()
         let selector = RecoveryStrategySelector(registry: registry)
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         memoryStore.recordStrategy(
             StrategyRecord(app: "Safari", strategy: "dismiss_modal", success: true)
         )
@@ -201,7 +201,7 @@ struct DigitalEngineerLayerTests {
             state: WorldState(
                 observation: Observation(app: "Safari", windowTitle: "Inbox", url: nil, focusedElementID: nil, elements: [])
             ),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(attempt.promptDiagnostics?.templateKind == .recoverySelection)
@@ -328,7 +328,7 @@ struct DigitalEngineerLayerTests {
         let workspace = try makeCodePlannerWorkspace()
         let planner = CodePlanner()
         let graphStore = GraphStore(databaseURL: makeTempGraphURL())
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         let goalDescription = "fix failing build in Sources/Example/Calculator.swift"
         for _ in 0..<3 {
             memoryStore.recordFixPattern(
@@ -374,7 +374,7 @@ struct DigitalEngineerLayerTests {
         let workspace = try makeCodePlannerWorkspace()
         let planner = CodePlanner()
         let graphStore = GraphStore(databaseURL: makeTempGraphURL())
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         let observation = Observation(app: "Workspace", windowTitle: "Workspace", url: nil, focusedElementID: nil, elements: [])
         let snapshot = RepositoryIndexer().index(workspaceRoot: workspace.root)
         let taskContext = TaskContext.from(
@@ -419,7 +419,7 @@ struct DigitalEngineerLayerTests {
 
         let planner = CodePlanner()
         let graphStore = GraphStore(databaseURL: makeTempGraphURL())
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         memoryStore.setWorkspaceRoot(workspace.root.path)
         let taskContext = TaskContext.from(
             goal: Goal(
@@ -460,7 +460,7 @@ struct DigitalEngineerLayerTests {
 
         let planner = CodePlanner()
         let graphStore = GraphStore(databaseURL: makeTempGraphURL())
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         memoryStore.setWorkspaceRoot(workspace.root.path)
         let taskContext = TaskContext.from(
             goal: Goal(
@@ -550,7 +550,7 @@ struct DigitalEngineerLayerTests {
                 repositorySnapshot: RepositoryIndexer().index(workspaceRoot: workspace.root)
             ),
             graphStore: GraphStore(databaseURL: makeTempGraphURL()),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(decision?.source == .workflow)
@@ -660,7 +660,7 @@ struct DigitalEngineerLayerTests {
             repositorySnapshot: snapshot
         )
 
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         memoryStore.setWorkspaceRoot(workspace.root.path)
 
         let match = WorkflowRetriever().retrieve(
@@ -763,7 +763,7 @@ struct DigitalEngineerLayerTests {
             observation: Observation(app: "Workspace", windowTitle: "Workspace", url: nil, focusedElementID: nil, elements: []),
             repositorySnapshot: snapshot
         )
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         for _ in 0..<3 {
             memoryStore.recordFixPattern(
                 FixPattern(

@@ -43,7 +43,7 @@ extension MainPlanner {
     func nextStep(
         worldState: WorldState,
         graphStore: GraphStore,
-        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
+        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
     ) -> PlannerDecision? {
         nextStep(
             worldState: worldState,
@@ -315,7 +315,7 @@ extension MemoryDecisionBias {
 
 extension MemoryDecisionBiasCalculator {
     convenience init() {
-        self.init(memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory()))
+        self.init(memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()))
     }
 
     func bias(
@@ -814,8 +814,8 @@ extension CodePlanner {
 extension ExperimentManager {
     convenience init() {
         self.init(
-            runner: ParallelRunner(),
-            ranker: PatchRanker(),
+            runner: ParallelRunner(workspaceRunner: WorkspaceRunner(), repositoryIndexer: RepositoryIndexer()),
+            ranker: PatchRanker(comparator: ResultComparator()),
             repositoryIndexer: RepositoryIndexer()
         )
     }
@@ -823,7 +823,7 @@ extension ExperimentManager {
 
 
 extension PatchPipeline {
-    convenience init(sandboxEvaluator: PatchSandboxEvaluator) {
+    init(sandboxEvaluator: @escaping SandboxEvaluatorFn) {
         self.init(
             targetSelector: PatchTargetSelector(),
             strategyLibrary: PatchStrategyLibrary(),
@@ -846,9 +846,20 @@ extension WorkflowRetriever {
             taskContext: taskContext, 
             worldState: worldState, 
             workflowIndex: workflowIndex, 
-            memoryStore: UnifiedMemoryStore(), 
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()), 
             selectedStrategy: .testDefault
         )
     }
 }
 
+
+extension MainPlanner {
+    convenience init(workflowIndex: WorkflowIndex, reasoningThreshold: Double) {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(processAdapter: DefaultProcessAdapter()),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer(),
+            workflowIndex: workflowIndex,
+            reasoningThreshold: reasoningThreshold
+        )
+    }
+}

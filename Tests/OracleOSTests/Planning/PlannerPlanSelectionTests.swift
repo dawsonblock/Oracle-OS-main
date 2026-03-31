@@ -198,7 +198,7 @@ struct PlannerPlanSelectionTests {
             worldState: worldState,
             graphStore: GraphStore(databaseURL: makeTempGraphURL()),
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(!scored.isEmpty)

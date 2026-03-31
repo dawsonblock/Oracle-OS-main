@@ -22,7 +22,7 @@ struct StrategyScopedLLMPlanTests {
         let worldState = makeWorldState(app: "Workspace")
         let graphStore = GraphStore()
         let workflowIndex = WorkflowIndex()
-        let memoryStore = UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
 
         let repoStrategy = SelectedStrategy(
             kind: .repoRepair,
@@ -102,7 +102,7 @@ struct StrategyScopedLLMPlanTests {
             worldState: worldState,
             graphStore: GraphStore(),
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory()),
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()),
             selectedStrategy: strategy
         )
 

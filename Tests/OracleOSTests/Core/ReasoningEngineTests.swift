@@ -259,7 +259,7 @@ struct ReasoningEngineTests {
             worldState: worldState,
             graphStore: graphStore,
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
         let clickOutcome = simulator.simulate(
             plan: clickPlan,
@@ -268,7 +268,7 @@ struct ReasoningEngineTests {
             worldState: worldState,
             graphStore: graphStore,
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(modalOutcome != nil)
