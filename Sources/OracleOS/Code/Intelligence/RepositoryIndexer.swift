@@ -1,7 +1,7 @@
 import Foundation
 
 public final class RepositoryIndexer: @unchecked Sendable {
-    private let processAdapter: ProcessAdapter
+    private let processAdapter: any ProcessAdapter
 
     private struct ParsedFile {
         let file: RepositoryFile
@@ -15,7 +15,7 @@ public final class RepositoryIndexer: @unchecked Sendable {
         let kind: SymbolEdgeKind
     }
 
-    public init(processAdapter: ProcessAdapter) {
+    public init(processAdapter: any ProcessAdapter) {
         self.processAdapter = processAdapter
     }
 

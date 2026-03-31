@@ -18,14 +18,14 @@ public actor VerifiedExecutor {
     private let commandRouter: CommandRouter
     private let preconditionsValidator: PreconditionsValidator
     private let postconditionsValidator: PostconditionsValidator
-    private let stateProvider: WorldStateProviding?
+    private let stateProvider: any WorldStateProviding?
 
     public init(
         policyEngine: PolicyEngine,
         commandRouter: CommandRouter,
         preconditionsValidator: PreconditionsValidator,
         postconditionsValidator: PostconditionsValidator,
-        stateProvider: WorldStateProviding? = nil
+        stateProvider: any WorldStateProviding? = nil
     ) {
         self.policyEngine = policyEngine
         self.commandRouter = commandRouter

@@ -31,9 +31,9 @@ public enum GitAccessLevel: Sendable {
 }
 
 public final class WorkspaceRunner: @unchecked Sendable {
-    private let processAdapter: ProcessAdapter
+    private let processAdapter: any ProcessAdapter
 
-    public init(processAdapter: ProcessAdapter) {
+    public init(processAdapter: any ProcessAdapter) {
         self.processAdapter = processAdapter
     }
 
