@@ -49,11 +49,17 @@ public actor VerifiedExecutor {
     ///   - Type system (no alternate execute() paths)
     ///   - Static analysis (grep for shell escapes, .write(to:), FileManager outside this actor)
     public func execute(_ command: Command) async throws -> ExecutionOutcome {
-        // GUARD: Verify command is typed (no shell escape hatch)
+        // GUARD: Explicit Allowlisting
+        // Verify command is strongly typed and implicitly safe to execute within boundaries
         switch command.payload {
         case .build, .test, .git, .file, .ui, .code:
-            // Typed command OK — proceed
             break
+        @unknown default:
+            return failOutcome(
+                command: command,
+                status: .failed,
+                reason: "Architectural Violation: Unknown command type. All payloads must be explicitly allowlisted."
+            )
         }
 
         // Check preconditions against current world state
@@ -90,19 +96,14 @@ public actor VerifiedExecutor {
                 )
             }
 
-            // GUARD: Ensure events are present (every execution must produce audit trail)
+            // GUARD: Strict 1-domain-event invariant
+            // Every execution MUST produce at least one audit trail event directly.
+            // Removing the fallback auto-injection ensures routers don't silently skip event tracking.
             if outcome.events.isEmpty {
-                let event = DomainEventFactory.commandExecuted(
+                return failOutcome(
                     command: command,
-                    status: "success"
-                )
-                outcome = ExecutionOutcome(
-                    commandID: outcome.commandID,
-                    status: outcome.status,
-                    observations: outcome.observations,
-                    artifacts: outcome.artifacts,
-                    events: [event],
-                    verifierReport: outcome.verifierReport
+                    status: .failed,
+                    reason: "Architectural Violation: Execution produced zero domain events. Routers MUST emit >= 1 event per execute()."
                 )
             }
             return outcome
