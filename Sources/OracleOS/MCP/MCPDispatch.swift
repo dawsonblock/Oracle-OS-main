@@ -374,7 +374,7 @@ public enum MCPDispatch {
                 )
             }
             // Parse params from the MCP arguments
-            let recipeParams = args["params"]?.objectValue?.compactMapValues { $0.stringValue } ?? [:]
+            let recipeParams = args["params"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
 
             return RecipeEngine.run(
                 recipe: recipe,
