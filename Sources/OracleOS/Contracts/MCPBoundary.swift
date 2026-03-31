@@ -66,7 +66,8 @@ public enum JSONValue: Sendable, Codable, Equatable {
     /// Losslessly convert a JSON-safe [String: Any] dictionary to JSONValue.
     /// Fails and returns nil for non-JSON-serializable values.
     public static func from(legacyDict dict: [String: Any]) -> JSONValue? {
-        guard let data = try? JSONSerialization.data(withJSONObject: dict),
+        guard JSONSerialization.isValidJSONObject(dict),
+              let data = try? JSONSerialization.data(withJSONObject: dict),
               let decoded = try? JSONDecoder().decode(JSONValue.self, from: data)
         else { return nil }
         return decoded
