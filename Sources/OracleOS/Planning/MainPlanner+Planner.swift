@@ -114,8 +114,8 @@ extension MainPlanner: Planner {
                 ?? FileManager.default.currentDirectoryPath
             let spec = BuildSpec(
                 workspaceRoot: workspacePath,
-                scheme: intent.metadata["scheme"],
-                configuration: intent.metadata["configuration"] ?? "Debug"
+                target: intent.metadata["target"],
+                configuration: BuildConfiguration(rawValue: (intent.metadata["configuration"] ?? "debug").lowercased()) ?? .debug
             )
             return Command(type: CommandType.code, payload: .build(spec), metadata: metadata)
         }
@@ -126,8 +126,7 @@ extension MainPlanner: Planner {
                 ?? FileManager.default.currentDirectoryPath
             let spec = TestSpec(
                 workspaceRoot: workspacePath,
-                scheme: intent.metadata["scheme"],
-                filter: intent.metadata["filter"]
+                target: intent.metadata["target"]
             )
             return Command(type: CommandType.code, payload: .test(spec), metadata: metadata)
         }

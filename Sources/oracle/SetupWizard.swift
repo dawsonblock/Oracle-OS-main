@@ -753,17 +753,18 @@ struct SetupWizard {
     }
 
     private func runShell(_ command: String) async -> ShellResult {
-        // removed local executor
-        let spec = BuildSpec(workspaceRoot: "/", extraArgs: ["-c", command])
-        let cmd = Command(type: .system, payload: .build(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", command]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
         do {
-            let outcome = try await executor.execute(cmd)
-            if outcome.status == .success {
-                let output = outcome.observations.map { $0.content }.joined(separator: "\n")
-                return ShellResult(output: output, exitCode: 0)
-            } else {
-                return ShellResult(output: outcome.verifierReport.notes.first ?? outcome.status.rawValue, exitCode: 1)
-            }
+            try process.run()
+            process.waitUntilExit()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            return ShellResult(output: output.trimmingCharacters(in: .whitespacesAndNewlines), exitCode: process.terminationStatus)
         } catch {
             return ShellResult(output: "\(error)", exitCode: -1)
         }
@@ -772,19 +773,16 @@ struct SetupWizard {
     /// Run a command with live stdout/stderr output (for progress display).
     /// Returns the exit code.
     private func runShellLive(_ executable: String, args: [String]) async -> Int32 {
-        // removed local executor
-        let spec = BuildSpec(workspaceRoot: "/", extraArgs: args)
-        let cmd = Command(type: .system, payload: .build(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = [executable] + args
+        // Inherit standard output and error to show live progress
+        process.standardOutput = FileHandle.standardOutput
+        process.standardError = FileHandle.standardError
         do {
-            let outcome = try await executor.execute(cmd)
-            if outcome.status == .success {
-                let output = outcome.observations.map { $0.content }.joined(separator: "\n")
-                print(output)
-                return 0
-            } else {
-                print("  ERROR: \(outcome.verifierReport.notes.first ?? outcome.status.rawValue)")
-                return 1
-            }
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus
         } catch {
             print("  ERROR: Failed to run \(executable): \(error)")
             return -1

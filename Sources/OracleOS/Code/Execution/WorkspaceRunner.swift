@@ -122,31 +122,14 @@ public final class WorkspaceRunner: @unchecked Sendable {
 
     private func buildArgs(_ spec: BuildSpec) -> [String] {
         var args = ["build"]
-        if let scheme = spec.scheme {
-            args.append(contentsOf: ["-scheme", scheme])
-        }
-        if let config = spec.configuration {
-            args.append(contentsOf: ["-configuration", config])
-        }
-        if let dest = spec.destination {
-            args.append(contentsOf: ["-destination", dest])
-        }
-        args.append(contentsOf: spec.extraArgs)
+        if let target = spec.target { args += ["--target", target] }
+        if spec.configuration == .release { args += ["-c", "release"] }
         return args
     }
 
     private func testArgs(_ spec: TestSpec) -> [String] {
         var args = ["test"]
-        if let scheme = spec.scheme {
-            args.append(contentsOf: ["-scheme", scheme])
-        }
-        if let filter = spec.filter {
-            args.append(contentsOf: ["-testNamePattern", filter])
-        }
-        if spec.failureOnly {
-            args.append("-failureOnly")
-        }
-        args.append(contentsOf: spec.extraArgs)
+        if let target = spec.target { args += ["--filter", target] }
         return args
     }
 
