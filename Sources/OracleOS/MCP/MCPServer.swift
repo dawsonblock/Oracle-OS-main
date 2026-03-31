@@ -77,7 +77,11 @@ public final class MCPServer {
 
             case "tools/call":
                 if let id {
-                    writeResponse(id: id, result: await MCPDispatch.handle(params))
+                    if let request = MCPToolRequest(params: params) {
+                        writeResponse(id: id, result: await MCPDispatch.handle(request).toDict())
+                    } else {
+                        writeError(id: id, code: -32602, message: "tools/call missing required field: name")
+                    }
                 }
 
             case "ping":
