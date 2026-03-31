@@ -190,9 +190,16 @@ case .ui:
         switch action.name {
         case "searchRepository":
             let workspaceRoot = action.workspacePath ?? FileManager.default.currentDirectoryPath
-            let snapshot = repositoryIndexer.indexIfNeeded(
+            guard let snapshot = repositoryIndexer.loadPersistedSnapshot(
                 workspaceRoot: URL(fileURLWithPath: workspaceRoot, isDirectory: true)
-            )
+            ) else {
+                return CommandRouter.failureOutcome(
+                    command: command,
+                    reason: "Repository not yet indexed. Wait for memory ingestion to catch up.",
+                    policyDecision: policyDecision,
+                    router: "code"
+                )
+            }
             let matches = CodeSearch().search(query: action.query ?? "", in: snapshot)
             let content = matches
                 .prefix(10)

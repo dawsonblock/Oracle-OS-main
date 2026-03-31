@@ -5,6 +5,7 @@ public actor FileEventStore: EventStore {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
     private var sequenceCounter: Int = 0
+    private var streamContinuations: [UUID: AsyncStream<EventEnvelope>.Continuation] = [:]
 
     public init(root: URL) throws {
         let eventsDir = root.appendingPathComponent("events", isDirectory: true)
@@ -19,6 +20,23 @@ public actor FileEventStore: EventStore {
         self.sequenceCounter = existing.map { $0.sequenceNumber }.max() ?? 0
     }
 
+    public func stream() -> AsyncStream<EventEnvelope> {
+        let id = UUID()
+        return AsyncStream { continuation in
+            streamContinuations[id] = continuation
+            
+            continuation.onTermination = { @Sendable _ in
+                Task {
+                    await self.removeContinuation(id: id)
+                }
+            }
+        }
+    }
+    
+    private func removeContinuation(id: UUID) {
+        streamContinuations.removeValue(forKey: id)
+    }
+
     public func append(_ envelope: EventEnvelope) throws {
         try append(contentsOf: [envelope])
     }
@@ -28,6 +46,9 @@ public actor FileEventStore: EventStore {
         for env in newEnvelopes {
             payload.append(try encoder.encode(env))
             payload.append(contentsOf: [0x0A])
+            for continuation in streamContinuations.values {
+                continuation.yield(env)
+            }
         }
         
         let handle = try FileHandle(forWritingTo: logURL)

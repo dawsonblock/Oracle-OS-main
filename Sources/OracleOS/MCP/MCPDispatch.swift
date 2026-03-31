@@ -374,7 +374,15 @@ public enum MCPDispatch {
                 )
             }
             // Parse params from the MCP arguments
-            let recipeParams = args["params"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
+            let recipeParams: [String: String] = args["params"]?.objectValue?.compactMapValues { v in
+                switch v {
+                case .string(let s): return s
+                case .int(let i): return String(i)
+                case .double(let d): return String(d)
+                case .bool(let b): return String(b)
+                default: return nil
+                }
+            } ?? [:]
 
             return RecipeEngine.run(
                 recipe: recipe,
@@ -685,7 +693,15 @@ public enum MCPDispatch {
             // or we could bridge it directly to RecipeStore's run logic. For now,
             // we will return the workflow plan details dynamically formatted.
             
-            let substitutions = args["parameters"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
+            let substitutions: [String: String] = args["parameters"]?.objectValue?.compactMapValues { v in
+                switch v {
+                case .string(let s): return s
+                case .int(let i): return String(i)
+                case .double(let d): return String(d)
+                case .bool(let b): return String(b)
+                default: return nil
+                }
+            } ?? [:]
             
             // Format for execution instructions
             var executionSteps: [[String: Any]] = []

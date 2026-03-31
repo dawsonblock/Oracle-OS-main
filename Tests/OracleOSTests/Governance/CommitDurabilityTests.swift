@@ -176,14 +176,45 @@ class CommitDurabilityTests: XCTestCase {
 private actor InMemoryEventStore: EventStore {
     private var events: [EventEnvelope] = []
     private var nextSeq: Int = 1
+    private var continuations: [UUID: AsyncStream<EventEnvelope>.Continuation] = [:]
 
-    func append(_ envelope: EventEnvelope) { events.append(envelope) }
-    func append(contentsOf newEnvelopes: [EventEnvelope]) { events.append(contentsOf: newEnvelopes) }
+    func append(_ envelope: EventEnvelope) { 
+        events.append(envelope) 
+        for continuation in continuations.values {
+            continuation.yield(envelope)
+        }
+    }
+    
+    func append(contentsOf newEnvelopes: [EventEnvelope]) { 
+        events.append(contentsOf: newEnvelopes)
+        for continuation in continuations.values {
+            for env in newEnvelopes { continuation.yield(env) }
+        }
+    }
+    
     func all() -> [EventEnvelope] { events }
     func events(forCommandID id: CommandID) -> [EventEnvelope] { events.filter { $0.commandID == id } }
     func events(after sequenceNumber: Int) -> [EventEnvelope] { events.filter { $0.sequenceNumber > sequenceNumber } }
     func nextSequenceNumber() -> Int { let seq = nextSeq; nextSeq += 1; return seq }
     func sequenceCount() -> Int { return events.count }
+    
+    nonisolated func stream() -> AsyncStream<EventEnvelope> {
+        let id = UUID()
+        return AsyncStream { continuation in
+            continuation.onTermination = { @Sendable _ in
+                Task { await self.removeContinuation(id: id) }
+            }
+            Task { await self.addContinuation(id: id, continuation: continuation) }
+        }
+    }
+    
+    private func addContinuation(id: UUID, continuation: AsyncStream<EventEnvelope>.Continuation) {
+        continuations[id] = continuation
+    }
+    
+    private func removeContinuation(id: UUID) {
+        continuations[id] = nil
+    }
 }
 private struct TestEventReducer: EventReducer {
     func apply(events: [EventEnvelope], to state: inout WorldStateModel) {}

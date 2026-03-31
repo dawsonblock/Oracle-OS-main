@@ -19,6 +19,19 @@ public enum RuntimeBootstrap {
 
         let orchestrator = RuntimeOrchestrator(container: container)
 
+        // Start Memory/Event Ingestor Background Task
+        let ingestor = MemoryEventIngestor(
+            repositoryIndexer: container.repositoryIndexer,
+            memoryStore: container.memoryStore
+        )
+        Task {
+            for await envelope in await container.eventStore.stream() {
+                if let event = DomainEventCodec.decode(from: envelope) {
+                    ingestor.handle(event)
+                }
+            }
+        }
+
         return BootstrappedRuntime(
             container: container,
             orchestrator: orchestrator,
