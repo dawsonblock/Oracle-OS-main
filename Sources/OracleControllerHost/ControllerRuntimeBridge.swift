@@ -8,14 +8,16 @@ import OracleOS
 final class ControllerRuntimeBridge {
     let sessionID: String
     let sessionStartedAt: Date
-    let runtimeContext: RuntimeContext
     let oracleRuntime: RuntimeOrchestrator
     let runtimeLifecycle: RuntimeLifecycle
     let diagnosticsBuilder: RuntimeDiagnosticsBuilder
     
-    /// The bootstrapped runtime bundle containing container, orchestrator, and recovery report.
+    /// The bootstrapped runtime bundle — single authority for all services.
     private let bootstrappedRuntime: BootstrappedRuntime
     
+    /// Direct container access — the single runtime authority.
+    var container: RuntimeContainer { bootstrappedRuntime.container }
+
     /// Convenience accessors for tracing services (from unified container)
     var traceRecorder: TraceRecorder { bootstrappedRuntime.container.traceRecorder }
     var traceStore: ExperienceStore { bootstrappedRuntime.container.traceStore }
@@ -32,11 +34,10 @@ final class ControllerRuntimeBridge {
         }
         
         // Pull context from the unified container
-        self.runtimeContext = RuntimeContext(container: bootstrapped.container)
         self.oracleRuntime = bootstrapped.orchestrator
         self.diagnosticsBuilder = RuntimeDiagnosticsBuilder()
         
-        self.runtimeLifecycle = RuntimeLifecycle(approvalStore: runtimeContext.approvalStore)
+        self.runtimeLifecycle = RuntimeLifecycle(approvalStore: bootstrapped.container.approvalStore)
         self.sessionID = bootstrapped.container.traceRecorder.sessionID
         self.sessionStartedAt = Date()
         self.runtimeLifecycle.startControllerHeartbeat(sessionID: sessionID)
@@ -93,9 +94,9 @@ final class ControllerRuntimeBridge {
             experimentsDirectoryPath: OracleProductPaths.experimentsDirectory.path,
             logsDirectoryPath: OracleProductPaths.logsDirectory.path,
             graphDatabasePath: OracleProductPaths.graphDatabaseURL.path,
-            approvalBrokerActive: runtimeContext.approvalStore.isActive(),
+            approvalBrokerActive: container.approvalStore.isActive(),
             controllerConnected: runtimeLifecycle.controllerConnected(),
-            policyMode: runtimeContext.config.policyMode.rawValue,
+            policyMode: container.config.policyMode.rawValue,
             runningFromAppBundle: OracleProductPaths.runningFromAppBundle,
             bundledHostAvailable: OracleProductPaths.runningFromAppBundle,
             bundledVisionBootstrapAvailable: OracleProductPaths.bundledVisionBootstrapDirectory != nil,
@@ -108,13 +109,13 @@ final class ControllerRuntimeBridge {
     func diagnosticsSnapshot() -> ControllerDiagnosticsSnapshot {
         let traceEvents = diagnosticsBuilder.loadTraceEvents()
         let observation = ObservationBuilder.capture(appName: nil)
-        let hostSnapshot = runtimeContext.automationHost.snapshots.captureSnapshot(appName: observation.app)
-        let browserSession = runtimeContext.browserController.snapshot(
+        let hostSnapshot = container.automationHost.snapshots.captureSnapshot(appName: observation.app)
+        let browserSession = container.browserController.snapshot(
             appName: observation.app,
             observation: observation
         ).map { BrowserSession(appName: observation.app ?? $0.browserApp, page: $0, available: true) }
         let snapshot = diagnosticsBuilder.build(
-            graphStore: runtimeContext.graphStore,
+            graphStore: container.graphStore,
             traceEvents: traceEvents,
             hostSnapshot: hostSnapshot,
             browserSession: browserSession
@@ -270,15 +271,15 @@ final class ControllerRuntimeBridge {
     }
 
     func listApprovalRequests() -> [ApprovalRequestDocument] {
-        runtimeContext.approvalStore.listPendingRequests().map(map)
+        container.approvalStore.listPendingRequests().map(map)
     }
 
     func approveApprovalRequest(id: String) throws -> ApprovalReceipt {
-        try runtimeContext.approvalStore.approve(requestID: id)
+        try container.approvalStore.approve(requestID: id)
     }
 
     func rejectApprovalRequest(id: String) throws {
-        try runtimeContext.approvalStore.reject(requestID: id)
+        try container.approvalStore.reject(requestID: id)
     }
 
     func recordedSteps(since count: Int) -> [TraceStepViewModel] {

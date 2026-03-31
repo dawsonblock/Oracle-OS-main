@@ -1,9 +1,14 @@
 import Foundation
 
-/// Bridges the AgentLoop execution path to the IntentAPI spine.
+/// Translates legacy ActionIntent into the canonical Intent model and submits via IntentAPI.
 ///
-/// Translates ActionIntent → Intent → submitIntent, routing all execution
-/// through the IntentAPI-based RuntimeOrchestrator.
+/// SCOPE: This is a typed translation bridge, not an alternate execution path.
+/// It converts ActionIntent (external UI automation input) → Intent → RuntimeOrchestrator.submitIntent().
+/// Every execution call passes through RuntimeOrchestrator. There is no direct executor access here.
+///
+/// INVARIANT: This file must NEVER call VerifiedExecutor, DefaultProcessAdapter,
+/// CommandRouter, or any other execution layer directly. If you find such a call, it is a bug.
+/// All execution is mediated by IntentAPI (implemented by RuntimeOrchestrator).
 @MainActor
 public final class RuntimeExecutionDriver: AgentExecutionDriver {
     private final class SubmissionState: @unchecked Sendable {

@@ -15,11 +15,9 @@ public enum MCPDispatch {
     private static let toolTimeoutSeconds: TimeInterval = 60
 
     // MARK: - Unified Runtime Bootstrap
-    // Single source of truth: RuntimeBootstrap creates all shared services.
-    // Previous split (separate runtimeContext + runtimeContainer) eliminated.
+    // RuntimeContainer is the single authority. No parallel context object.
     
     private static var _bootstrappedRuntime: BootstrappedRuntime?
-    private static var _runtimeContext: RuntimeContext?
     
     /// Lazily bootstrap the unified runtime with recovery.
     /// Returns the BootstrappedRuntime containing container, orchestrator, and recovery report.
@@ -38,19 +36,7 @@ public enum MCPDispatch {
         return built
     }
     
-    /// RuntimeContext with services pulled from the unified container.
-    private static func getRuntimeContext() async throws -> RuntimeContext {
-        if let existing = _runtimeContext {
-            return existing
-        }
-        let bootstrapped = try await getBootstrappedRuntime()
-        let ctx = RuntimeContext(container: bootstrapped.container)
-        _runtimeContext = ctx
-        return ctx
-    }
-    
     /// Properties that are safe to access ONCE bootstrap has finished.
-    private static var runtimeContext: RuntimeContext { _runtimeContext! }
     private static var runtime: RuntimeOrchestrator { _bootstrappedRuntime!.orchestrator }
     private static var runtimeContainer: RuntimeContainer { _bootstrappedRuntime!.container }
 
@@ -63,8 +49,8 @@ public enum MCPDispatch {
     /// the MCP server indefinitely (the #1 user-reported issue).
     public static func handle(_ params: [String: Any]) async -> [String: Any] {
         do {
-            let ctx = try await getRuntimeContext()
-            ctx.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
+            let bootstrapped = try await getBootstrappedRuntime()
+            bootstrapped.container.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
         } catch {
             return errorContent("Failed to bootstrap runtime kernel: \(error)")
         }
@@ -495,7 +481,7 @@ public enum MCPDispatch {
             let kinds = kindsRaw.compactMap { ProjectMemoryKind(rawValue: $0) }
             let limit = int(args, "limit") ?? 10
             
-            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+            guard let projectStore = runtimeContainer.memoryStore.projectStore else {
                 return ToolResult(success: false, error: "Project Memory store is not available. Ensure Oracle OS is running in a valid project workspace.")
             }
             
@@ -522,7 +508,7 @@ public enum MCPDispatch {
                 return ToolResult(success: false, error: "Invalid kind: \(kindRaw)")
             }
             
-            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+            guard let projectStore = runtimeContainer.memoryStore.projectStore else {
                 return ToolResult(success: false, error: "Project Memory store is not available.")
             }
             
@@ -612,7 +598,7 @@ public enum MCPDispatch {
             // but run() is async.
             Task {
                 do {
-                    let results = try await runtimeContext.experimentManager.run(spec: spec)
+                    let results = try await runtimeContainer.experimentManager.run(spec: spec)
                     // Format results
                     let serialized = results.map { [
                         "id": $0.id,
@@ -649,7 +635,7 @@ public enum MCPDispatch {
                 return ToolResult(success: false, error: "Missing required parameters: goal_description, candidate_paths")
             }
             let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let snapshot = runtimeContainer.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
             let engine = ArchitectureEngine()
             let review = engine.review(goalDescription: goal, snapshot: snapshot, candidatePaths: paths)
             
@@ -682,7 +668,7 @@ public enum MCPDispatch {
             )
             
             let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let snapshot = runtimeContainer.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
             let engine = ArchitectureEngine()
             let review = engine.reviewCandidatePatch(
                 goalDescription: goal,
@@ -707,7 +693,7 @@ public enum MCPDispatch {
             let sema = DispatchSemaphore(value: 0)
             var runResult: ToolResult?
             Task {
-                let events = runtimeContext.traceStore.loadRecentEvents(limit: limit)
+                let events = runtimeContainer.traceStore.loadRecentEvents(limit: limit)
                 let synthesizer = WorkflowSynthesizer()
                 let plans = synthesizer.synthesize(goalPattern: goalPattern, events: events)
                 

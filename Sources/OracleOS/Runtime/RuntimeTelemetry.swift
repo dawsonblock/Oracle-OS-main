@@ -1,12 +1,13 @@
 import Foundation
 
 /// Handles telemetry, metrics, and trace recording for the runtime.
+/// Reads directly from RuntimeContainer — the single authority.
 @MainActor
 public struct RuntimeTelemetry {
-    private let context: RuntimeContext
+    private let container: RuntimeContainer
 
-    public init(context: RuntimeContext) {
-        self.context = context
+    public init(container: RuntimeContainer) {
+        self.container = container
     }
 
     /// Record a single action outcome in metrics.
@@ -15,7 +16,7 @@ public struct RuntimeTelemetry {
         elapsedMs: Double,
         isPatch: Bool
     ) {
-        context.metricsRecorder.recordAction(
+        container.metricsRecorder.recordAction(
             success: success,
             elapsedMs: elapsedMs,
             isPatch: isPatch
@@ -29,7 +30,7 @@ public struct RuntimeTelemetry {
         graphCandidates: Int,
         llmFallbackCandidates: Int
     ) {
-        context.metricsRecorder.recordSearchCycle(
+        container.metricsRecorder.recordSearchCycle(
             candidatesGenerated: candidatesGenerated,
             memoryCandidates: memoryCandidates,
             graphCandidates: graphCandidates,
@@ -52,7 +53,7 @@ public struct RuntimeTelemetry {
         surface: RuntimeSurface,
         message: String
     ) -> URL? {
-        let stepID = context.traceRecorder.makeStepID()
+        let stepID = container.traceRecorder.makeStepID()
         
         let event = TraceEvent(
             sessionID: sessionID,
@@ -115,7 +116,7 @@ public struct RuntimeTelemetry {
             notes: message
         )
 
-        context.traceRecorder.record(event)
-        return try? context.traceStore.append(event)
+        container.traceRecorder.record(event)
+        return try? container.traceStore.append(event)
     }
 }

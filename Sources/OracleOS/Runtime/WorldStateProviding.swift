@@ -6,7 +6,7 @@ public protocol WorldStateProviding: Sendable {
     func snapshot() async -> WorldModelSnapshot
 }
 
-/// Adapter that provides world state from RuntimeContext.
+/// Adapter that provides world state via a closure — decoupled from any specific runtime authority.
 public final class RuntimeWorldStateProvider: WorldStateProviding, @unchecked Sendable {
     private let getWorldState: @Sendable () async -> WorldStateModel
 
