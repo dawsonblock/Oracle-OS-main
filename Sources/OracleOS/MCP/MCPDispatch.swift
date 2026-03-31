@@ -685,7 +685,7 @@ public enum MCPDispatch {
             // or we could bridge it directly to RecipeStore's run logic. For now,
             // we will return the workflow plan details dynamically formatted.
             
-            let substitutions = args["parameters"]?.objectValue?.compactMapValues { $0.stringValue } ?? [:]
+            let substitutions = args["parameters"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
             
             // Format for execution instructions
             var executionSteps: [[String: Any]] = []
