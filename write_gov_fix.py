@@ -1,4 +1,9 @@
-import XCTest
+import os
+import re
+
+path = "Tests/OracleOSTests/Governance/ExecutionBoundaryTests.swift"
+
+new_content = """import XCTest
 @testable import OracleOS
 
 final class ExecutionBoundaryTests: XCTestCase {
@@ -49,7 +54,7 @@ final class ExecutionBoundaryTests: XCTestCase {
                 offenders.append(fileURL.lastPathComponent)
             }
         }
-        XCTAssertFalse(foundShell, "Found legacy '.shell' payload in files: \(offenders.joined(separator: ", "))")
+        XCTAssertFalse(foundShell, "Found legacy '.shell' payload in files: \\(offenders.joined(separator: ", "))")
     }
 
     func testAllProcessUsageRouted() throws {
@@ -73,11 +78,15 @@ final class ExecutionBoundaryTests: XCTestCase {
             for line in lines {
                 if (line.contains("Process()") || line.contains("Process.run") || line.contains("Process {")) && !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
                     if !fileURL.lastPathComponent.contains("DefaultProcessAdapter") && !fileURL.lastPathComponent.contains("ProcessShadow") {
-                        processUsages.append("\(fileURL.lastPathComponent): \(line.trimmingCharacters(in: .whitespaces))")
+                        processUsages.append("\\(fileURL.lastPathComponent): \\(line.trimmingCharacters(in: .whitespaces))")
                     }
                 }
             }
         }
-        XCTAssertTrue(processUsages.isEmpty, "Found direct Process usage outside DefaultProcessAdapter in: \n\(processUsages.joined(separator: "\n"))")
+        XCTAssertTrue(processUsages.isEmpty, "Found direct Process usage outside DefaultProcessAdapter in: \\n\\(processUsages.joined(separator: \"\\n\"))")
     }
 }
+"""
+
+with open(path, "w") as f:
+    f.write(new_content)

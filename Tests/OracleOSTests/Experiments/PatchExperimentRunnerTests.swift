@@ -12,7 +12,7 @@ struct PatchExperimentRunnerTests {
             errorSignature: "Fatal error: Index out of range",
             faultLocationConfidence: 0.8,
             candidates: [makeCandidatePatch()],
-            snapshot: nil
+            snapshot: nil as RepositorySnapshot? as RepositorySnapshot? as RepositorySnapshot?
         )
 
         #expect(!plan.strategies.isEmpty)
@@ -27,7 +27,7 @@ struct PatchExperimentRunnerTests {
             errorSignature: "nil unwrap",
             faultLocationConfidence: 0.6,
             candidates: [],
-            snapshot: nil
+            snapshot: nil as RepositorySnapshot? as RepositorySnapshot? as RepositorySnapshot?
         )
 
         #expect(plan.errorSignature == "nil unwrap")

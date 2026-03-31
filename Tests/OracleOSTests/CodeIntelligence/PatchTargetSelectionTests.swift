@@ -45,7 +45,7 @@ struct PatchTargetSelectionTests {
 
     @Test("ExperimentResultRanker ranks succeeded results higher")
     func resultRankerPrefersSuccess() {
-        let ranker = ExperimentResultRanker()
+        let ranker = ExperimentResultRanker(patchRanker: PatchRanker(comparator: ResultComparator()))
         let succeeded = makeResult(id: "pass", succeeded: true)
         let failed = makeResult(id: "fail", succeeded: false)
 

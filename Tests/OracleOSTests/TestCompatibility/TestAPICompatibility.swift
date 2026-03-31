@@ -827,7 +827,7 @@ extension PatchPipeline {
         self.init(
             targetSelector: PatchTargetSelector(),
             strategyLibrary: PatchStrategyLibrary(),
-            impactPredictor: RepositoryChangeImpactAnalyzer(),
+            impactPredictor: PatchImpactPredictor(impactAnalyzer: RepositoryChangeImpactAnalyzer()),
             maximumStrategiesPerTarget: 3,
             sandboxEvaluator: sandboxEvaluator
         )
@@ -840,7 +840,7 @@ extension WorkflowRetriever {
         taskContext: TaskContext,
         worldState: WorldState,
         workflowIndex: WorkflowIndex
-    ) -> ParameterizedWorkflow? {
+    ) -> WorkflowMatch? {
         return self.retrieve(
             goal: goal, 
             taskContext: taskContext, 
@@ -863,3 +863,15 @@ extension MainPlanner {
         )
     }
 }
+
+
+extension PatchExperimentRunner {
+    convenience init() {
+        self.init(
+            experimentManager: ExperimentManager(),
+            ranker: PatchRanker(comparator: ResultComparator())
+        )
+    }
+}
+
+
