@@ -70,65 +70,6 @@ public final class StrategySelector: @unchecked Sendable {
         )
     }
 
-    // MARK: - Legacy entry point (preserved for backward compatibility)
-
-    /// Select the best strategy for the current situation.
-    public func select(
-        goal: Goal,
-        worldState: WorldState,
-        memoryInfluence: MemoryInfluence,
-        workflowIndex: WorkflowIndex,
-        agentKind: AgentKind
-    ) -> StrategySelection {
-        let conditions = activeConditions(
-            worldState: worldState,
-            goal: goal,
-            workflowIndex: workflowIndex
-        )
-
-        var scored: [(TaskStrategy, Double)] = []
-        for strategy in library {
-            guard strategy.applicableAgentKinds.contains(agentKind) else { continue }
-            let conditionMatch = conditionScore(
-                strategy: strategy,
-                activeConditions: conditions
-            )
-            guard conditionMatch > 0 || strategy.requiredConditions.isEmpty else { continue }
-
-            let memoryBoost = memoryBoost(
-                strategy: strategy,
-                influence: memoryInfluence
-            )
-            let total = strategy.priorityScore + conditionMatch + memoryBoost
-            scored.append((strategy, total))
-        }
-
-        scored.sort { $0.1 > $1.1 }
-
-        guard let best = scored.first else {
-            let fallback = TaskStrategy(
-                kind: .uiExploration,
-                description: "Default exploration when no strategy matches",
-                priorityScore: 0.1
-            )
-            return StrategySelection(
-                selected: fallback,
-                score: 0.1,
-                alternatives: [],
-                conditions: conditions,
-                notes: ["no strategy matched; falling back to exploration"]
-            )
-        }
-
-        return StrategySelection(
-            selected: best.0,
-            score: best.1,
-            alternatives: scored.dropFirst().prefix(3).map { $0.0 },
-            conditions: conditions,
-            notes: []
-        )
-    }
-
     // MARK: - Strategy resolution
 
     private func resolveStrategyKind(
@@ -373,25 +314,4 @@ public final class StrategySelector: @unchecked Sendable {
     }
 }
 
-/// The result of strategy selection including the chosen strategy and metadata.
-public struct StrategySelection: Sendable {
-    public let selected: TaskStrategy
-    public let score: Double
-    public let alternatives: [TaskStrategy]
-    public let conditions: Set<StrategyCondition>
-    public let notes: [String]
 
-    public init(
-        selected: TaskStrategy,
-        score: Double,
-        alternatives: [TaskStrategy] = [],
-        conditions: Set<StrategyCondition> = [],
-        notes: [String] = []
-    ) {
-        self.selected = selected
-        self.score = score
-        self.alternatives = alternatives
-        self.conditions = conditions
-        self.notes = notes
-    }
-}

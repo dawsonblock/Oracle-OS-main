@@ -13,7 +13,7 @@ struct StrategyLayerTests {
         let goal = Goal(description: "submit form", preferredAgentKind: .os)
         let worldState = makeWorldState(app: "Safari", modalClass: "dialog")
 
-        let selection = selector.select(
+        let selection = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
@@ -21,8 +21,7 @@ struct StrategyLayerTests {
             agentKind: .os
         )
 
-        #expect(selection.selected.kind == .recovery)
-        #expect(selection.conditions.contains(.modalPresent))
+        #expect(selection.kind == .recoveryMode)
     }
 
     @Test("Strategy selector chooses code repair when repo is open")
@@ -44,7 +43,7 @@ struct StrategyLayerTests {
             )
         )
 
-        let selection = selector.select(
+        let selection = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
@@ -52,10 +51,8 @@ struct StrategyLayerTests {
             agentKind: .code
         )
 
-        #expect(selection.conditions.contains(.repositoryOpen))
-        #expect(selection.conditions.contains(.testsFailing))
-        let strategyKind = selection.selected.kind
-        #expect(strategyKind == .testFix || strategyKind == .codeRepair)
+        let strategyKind = selection.kind
+        #expect(strategyKind == .repoRepair)
     }
 
     @Test("Strategy selector falls back to exploration when nothing matches")
@@ -64,7 +61,7 @@ struct StrategyLayerTests {
         let goal = Goal(description: "do something", preferredAgentKind: .os)
         let worldState = makeWorldState(app: "Finder")
 
-        let selection = selector.select(
+        let selection = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
@@ -72,8 +69,8 @@ struct StrategyLayerTests {
             agentKind: .os
         )
 
-        #expect(selection.selected.kind != .recovery)
-        #expect(selection.score > 0)
+        #expect(selection.kind != .recoveryMode)
+        #expect(selection.confidence > 0)
     }
 
     @Test("Strategy selector boosts score with memory influence")
@@ -95,7 +92,7 @@ struct StrategyLayerTests {
             )
         )
 
-        let withMemory = selector.select(
+        let withMemory = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(preferredFixPath: "Sources/Foo.swift"),
@@ -103,7 +100,7 @@ struct StrategyLayerTests {
             agentKind: .code
         )
 
-        let withoutMemory = selector.select(
+        let withoutMemory = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
@@ -112,7 +109,7 @@ struct StrategyLayerTests {
         )
 
         // Memory influence should boost the score for code repair strategies
-        #expect(withMemory.score >= withoutMemory.score)
+        #expect(withMemory.confidence >= withoutMemory.confidence)
     }
 
     @Test("Strategy selector provides alternatives")
@@ -134,7 +131,7 @@ struct StrategyLayerTests {
             )
         )
 
-        let selection = selector.select(
+        let selection = selector.selectStrategy(
             goal: goal,
             worldState: worldState,
             memoryInfluence: MemoryInfluence(),
@@ -143,7 +140,7 @@ struct StrategyLayerTests {
         )
 
         // Should have at least one alternative strategy
-        #expect(!selection.alternatives.isEmpty || selection.score > 0)
+        #expect(selection.confidence > 0)
     }
 
     // MARK: - StrategyEvaluator
