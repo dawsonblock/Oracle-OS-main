@@ -15,8 +15,6 @@ class ExecutionBoundaryEnforcementTests: XCTestCase {
 
         // Verify all cases are typed:
         switch payload {
-        case .diagnostic(_), .envSetup(_), .hostService(_), .inference(_):
-            XCTAssertTrue(true)
         case .build(_):
             XCTAssertTrue(true)
         case .test(_):

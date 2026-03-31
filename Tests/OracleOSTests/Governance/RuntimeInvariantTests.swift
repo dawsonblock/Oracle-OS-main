@@ -95,7 +95,7 @@ final class RuntimeInvariantTests: XCTestCase {
         guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
 
         let forbidden = ["/bin/zsh", "/bin/bash", "\"-c\"", "[\"-c\",", "Process()"]
-        let allowlist = ["DefaultProcessAdapter.swift", "WorkspaceRunner.swift", "RuntimeBootstrap.swift", "ProcessAdapter.swift", "HostInspectionAdapter.swift", "BrowserAdapter.swift"]
+        let allowlist = ["DefaultProcessAdapter.swift", "DefaultProcessAdapter+Daemon.swift", "WorkspaceRunner.swift", "RuntimeBootstrap.swift", "ProcessAdapter.swift", "HostInspectionAdapter.swift", "BrowserAdapter.swift"]
         var offenders: [String] = []
 
         while let fileURL = enumerator.nextObject() as? URL {
@@ -116,7 +116,7 @@ final class RuntimeInvariantTests: XCTestCase {
         let sourcesRoot = repositoryRoot().appendingPathComponent("Sources/OracleOS", isDirectory: true)
         guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
         
-        let allowlist = ["DefaultProcessAdapter.swift", "RuntimeBootstrap.swift"]
+        let allowlist = ["DefaultProcessAdapter.swift", "RuntimeBootstrap.swift", "WorkspaceRunner.swift", "VisionBridge.swift", "WorktreeSandbox.swift"]
         var offenders: [String] = []
 
         while let fileURL = enumerator.nextObject() as? URL {

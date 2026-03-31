@@ -83,7 +83,7 @@ extension MainPlanner: Planner {
 
         if objective.contains("search") || objective.contains("find") || objective.contains("query") {
             return Command(
-                type: .code,
+                type: CommandType.code,
                 payload: .code(CodeAction(name: "searchRepository", query: intent.objective)),
                 metadata: metadata
             )
@@ -92,7 +92,7 @@ extension MainPlanner: Planner {
         if objective.contains("read") || objective.contains("open") || objective.contains("view") {
             let path = intent.metadata["filePath"] ?? intent.objective
             return Command(
-                type: .code,
+                type: CommandType.code,
                 payload: .code(CodeAction(name: "readFile", filePath: path)),
                 metadata: metadata
             )
@@ -102,7 +102,7 @@ extension MainPlanner: Planner {
             let path = intent.metadata["filePath"] ?? ""
             let patch = intent.metadata["patch"] ?? intent.objective
             return Command(
-                type: .code,
+                type: CommandType.code,
                 payload: .file(FileMutationSpec(path: path, operation: .write, content: patch)),
                 metadata: metadata
             )
@@ -117,7 +117,7 @@ extension MainPlanner: Planner {
                 scheme: intent.metadata["scheme"],
                 configuration: intent.metadata["configuration"] ?? "Debug"
             )
-            return Command(type: .code, payload: .build(spec), metadata: metadata)
+            return Command(type: CommandType.code, payload: .build(spec), metadata: metadata)
         }
 
         if objective.contains("test") || objective.contains("run test") {
@@ -129,11 +129,11 @@ extension MainPlanner: Planner {
                 scheme: intent.metadata["scheme"],
                 filter: intent.metadata["filter"]
             )
-            return Command(type: .code, payload: .test(spec), metadata: metadata)
+            return Command(type: CommandType.code, payload: .test(spec), metadata: metadata)
         }
 
         return Command(
-            type: .code,
+            type: CommandType.code,
             payload: .code(CodeAction(name: "searchRepository", query: intent.objective)),
             metadata: metadata
         )
@@ -205,7 +205,7 @@ extension MainPlanner: Planner {
             // This path is legacy. Eventually, codeCommand should be removed.
             // For now, treat it as a search fallback.
             return Command(
-                type: .code,
+                type: CommandType.code,
                 payload: .code(CodeAction(name: "searchRepository", query: codeCommand.summary)),
                 metadata: metadata
             )
@@ -248,7 +248,10 @@ extension MainPlanner: Planner {
             width: actionIntent.width,
             height: actionIntent.height
         )
-        let type: CommandType = actionIntent.agentKind == .code ? .code : .ui
-        return Command(type: type, payload: .ui(uiAction), metadata: metadata)
+        let isCode = actionIntent.agentKind == .code
+        if isCode {
+            return Command(type: CommandType.code, payload: .code(CodeAction(name: actionIntent.action, query: actionIntent.query)), metadata: metadata)
+        }
+        return Command(type: .ui, payload: .ui(uiAction), metadata: metadata)
     }
 }
