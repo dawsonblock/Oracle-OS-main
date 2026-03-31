@@ -79,18 +79,27 @@ public enum MCPDispatch {
 
         let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
 
+        struct ArgsWrapper: @unchecked Sendable {
+            let args: [String: Any]
+        }
+        let argsWrapper = ArgsWrapper(args: args)
+
         let responseWrapper: ResultWrapper
         do {
             responseWrapper = try await withThrowingTaskGroup(of: ResultWrapper.self) { group in
-                group.addTask {
-                    let result: [String: Any]
-                    if toolName == "oracle_screenshot" {
-                        result = await handleScreenshot(args)
-                    } else {
-                        let toolResult = await dispatch(tool: toolName, args: args)
-                        result = await formatResult(toolResult, toolName: toolName)
+                let wArgs = argsWrapper
+                group.addTask { @Sendable in
+                    let wrappedResult: ResultWrapper = await MainActor.run {
+                        let result: [String: Any]
+                        if toolName == "oracle_screenshot" {
+                            result = handleScreenshot(wArgs.args)
+                        } else {
+                            let toolResult = dispatch(tool: toolName, args: wArgs.args)
+                            result = formatResult(toolResult, toolName: toolName)
+                        }
+                        return ResultWrapper(payload: result)
                     }
-                    return ResultWrapper(payload: result)
+                    return wrappedResult
                 }
                 
                 group.addTask {
@@ -132,7 +141,7 @@ public enum MCPDispatch {
     }
 
     /// Screenshot handler returns MCP image content type for inline display.
-    nonisolated private static func handleScreenshot(_ args: [String: Any]) -> [String: Any] {
+    private static func handleScreenshot(_ args: [String: Any]) -> [String: Any] {
         let result = AXScanner.screenshot(
             appName: str(args, "app"),
             fullResolution: bool(args, "full_resolution") ?? false
@@ -171,7 +180,7 @@ public enum MCPDispatch {
 
     // MARK: - Dispatch
 
-    nonisolated private static func dispatch(tool: String, args: [String: Any]) -> ToolResult {
+    private static func dispatch(tool: String, args: [String: Any]) -> ToolResult {
         switch tool {
 
         // Perception
@@ -773,7 +782,7 @@ public enum MCPDispatch {
     // MARK: - Response Formatting
 
     /// Format a ToolResult as MCP content array.
-    nonisolated nonisolated private static func formatResult(_ result: ToolResult, toolName: String) -> [String: Any] {
+    private static func formatResult(_ result: ToolResult, toolName: String) -> [String: Any] {
         let dict = result.toDict()
 
         // Serialize to JSON string for MCP text content
