@@ -382,8 +382,8 @@ struct Doctor {
 
     private func runShell(_ command: String) async -> ShellResult {
         // removed local executor
-        let spec = DiagnosticSpec(command: command)
-        let cmd = Command(type: .system, payload: .diagnostic(spec), metadata: CommandMetadata(intentID: UUID(), source: "doctor"))
+        let spec = BuildSpec(workspaceRoot: "/", extraArgs: ["-c", command])
+        let cmd = Command(type: .system, payload: .build(spec), metadata: CommandMetadata(intentID: UUID(), source: "doctor"))
         do {
             let outcome = try await executor.execute(cmd)
             if outcome.status == .success {

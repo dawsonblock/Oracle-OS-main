@@ -150,14 +150,7 @@ public final class PolicyEngine: @unchecked Sendable {
                 postconditions: []
             )
         
-        case .diagnostic:
-            return ActionIntent(agentKind: .os, app: "System", name: "diagnostic", action: "diagnostic", postconditions: [])
-        case .envSetup:
-            return ActionIntent(agentKind: .os, app: "System", name: "envSetup", action: "envSetup", postconditions: [])
-        case .hostService:
-            return ActionIntent(agentKind: .os, app: "System", name: "hostService", action: "hostService", postconditions: [])
-        case .inference:
-            return ActionIntent(agentKind: .os, app: "System", name: "inference", action: "inference", postconditions: [])
+        
 
 case .code(let action):
             return ActionIntent(

@@ -136,4 +136,26 @@ class TransitionalArtifactRemovalTests: XCTestCase {
         XCTAssertNotNil(liveConfig)
         XCTAssertNotNil(testConfig)
     }
+
+    private func repositoryRoot() -> URL {
+        var url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+        let fm = FileManager.default
+        while true {
+            if fm.fileExists(atPath: url.appendingPathComponent("Package.swift").path) { return url }
+            let parent = url.deletingLastPathComponent()
+            if parent.path == url.path { return url }
+            url = parent
+        }
+    }
+
+    func test_system_router_does_not_directly_spawn_processes() throws {
+        let sourcePath = repositoryRoot().appendingPathComponent("Sources/OracleOS/Execution/Routing/SystemRouter.swift")
+        guard let text = try? String(contentsOf: sourcePath, encoding: .utf8) else { return }
+        
+        let forbidden = ["DefaultProcessAdapter(", "/bin/zsh", "/bin/bash", "\"-c\"", "Process("]
+        for pattern in forbidden {
+            XCTAssertFalse(text.contains(pattern), "SystemRouter contains \(pattern)")
+        }
+    }
+
 }
