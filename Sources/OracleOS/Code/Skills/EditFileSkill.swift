@@ -20,7 +20,7 @@ memoryStore: UnifiedMemoryStore
             summary: "edit \(path)"
         )
         return SkillResolution(
-            intent: .code(name: "Edit file", command: command, workspaceRelativePath: path),
+            intent: .code(name: "Edit file", command: command, workspaceRelativePath: path, text: taskContext.goal.description),
             repositorySnapshotID: snapshot.id
         )
     }

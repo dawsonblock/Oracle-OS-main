@@ -3,8 +3,8 @@ import Foundation
 public struct MemoryRouter {
     private let unifiedStore: UnifiedMemoryStore
 
-    public init(memoryStore: UnifiedMemoryStore? = nil) {
-        self.unifiedStore = memoryStore ?? UnifiedMemoryStore()
+    public init(memoryStore: UnifiedMemoryStore) {
+        self.unifiedStore = memoryStore
     }
 
     public func influence(for context: MemoryQueryContext) -> MemoryInfluence {

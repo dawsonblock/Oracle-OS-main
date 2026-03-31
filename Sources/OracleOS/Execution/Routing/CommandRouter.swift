@@ -8,7 +8,7 @@ public struct CommandRouter: @unchecked Sendable {
     public init(
         automationHost: AutomationHost? = nil,
         workspaceRunner: WorkspaceRunner? = nil,
-        repositoryIndexer: RepositoryIndexer = RepositoryIndexer()
+        repositoryIndexer: RepositoryIndexer
     ) {
         self.systemRouter = SystemRouter(workspaceRunner: workspaceRunner)
         self.uiRouter = UIRouter(automationHost: automationHost)

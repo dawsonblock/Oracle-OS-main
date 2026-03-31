@@ -28,6 +28,8 @@ public final class MainPlanner: @unchecked Sendable {
     private let planGenerator: PlanGenerator
 
     public init(
+        repositoryIndexer: RepositoryIndexer,
+        impactAnalyzer: RepositoryChangeImpactAnalyzer,
         workflowIndex: WorkflowIndex? = nil,
         osPlanner: OSPlanner? = nil,
         codePlanner: CodePlanner? = nil,
@@ -46,6 +48,8 @@ public final class MainPlanner: @unchecked Sendable {
             promptEngine: promptEngine
         )
         let resolvedCodePlanner = codePlanner ?? CodePlanner(
+            repositoryIndexer: repositoryIndexer,
+            impactAnalyzer: impactAnalyzer,
             workflowIndex: resolvedWorkflowIndex,
             workflowRetriever: sharedWorkflowRetriever,
             promptEngine: promptEngine
@@ -369,9 +373,10 @@ public final class MainPlanner: @unchecked Sendable {
     public func nextAction(
         worldState: WorldState,
         graphStore: GraphStore,
+        memoryStore: UnifiedMemoryStore,
         selectedStrategy: SelectedStrategy
     ) -> ActionContract? {
-        nextStep(worldState: worldState, graphStore: graphStore, selectedStrategy: selectedStrategy)?.actionContract
+        nextStep(worldState: worldState, graphStore: graphStore, memoryStore: memoryStore, selectedStrategy: selectedStrategy)?.actionContract
     }
 
     public func plan(goal: String) -> Plan {

@@ -33,10 +33,17 @@ extension SelectedStrategy {
 }
 
 extension MainPlanner {
+    convenience init() {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(processAdapter: DefaultProcessAdapter()),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer()
+        )
+    }
+
     func nextStep(
         worldState: WorldState,
         graphStore: GraphStore,
-        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore()
+        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
     ) -> PlannerDecision? {
         nextStep(
             worldState: worldState,
@@ -308,7 +315,7 @@ extension MemoryDecisionBias {
 
 extension MemoryDecisionBiasCalculator {
     convenience init() {
-        self.init(memoryStore: UnifiedMemoryStore())
+        self.init(memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory()))
     }
 
     func bias(
@@ -773,3 +780,75 @@ extension GraphStore {
             .first { $0.actionContractID == contract.id }
     }
 }
+
+
+extension RepositoryIndexer {
+    convenience init() {
+        self.init(processAdapter: DefaultProcessAdapter())
+    }
+}
+
+extension WorkspaceRunner {
+    convenience init() {
+        self.init(processAdapter: DefaultProcessAdapter())
+    }
+}
+
+extension CodePlanner {
+    convenience init() {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer()
+        )
+    }
+    
+    convenience init(workflowIndex: WorkflowIndex) {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer(),
+            workflowIndex: workflowIndex
+        )
+    }
+}
+
+extension ExperimentManager {
+    convenience init() {
+        self.init(
+            runner: ParallelRunner(),
+            ranker: PatchRanker(),
+            repositoryIndexer: RepositoryIndexer()
+        )
+    }
+}
+
+
+extension PatchPipeline {
+    convenience init(sandboxEvaluator: PatchSandboxEvaluator) {
+        self.init(
+            targetSelector: PatchTargetSelector(),
+            strategyLibrary: PatchStrategyLibrary(),
+            impactPredictor: RepositoryChangeImpactAnalyzer(),
+            maximumStrategiesPerTarget: 3,
+            sandboxEvaluator: sandboxEvaluator
+        )
+    }
+}
+
+extension WorkflowRetriever {
+    func retrieve(
+        goal: Goal,
+        taskContext: TaskContext,
+        worldState: WorldState,
+        workflowIndex: WorkflowIndex
+    ) -> ParameterizedWorkflow? {
+        return self.retrieve(
+            goal: goal, 
+            taskContext: taskContext, 
+            worldState: worldState, 
+            workflowIndex: workflowIndex, 
+            memoryStore: UnifiedMemoryStore(), 
+            selectedStrategy: .testDefault
+        )
+    }
+}
+

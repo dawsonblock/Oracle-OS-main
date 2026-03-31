@@ -83,7 +83,11 @@ public enum RuntimeBootstrap {
             stateProvider: stateProvider
         )
 
-        let planner = MainPlanner()
+        let impactAnalyzer = RepositoryChangeImpactAnalyzer()
+        let planner = MainPlanner(
+            repositoryIndexer: repositoryIndexer,
+            impactAnalyzer: impactAnalyzer
+        )
 
         // Create shared runtime services ONCE here
         let traceRecorder = TraceRecorder()
@@ -94,7 +98,7 @@ public enum RuntimeBootstrap {
         
         // Create shared stateful read-side services (MainActor-dependent)
         let graphStore = GraphStore()
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
         let stateMemoryIndex = StateMemoryIndex()
         let searchController = SearchController(
             generator: CandidateGenerator(
@@ -106,13 +110,22 @@ public enum RuntimeBootstrap {
         let stateAbstraction = StateAbstraction()
         let recoveryEngine = RecoveryEngine()
         let architectureEngine = ArchitectureEngine()
-        let experimentManager = ExperimentManager()
+        let parallelRunner = ParallelRunner(
+            workspaceRunner: workspaceRunner,
+            repositoryIndexer: repositoryIndexer
+        )
+        let patchRanker = PatchRanker(comparator: ResultComparator())
+        let experimentManager = ExperimentManager(
+            runner: parallelRunner,
+            ranker: patchRanker,
+            repositoryIndexer: repositoryIndexer
+        )
         let criticLoop = CriticLoop()
         let stateAbstractionEngine = StateAbstractionEngine()
         
         let automationHost = AutomationHost.live()
         let browserController = BrowserController()
-        let browserPageStateBuilder = BrowserPageStateBuilder()
+        let browserPageStateBuilder = BrowserPageStateBuilder(controller: browserController)
 
         return RuntimeContainer(
             planner: planner,

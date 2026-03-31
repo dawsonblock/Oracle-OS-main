@@ -11,7 +11,10 @@ struct StrategyScopedLLMPlanTests {
         let evaluator = PlanEvaluator()
         let generator = PlanGenerator(
             reasoningEngine: engine,
-            planEvaluator: evaluator
+            planEvaluator: evaluator,
+            operatorRegistry: OperatorRegistry(),
+            osPlanner: OSPlanner(),
+            codePlanner: CodePlanner()
         )
 
         let state = makeReasoningState()
@@ -19,7 +22,7 @@ struct StrategyScopedLLMPlanTests {
         let worldState = makeWorldState(app: "Workspace")
         let graphStore = GraphStore()
         let workflowIndex = WorkflowIndex()
-        let memoryStore = UnifiedMemoryStore()
+        let memoryStore = UnifiedMemoryStore(appMemory: InMemoryStrategyMemory())
 
         let repoStrategy = SelectedStrategy(
             kind: .repoRepair,
@@ -99,7 +102,7 @@ struct StrategyScopedLLMPlanTests {
             worldState: worldState,
             graphStore: GraphStore(),
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore(),
+            memoryStore: UnifiedMemoryStore(appMemory: InMemoryStrategyMemory()),
             selectedStrategy: strategy
         )
 
