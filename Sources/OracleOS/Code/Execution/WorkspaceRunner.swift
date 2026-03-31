@@ -80,7 +80,7 @@ public final class WorkspaceRunner: @unchecked Sendable {
 
     /// Apply a file mutation with typed spec.
     public func applyFile(_ spec: FileMutationSpec) async throws {
-        let url = URL(fileURLWithPath: spec.path)
+        let url = try resolvePath(spec)
         
         switch spec.operation {
         case .write:
@@ -102,6 +102,23 @@ public final class WorkspaceRunner: @unchecked Sendable {
     }
 
     // MARK: - Helper Methods
+
+    private func resolvePath(_ spec: FileMutationSpec) throws -> URL {
+        let rootPath = spec.workspaceRoot ?? FileManager.default.currentDirectoryPath
+        let root = URL(fileURLWithPath: rootPath).standardizedFileURL
+        
+        let target: URL
+        if spec.path.hasPrefix("/") {
+            target = URL(fileURLWithPath: spec.path).standardizedFileURL
+        } else {
+            target = root.appendingPathComponent(spec.path).standardizedFileURL
+        }
+        
+        guard target.path.hasPrefix(root.path) else {
+            throw WorkspaceRunnerError.scopeViolation("Path \(target.path) is outside workspace root \(root.path)")
+        }
+        return target
+    }
 
     private func buildArgs(_ spec: BuildSpec) -> [String] {
         var args = ["build"]
