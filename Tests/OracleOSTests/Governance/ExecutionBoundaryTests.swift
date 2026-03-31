@@ -104,4 +104,31 @@ final class ExecutionBoundaryTests: XCTestCase {
         }
         XCTAssertTrue(badFiles.isEmpty, "Found legacy planners or experimental memory paths: \(badFiles.joined(separator: ", "))")
     }
+
+    func testNoLegacyExecutionAPIsExist() throws {
+        let sourcesURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources")
+
+        guard let enumerator = FileManager.default.enumerator(at: sourcesURL, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) else {
+            XCTFail("Could not enumerate Sources directory")
+            return
+        }
+
+        var legacyUsages = [String]()
+
+        for case let fileURL as URL in enumerator where fileURL.pathExtension == "swift" {
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            let lines = content.components(separatedBy: .newlines)
+            for (i, line) in lines.enumerated() {
+                if (line.contains("performAction(") || line.contains("executeLegacy(")) && !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
+                    legacyUsages.append("\(fileURL.lastPathComponent):\(i+1)")
+                }
+            }
+        }
+        XCTAssertTrue(legacyUsages.isEmpty, "Found legacy execution APIs (performAction/executeLegacy) in: \n\(legacyUsages.joined(separator: "\n"))")
+    }
 }
