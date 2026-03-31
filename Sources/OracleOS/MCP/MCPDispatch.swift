@@ -41,7 +41,7 @@ public enum MCPDispatch {
     private static var runtime: RuntimeOrchestrator { _bootstrappedRuntime!.orchestrator }
     private static var runtimeContainer: RuntimeContainer { _bootstrappedRuntime!.container }
 
-    private struct ResultWrapper: @unchecked Sendable {
+    private struct ResultWrapper: Sendable {
         let payload: MCPToolResponse?
     }
 
