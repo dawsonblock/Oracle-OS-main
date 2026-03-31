@@ -730,7 +730,18 @@ public enum MCPDispatch {
     }
 
     static func errorContent(_ message: String) -> MCPToolResponse {
-        MCPToolResponse.error("{\"success\":false,\"error\":\"\(message)\"}")
+        let payload: [String: Any] = [
+            "success": false,
+            "error": message
+        ]
+
+        if let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
+           let jsonStr = String(data: data, encoding: .utf8) {
+            return MCPToolResponse.error(jsonStr)
+        }
+
+        // Fallback: do not include the original message to avoid invalid JSON.
+        return MCPToolResponse.error("{\"success\":false,\"error\":\"Serialization error\"}")
     }
 
     // MARK: - Parameter Helpers
