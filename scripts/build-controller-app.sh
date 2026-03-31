@@ -50,12 +50,13 @@ CONTENTS_DIR="$APP_BUNDLE/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 HELPERS_DIR="$CONTENTS_DIR/Helpers"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
-BUILD_PRODUCTS_DIR="$PROJECT_ROOT/.build/$CONFIGURATION"
+BUILD_PRODUCTS_DIR=$(swift build -c "$CONFIGURATION" --show-bin-path)
 
 mkdir -p "$OUTPUT_DIR"
 
 echo "Building Oracle Controller app bundle ($CONFIGURATION)"
-swift build -c "$CONFIGURATION" --product OracleController --product OracleControllerHost
+swift build -c "$CONFIGURATION" --product OracleController
+swift build -c "$CONFIGURATION" --product OracleControllerHost
 
 CONTROLLER_BINARY="$BUILD_PRODUCTS_DIR/OracleController"
 HOST_BINARY="$BUILD_PRODUCTS_DIR/OracleControllerHost"
