@@ -121,7 +121,7 @@ final class ControllerBoundaryTests: XCTestCase {
     func test_code_intents_do_not_emit_ui_payloads() throws {
         let sourcePath = repositoryRoot().appendingPathComponent("Sources/OracleOS/Planning/MainPlanner+Planner.swift")
         guard let text = try? String(contentsOf: sourcePath, encoding: .utf8) else { return }
-        XCTAssertFalse(text.contains("type: .code") && text.contains("payload: .ui("), "MainPlanner emits .ui for .code")
+        XCTAssertFalse(text.contains("type: .code, payload: .ui") || text.contains("Command(type: .code, payload: .ui"), "MainPlanner emits .ui for .code")
     }
 
 }

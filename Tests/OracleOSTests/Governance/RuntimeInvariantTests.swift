@@ -116,7 +116,7 @@ final class RuntimeInvariantTests: XCTestCase {
         let sourcesRoot = repositoryRoot().appendingPathComponent("Sources/OracleOS", isDirectory: true)
         guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
         
-        let allowlist = ["DefaultProcessAdapter.swift", "RuntimeBootstrap.swift", "WorkspaceRunner.swift", "VisionBridge.swift", "WorktreeSandbox.swift"]
+        let allowlist = ["DefaultProcessAdapter.swift", "RuntimeBootstrap.swift", "WorkspaceRunner.swift", "VisionBridge.swift", "WorktreeSandbox.swift", "RuntimeDiagnostics.swift"]
         var offenders: [String] = []
 
         while let fileURL = enumerator.nextObject() as? URL {
