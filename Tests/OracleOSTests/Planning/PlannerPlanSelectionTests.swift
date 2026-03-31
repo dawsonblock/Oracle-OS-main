@@ -75,7 +75,7 @@ struct PlannerPlanSelectionTests {
 
     @Test("Stable graph plan beats candidate graph plan")
     func stableGraphBeatsCandidateGraph() {
-        let planner = MainPlanner(reasoningThreshold: 0)
+        let planner = MainPlanner(workflowIndex: WorkflowIndex(), reasoningThreshold: 0)
         let goal = Goal(
             description: "open settings in Safari",
             targetApp: "Safari",
@@ -101,7 +101,7 @@ struct PlannerPlanSelectionTests {
 
     @Test("Low-confidence code tasks escalate to experiments")
     func lowConfidenceCodeTasksEscalateToExperiments() {
-        let planner = MainPlanner(reasoningThreshold: 0.25)
+        let planner = MainPlanner(workflowIndex: WorkflowIndex(), reasoningThreshold: 0.25)
         let goal = Goal(
             description: "fix the failing unit test in Calculator.swift",
             workspaceRoot: "/tmp/workspace",
@@ -198,7 +198,7 @@ struct PlannerPlanSelectionTests {
             worldState: worldState,
             graphStore: GraphStore(databaseURL: makeTempGraphURL()),
             workflowIndex: WorkflowIndex(),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(!scored.isEmpty)

@@ -3,9 +3,9 @@ import Foundation
 /// Replays a runtime cycle from event history into a readable timeline.
 /// Traces derive from event history and execution outcomes — not scattered manual logs.
 public struct EventReplay {
-    private let eventStore: EventStore
+    private let eventStore: any EventStore
 
-    public init(eventStore: EventStore) {
+    public init(eventStore: any EventStore) {
         self.eventStore = eventStore
     }
 

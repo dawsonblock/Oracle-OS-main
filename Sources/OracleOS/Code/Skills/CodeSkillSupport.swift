@@ -33,7 +33,7 @@ enum CodeSkillSupport {
         if let repositorySnapshot = state.repositorySnapshot {
             return repositorySnapshot
         }
-        return RepositoryIndexer().indexIfNeeded(workspaceRoot: workspaceRoot)
+        throw CodeSkillResolutionError.noRepositorySnapshot
     }
 
     static func preferredPath(
@@ -71,7 +71,7 @@ memoryStore: UnifiedMemoryStore,
                best.path != next.path
             {
                 throw CodeSkillResolutionError.ambiguousEditTarget(
-                    rankedMatches.prefix(3).map(\.path).joined(separator: ", ")
+                    rankedMatches.prefix(3).map { $0.path }.joined(separator: ", ")
                 )
             }
             return best.path
@@ -79,7 +79,7 @@ memoryStore: UnifiedMemoryStore,
 
         let fallbackMatches = snapshot.files
                 .filter { !$0.isDirectory && ($0.path.hasSuffix(".swift") || $0.path.hasSuffix(".ts") || $0.path.hasSuffix(".js")) }
-                .map(\.path)
+                .map { $0.path }
         guard let first = fallbackMatches.first else {
             throw CodeSkillResolutionError.noRelevantFiles(taskContext.goal.description)
         }

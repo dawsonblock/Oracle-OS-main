@@ -4,7 +4,7 @@ import Foundation
 public final class BrowserPageStateBuilder {
     private let controller: BrowserController
 
-    public init(controller: BrowserController = BrowserController()) {
+    public init(controller: BrowserController) {
         self.controller = controller
     }
 

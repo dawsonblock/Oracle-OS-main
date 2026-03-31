@@ -197,7 +197,7 @@ struct GraphAwareLoopTests {
             _ = try skill.resolve(
                 query: ElementQuery(text: "Send", clickable: true),
                 state: state,
-                memoryStore: UnifiedMemoryStore()
+                memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
             )
             Issue.record("Expected ambiguous target error")
         } catch let error as SkillResolutionError {
@@ -379,7 +379,7 @@ struct GraphAwareLoopTests {
         let decision = planner.nextStep(
             worldState: WorldState(observation: inboxObservation),
             graphStore: store,
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(decision?.source == .workflow)
@@ -450,7 +450,7 @@ struct GraphAwareLoopTests {
         let decision = planner.nextStep(
             worldState: WorldState(observation: inboxObservation),
             graphStore: store,
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(decision?.source == .candidateGraph)
@@ -483,7 +483,7 @@ struct GraphAwareLoopTests {
                 )
             ),
             graphStore: GraphStore(databaseURL: makeTempGraphURL()),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(decision?.source == .exploration)
@@ -548,7 +548,7 @@ struct GraphAwareLoopTests {
                 preferredAgentKind: .os
             ),
             graphStore: store,
-            memoryStore: UnifiedMemoryStore(),
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()),
             worldState: WorldState(
                 observationHash: "start-hash",
                 planningState: start,

@@ -73,6 +73,7 @@ struct StrategyScopedWorkflowTests {
             taskContext: taskContext,
             worldState: worldState,
             workflowIndex: WorkflowIndex(),
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()),
             selectedStrategy: repoStrategy
         )
 

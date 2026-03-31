@@ -33,10 +33,17 @@ extension SelectedStrategy {
 }
 
 extension MainPlanner {
+    convenience init() {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(processAdapter: DefaultProcessAdapter()),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer()
+        )
+    }
+
     func nextStep(
         worldState: WorldState,
         graphStore: GraphStore,
-        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore()
+        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore(appMemory: StrategyMemory())
     ) -> PlannerDecision? {
         nextStep(
             worldState: worldState,
@@ -308,7 +315,7 @@ extension MemoryDecisionBias {
 
 extension MemoryDecisionBiasCalculator {
     convenience init() {
-        self.init(memoryStore: UnifiedMemoryStore())
+        self.init(memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()))
     }
 
     func bias(
@@ -773,3 +780,98 @@ extension GraphStore {
             .first { $0.actionContractID == contract.id }
     }
 }
+
+
+extension RepositoryIndexer {
+    convenience init() {
+        self.init(processAdapter: DefaultProcessAdapter())
+    }
+}
+
+extension WorkspaceRunner {
+    convenience init() {
+        self.init(processAdapter: DefaultProcessAdapter())
+    }
+}
+
+extension CodePlanner {
+    convenience init() {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer()
+        )
+    }
+    
+    convenience init(workflowIndex: WorkflowIndex) {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer(),
+            workflowIndex: workflowIndex
+        )
+    }
+}
+
+extension ExperimentManager {
+    convenience init() {
+        self.init(
+            runner: ParallelRunner(workspaceRunner: WorkspaceRunner(), repositoryIndexer: RepositoryIndexer()),
+            ranker: PatchRanker(comparator: ResultComparator()),
+            repositoryIndexer: RepositoryIndexer()
+        )
+    }
+}
+
+
+extension PatchPipeline {
+    init(sandboxEvaluator: @escaping SandboxEvaluatorFn) {
+        self.init(
+            targetSelector: PatchTargetSelector(),
+            strategyLibrary: PatchStrategyLibrary(),
+            impactPredictor: PatchImpactPredictor(impactAnalyzer: RepositoryChangeImpactAnalyzer()),
+            maximumStrategiesPerTarget: 3,
+            sandboxEvaluator: sandboxEvaluator
+        )
+    }
+}
+
+extension WorkflowRetriever {
+    func retrieve(
+        goal: Goal,
+        taskContext: TaskContext,
+        worldState: WorldState,
+        workflowIndex: WorkflowIndex
+    ) -> WorkflowMatch? {
+        return self.retrieve(
+            goal: goal, 
+            taskContext: taskContext, 
+            worldState: worldState, 
+            workflowIndex: workflowIndex, 
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory()), 
+            selectedStrategy: .testDefault
+        )
+    }
+}
+
+
+extension MainPlanner {
+    convenience init(workflowIndex: WorkflowIndex, reasoningThreshold: Double) {
+        self.init(
+            repositoryIndexer: RepositoryIndexer(processAdapter: DefaultProcessAdapter()),
+            impactAnalyzer: RepositoryChangeImpactAnalyzer(),
+            workflowIndex: workflowIndex,
+            reasoningThreshold: reasoningThreshold
+        )
+    }
+}
+
+
+extension PatchExperimentRunner {
+    convenience init() {
+        self.init(
+            experimentManager: ExperimentManager(),
+            ranker: PatchRanker(comparator: ResultComparator())
+        )
+    }
+}
+
+

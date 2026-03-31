@@ -37,7 +37,7 @@ struct WorkflowMemoryInfluenceTests {
                 observation: Observation(app: "Safari", windowTitle: "Safari", url: nil, focusedElementID: nil, elements: [])
             ),
             workflowIndex: workflowIndex,
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         // Should find a match based on goal pattern

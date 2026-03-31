@@ -754,8 +754,8 @@ struct SetupWizard {
 
     private func runShell(_ command: String) async -> ShellResult {
         // removed local executor
-        let spec = EnvSetupSpec(script: "/bin/zsh", arguments: ["-c", command])
-        let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
+        let spec = BuildSpec(workspaceRoot: "/", extraArgs: ["-c", command])
+        let cmd = Command(type: .system, payload: .build(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {
             let outcome = try await executor.execute(cmd)
             if outcome.status == .success {
@@ -773,8 +773,8 @@ struct SetupWizard {
     /// Returns the exit code.
     private func runShellLive(_ executable: String, args: [String]) async -> Int32 {
         // removed local executor
-        let spec = EnvSetupSpec(script: executable, arguments: args)
-        let cmd = Command(type: .system, payload: .envSetup(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
+        let spec = BuildSpec(workspaceRoot: "/", extraArgs: args)
+        let cmd = Command(type: .system, payload: .build(spec), metadata: CommandMetadata(intentID: UUID(), source: "setup"))
         do {
             let outcome = try await executor.execute(cmd)
             if outcome.status == .success {

@@ -51,13 +51,16 @@ public struct PatchExperimentPlan: Sendable {
 public final class PatchExperimentRunner: @unchecked Sendable {
     private let experimentManager: ExperimentManager
     private let strategyLibrary: PatchStrategyLibrary
+    private let ranker: PatchRanker
 
     public init(
-        experimentManager: ExperimentManager = ExperimentManager(),
-        strategyLibrary: PatchStrategyLibrary = .shared
+        experimentManager: ExperimentManager,
+        strategyLibrary: PatchStrategyLibrary = .shared,
+        ranker: PatchRanker
     ) {
         self.experimentManager = experimentManager
         self.strategyLibrary = strategyLibrary
+        self.ranker = ranker
     }
 
     public func plan(
@@ -93,7 +96,7 @@ public final class PatchExperimentRunner: @unchecked Sendable {
         faultLocationConfidence: Double,
 memoryStore: UnifiedMemoryStore?
     ) -> [ExperimentResult] {
-        let ranker = PatchRanker()
+        let ranker = self.ranker
         let ranked = ranker.rank(results)
 
         return ranked.enumerated().map { index, result in

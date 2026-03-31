@@ -18,14 +18,14 @@ public actor VerifiedExecutor {
     private let commandRouter: CommandRouter
     private let preconditionsValidator: PreconditionsValidator
     private let postconditionsValidator: PostconditionsValidator
-    private let stateProvider: WorldStateProviding?
+    private let stateProvider: (any WorldStateProviding)?
 
     public init(
         policyEngine: PolicyEngine,
         commandRouter: CommandRouter,
         preconditionsValidator: PreconditionsValidator,
         postconditionsValidator: PostconditionsValidator,
-        stateProvider: WorldStateProviding? = nil
+        stateProvider: (any WorldStateProviding)? = nil
     ) {
         self.policyEngine = policyEngine
         self.commandRouter = commandRouter
@@ -51,7 +51,7 @@ public actor VerifiedExecutor {
     public func execute(_ command: Command) async throws -> ExecutionOutcome {
         // GUARD: Verify command is typed (no shell escape hatch)
         switch command.payload {
-        case .build, .test, .git, .file, .ui, .code, .diagnostic, .envSetup, .hostService, .inference:
+        case .build, .test, .git, .file, .ui, .code:
             // Typed command OK — proceed
             break
         }

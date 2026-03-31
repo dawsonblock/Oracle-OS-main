@@ -157,8 +157,7 @@ public struct CodeRouter: @unchecked Sendable {
             )
 
         
-        case .diagnostic, .envSetup, .hostService, .inference:
-            return CommandRouter.failureOutcome(command: command, reason: "Invalid code payload", policyDecision: policyDecision, router: "code")
+        
 
 case .ui:
             return CommandRouter.failureOutcome(

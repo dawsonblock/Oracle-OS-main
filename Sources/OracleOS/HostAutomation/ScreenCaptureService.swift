@@ -5,7 +5,7 @@ import Foundation
 public final class ScreenCaptureService: CaptureServicing {
     private let processService: ProcessService
 
-    public init(processService: ProcessService = ProcessService()) {
+    public init(processService: ProcessService) {
         self.processService = processService
     }
 

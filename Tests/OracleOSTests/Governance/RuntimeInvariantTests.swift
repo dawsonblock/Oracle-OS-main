@@ -89,4 +89,74 @@ final class RuntimeInvariantTests: XCTestCase {
             )
         }
     }
+
+    func test_runtime_sources_do_not_shell_out() throws {
+        let sourcesRoot = repositoryRoot().appendingPathComponent("Sources/OracleOS", isDirectory: true)
+        guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
+
+        let forbidden = ["/bin/zsh", "/bin/bash", "\"-c\"", "[\"-c\",", "Process()"]
+        let allowlist = ["DefaultProcessAdapter.swift", "DefaultProcessAdapter+Daemon.swift", "WorkspaceRunner.swift", "RuntimeBootstrap.swift", "ProcessAdapter.swift", "HostInspectionAdapter.swift", "BrowserAdapter.swift"]
+        var offenders: [String] = []
+
+        while let fileURL = enumerator.nextObject() as? URL {
+            guard fileURL.pathExtension == "swift" else { continue }
+            let fileName = fileURL.lastPathComponent
+            if allowlist.contains(fileName) { continue }
+            if fileURL.path.contains("/Experimental/") || fileURL.path.contains("/Intelligence/") { continue }
+
+            guard let text = try? String(contentsOf: fileURL, encoding: .utf8) else { continue }
+            for pattern in forbidden {
+                if text.contains(pattern) { offenders.append(fileName) }
+            }
+        }
+        XCTAssertTrue(offenders.isEmpty, "Forbidden shell references: \(offenders)")
+    }
+
+    func test_default_process_adapter_not_constructed_outside_execution_wiring() throws {
+        let sourcesRoot = repositoryRoot().appendingPathComponent("Sources/OracleOS", isDirectory: true)
+        guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
+        
+        let allowlist = ["DefaultProcessAdapter.swift", "RuntimeBootstrap.swift", "WorkspaceRunner.swift", "VisionBridge.swift", "WorktreeSandbox.swift", "RuntimeDiagnostics.swift"]
+        var offenders: [String] = []
+
+        while let fileURL = enumerator.nextObject() as? URL {
+            guard fileURL.pathExtension == "swift" else { continue }
+            let fileName = fileURL.lastPathComponent
+            if allowlist.contains(fileName) { continue }
+            if fileURL.path.contains("/Experimental/") || fileURL.path.contains("/Intelligence/") { continue }
+            
+            guard let text = try? String(contentsOf: fileURL, encoding: .utf8) else { continue }
+            if text.contains("DefaultProcessAdapter(") { offenders.append(fileName) }
+        }
+        XCTAssertTrue(offenders.isEmpty, "DefaultProcessAdapter constructed outside wiring: \(offenders)")
+    }
+
+    func test_planner_calls_only_live_in_runtime_orchestrator() throws {
+        let sourcesRoot = repositoryRoot().appendingPathComponent("Sources/OracleOS", isDirectory: true)
+        guard let enumerator = FileManager.default.enumerator(at: sourcesRoot, includingPropertiesForKeys: nil) else { return }
+
+        let allowlist = ["RuntimeOrchestrator.swift", "SystemRouter.swift", "AgentLoop+Run.swift"]
+        var offenders: [String] = []
+
+        while let fileURL = enumerator.nextObject() as? URL {
+            guard fileURL.pathExtension == "swift" else { continue }
+            let fileName = fileURL.lastPathComponent
+            if allowlist.contains(fileName) { continue }
+
+            guard let text = try? String(contentsOf: fileURL, encoding: .utf8) else { continue }
+            if text.contains("planner.plan(") || text.contains("planner.nextStep(") { offenders.append(fileName) }
+        }
+        XCTAssertTrue(offenders.isEmpty, "planner.plan called outside Orchestrator: \(offenders)")
+    }
+
+    func test_supported_command_payload_cases_only() throws {
+        let sourcePath = repositoryRoot().appendingPathComponent("Sources/OracleOS/Core/Command/Command.swift")
+        guard let text = try? String(contentsOf: sourcePath, encoding: .utf8) else { return }
+
+        let forbidden = ["diagnostic(", "envSetup(", "hostService(", "inference("]
+        for pattern in forbidden {
+            XCTAssertFalse(text.contains(pattern), "Command.swift has: \(pattern)")
+        }
+    }
+
 }

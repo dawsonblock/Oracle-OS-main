@@ -120,10 +120,12 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         
         // Concurrent pipe draining using dispatch queues
         // IMPORTANT: Pipes must be drained WHILE process runs to prevent buffer deadlock
-        var stdoutData = Data()
-        var stdoutTruncated = false
-        var stderrData = Data()
-        var stderrTruncated = false
+        final class DrainResult: @unchecked Sendable {
+            var data: Data = Data()
+            var truncated: Bool = false
+        }
+        let stdoutRes = DrainResult()
+        let stderrRes = DrainResult()
         let maxBytes = Self.defaultMaxOutputBytes
         
         let stdoutQueue = DispatchQueue(label: "oracle.process.stdout")
@@ -135,16 +137,16 @@ public final class DefaultProcessAdapter: ProcessAdapter {
         group.enter()
         stdoutQueue.async {
             let res = self.drainPipeSync(stdout, maxBytes: maxBytes)
-            stdoutData = res.data
-            stdoutTruncated = res.truncated
+            stdoutRes.data = res.data
+            stdoutRes.truncated = res.truncated
             group.leave()
         }
         
         group.enter()
         stderrQueue.async {
             let res = self.drainPipeSync(stderr, maxBytes: maxBytes)
-            stderrData = res.data
-            stderrTruncated = res.truncated
+            stderrRes.data = res.data
+            stderrRes.truncated = res.truncated
             group.leave()
         }
         
@@ -157,13 +159,13 @@ public final class DefaultProcessAdapter: ProcessAdapter {
 
         return ProcessResult(
             exitCode: process.terminationStatus,
-            stdout: String(data: stdoutData, encoding: .utf8) ?? "",
-            stderr: String(data: stderrData, encoding: .utf8) ?? "",
+            stdout: String(data: stdoutRes.data, encoding: .utf8) ?? "",
+            stderr: String(data: stderrRes.data, encoding: .utf8) ?? "",
             durationMs: durationMs,
             timedOut: false,
             terminationReason: .exit,
-            stdoutTruncated: stdoutTruncated,
-            stderrTruncated: stderrTruncated
+            stdoutTruncated: stdoutRes.truncated,
+            stderrTruncated: stderrRes.truncated
         )
     }
     

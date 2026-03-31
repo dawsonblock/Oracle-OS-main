@@ -16,7 +16,7 @@ extension AgentLoop {
         }
 
         do {
-            try await orchestrator.submitIntent(intent)
+            _ = _ = try await orchestrator.submitIntent(intent)
         } catch {
             NSLog("AgentLoop: failed to submit intent: \(error)")
         }

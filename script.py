@@ -1,10 +1,22 @@
-import re
-with open('Sources/oracle/SetupWizard.swift', 'r') as f: text = f.read()
-text = text.replace('func run() {', 'func run() async {')
-text = text.replace('configureMCP()', 'await configureMCP()')
-text = text.replace('let hasVision = setupVision()', 'let hasVision = await setupVision()')
-text = text.replace('let verified = selfTest(', 'let verified = await selfTest(')
-text = text.replace('private func configureMCP() {', 'private func configureMCP() async {')
-text = text.replace('private func setupVision() -> Bool {', 'private func setupVision() async -> Bool {')
-text = text.replace('private func checkPythonWithMLX() -> Bool {', 'private func checkPythonWithMLX() async -> Bool {')
-text = text.replace('private func setupPythonVenv() -> Bool {', 'private func setupPythonVenv() async -> Bool {')
+import os
+path = "Sources/OracleOS/Code/Skills/CodeSkillSupport.swift"
+with open(path, "r") as f:
+    code = f.read()
+
+code = code.replace("repositorySnapshot(state: WorldState, workspaceRoot: URL, repositoryIndexer: RepositoryIndexer)", "repositorySnapshot(state: WorldState, workspaceRoot: URL)")
+code = code.replace("return repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)", "throw CodeSkillResolutionError.noRepositorySnapshot")
+code = code.replace("let snapshot = try repositorySnapshot(state: state, workspaceRoot: workspaceRoot, repositoryIndexer: repositoryIndexer)", "let snapshot = try repositorySnapshot(state: state, workspaceRoot: workspaceRoot)")
+
+with open(path, "w") as f:
+    f.write(code)
+
+for filename in ["WriteFileSkill.swift", "EditFileSkill.swift", "GeneratePatchSkill.swift", "OpenFileSkill.swift"]:
+    p = f"Sources/OracleOS/Code/Skills/{filename}"
+    if not os.path.exists(p): continue
+    with open(p, "r") as f:
+        code = f.read()
+    code = code.replace(", repositoryIndexer: repositoryIndexer", "")
+    code = code.replace(", repositoryIndexer", "")
+    with open(p, "w") as f:
+        f.write(code)
+

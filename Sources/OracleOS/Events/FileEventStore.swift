@@ -24,17 +24,17 @@ public actor FileEventStore: EventStore {
     }
     
     public func append(contentsOf newEnvelopes: [EventEnvelope]) throws {
+        var payload = Data()
+        for env in newEnvelopes {
+            payload.append(try encoder.encode(env))
+            payload.append(contentsOf: [0x0A])
+        }
+        
         let handle = try FileHandle(forWritingTo: logURL)
         defer { try? handle.close() }
         try handle.seekToEnd()
-        
-        for env in newEnvelopes {
-            let data = try encoder.encode(env)
-            handle.write(data)
-            handle.write(Data([0x0A]))
-        }
+        handle.write(payload)
         try handle.synchronize()
-        fsync(handle.fileDescriptor)
         fsync(handle.fileDescriptor)
     }
 

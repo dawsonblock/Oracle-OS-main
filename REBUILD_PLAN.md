@@ -1,6 +1,6 @@
 # Single-Hard-Path Runtime: Rebuild Plan
 
-## Completed (Phase 1 - 25% Done)
+## Completed (Phase 1 u0026 2 - 100% Done)
 
 ✅ Created 4 new Spec types:
   - BuildSpec.swift
@@ -22,7 +22,7 @@
 
 ---
 
-## Remaining Phase 1 (75% Done) — Close Execution Boundary
+## Remaining Phases (3-7)
 
 ### 1. Update Routers to Handle Typed Commands
 

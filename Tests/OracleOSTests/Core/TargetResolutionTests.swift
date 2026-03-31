@@ -20,7 +20,7 @@ struct TargetResolutionTests {
             _ = try skill.resolve(
                 query: ElementQuery(text: "Rename", clickable: true, visibleOnly: true, app: "Finder"),
                 state: WorldState(observation: observation),
-                memoryStore: UnifiedMemoryStore()
+                memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
             )
             Issue.record("Expected no candidate failure")
         } catch let error as SkillResolutionError {
@@ -61,7 +61,7 @@ struct TargetResolutionTests {
         let resolution = try skill.resolve(
             query: ElementQuery(text: "Subject", editable: true, visibleOnly: true, app: "Google Chrome"),
             state: WorldState(observation: observation),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(resolution.selectedCandidate?.element.id == "subject")
@@ -86,7 +86,7 @@ struct TargetResolutionTests {
             _ = try skill.resolve(
                 query: ElementQuery(text: "Email", editable: true, visibleOnly: true, app: "Google Chrome"),
                 state: WorldState(observation: observation),
-                memoryStore: UnifiedMemoryStore()
+                memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
             )
             Issue.record("Expected ambiguous candidate failure")
         } catch let error as SkillResolutionError {
@@ -123,7 +123,7 @@ struct TargetResolutionTests {
         let resolution = try skill.resolve(
             query: ElementQuery(text: "Quarterly Report.pdf", clickable: true, visibleOnly: true, app: "Finder"),
             state: WorldState(observation: observation),
-            memoryStore: UnifiedMemoryStore()
+            memoryStore: UnifiedMemoryStore(appMemory: StrategyMemory())
         )
 
         #expect(resolution.selectedCandidate?.element.id == "report")

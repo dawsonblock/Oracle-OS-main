@@ -20,7 +20,7 @@ public final class PlanGenerator: @unchecked Sendable {
         planEvaluator: PlanEvaluator,
         operatorRegistry: OperatorRegistry = .shared,
         osPlanner: OSPlanner? = nil,
-        codePlanner: CodePlanner? = nil,
+        codePlanner: CodePlanner,
     ) {
         self.reasoningEngine = reasoningEngine
         self.planEvaluator = planEvaluator
@@ -37,12 +37,7 @@ public final class PlanGenerator: @unchecked Sendable {
             workflowRetriever: sharedWorkflowRetriever,
             workflowExecutor: sharedWorkflowExecutor
         )
-        self.codePlanner = codePlanner ?? CodePlanner(
-            graphPlanner: sharedGraphPlanner,
-            workflowIndex: sharedWorkflowIndex,
-            workflowRetriever: sharedWorkflowRetriever,
-            workflowExecutor: sharedWorkflowExecutor
-        )
+        self.codePlanner = codePlanner
     }
 
 

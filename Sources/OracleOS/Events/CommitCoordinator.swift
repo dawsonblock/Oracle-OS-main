@@ -3,7 +3,7 @@ import Foundation
 /// Orchestrates the commit flow: appends events → runs reducers → emits new snapshot.
 /// INVARIANT: No state write may bypass CommitCoordinator.
 public actor CommitCoordinator {
-    private let eventStore: EventStore
+    private let eventStore: any EventStore
     private let reducers: [any EventReducer]
     private let wal: CommitWAL?
     private(set) var currentState: WorldStateModel
@@ -11,13 +11,13 @@ public actor CommitCoordinator {
     /// Recovery state to ensure idempotent startup
     private enum RecoveryState {
         case notStarted
-        case running(Task<RecoveryReport, Error>)
+        case running(Task<RecoveryReport, any Error>)
         case completed(RecoveryReport)
     }
     private var recoveryState: RecoveryState = .notStarted
 
     public init(
-        eventStore: EventStore,
+        eventStore: any EventStore,
         reducers: [any EventReducer],
         wal: CommitWAL? = nil,
         initialState: WorldStateModel = WorldStateModel()
