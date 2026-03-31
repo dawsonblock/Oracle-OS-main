@@ -4,7 +4,6 @@
 // Formats responses as MCP content arrays.
 
 import Foundation
-import Dispatch
 
 /// Routes MCP tool calls to the appropriate module function.
 @MainActor
@@ -80,43 +79,33 @@ public enum MCPDispatch {
 
         let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
 
-        let responseWrapper: ResultWrapper = await withCheckedContinuation { continuation in
-            let queue = DispatchQueue(label: "oracle.mcp.tool.\(toolName)")
-            let lock = NSLock()
-            var resumed = false
-
-            let work = DispatchWorkItem { [args] in
-                let result: [String: Any]
-                if toolName == "oracle_screenshot" {
-                    result = handleScreenshot(args)
-                } else {
-                    let toolResult = dispatch(tool: toolName, args: args)
-                    result = formatResult(toolResult, toolName: toolName)
+        let responseWrapper: ResultWrapper
+        do {
+            responseWrapper = try await withThrowingTaskGroup(of: ResultWrapper.self) { group in
+                group.addTask {
+                    let result: [String: Any]
+                    if toolName == "oracle_screenshot" {
+                        result = handleScreenshot(args)
+                    } else {
+                        let toolResult = dispatch(tool: toolName, args: args)
+                        result = formatResult(toolResult, toolName: toolName)
+                    }
+                    return ResultWrapper(payload: result)
                 }
                 
-                lock.lock()
-                if !resumed {
-                    resumed = true
-                    lock.unlock()
-                    continuation.resume(returning: ResultWrapper(payload: result))
-                } else {
-                    lock.unlock()
+                group.addTask {
+                    try await Task.sleep(nanoseconds: UInt64(actualTimeout * 1_000_000_000))
+                    return ResultWrapper(payload: nil)
                 }
-            }
-
-            queue.async(execute: work)
-
-            queue.asyncAfter(deadline: .now() + actualTimeout) {
-                lock.lock()
-                if !resumed {
-                    resumed = true
-                    work.cancel()
-                    lock.unlock()
-                    continuation.resume(returning: ResultWrapper(payload: nil))
-                } else {
-                    lock.unlock()
+                
+                if let first = try await group.next() {
+                    group.cancelAll()
+                    return first
                 }
+                return ResultWrapper(payload: nil)
             }
+        } catch {
+            responseWrapper = ResultWrapper(payload: nil)
         }
 
         let elapsed = Double(DispatchTime.now().uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000
