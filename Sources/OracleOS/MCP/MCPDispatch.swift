@@ -62,7 +62,7 @@ public enum MCPDispatch {
 
         let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
 
-        struct RequestWrapper: @unchecked Sendable {
+        struct RequestWrapper: Sendable {
             let request: MCPToolRequest
         }
         let argsWrapper = RequestWrapper(request: request)
