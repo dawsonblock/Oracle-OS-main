@@ -85,10 +85,10 @@ public enum MCPDispatch {
                 group.addTask {
                     let result: [String: Any]
                     if toolName == "oracle_screenshot" {
-                        result = handleScreenshot(args)
+                        result = await handleScreenshot(args)
                     } else {
-                        let toolResult = dispatch(tool: toolName, args: args)
-                        result = formatResult(toolResult, toolName: toolName)
+                        let toolResult = await dispatch(tool: toolName, args: args)
+                        result = await formatResult(toolResult, toolName: toolName)
                     }
                     return ResultWrapper(payload: result)
                 }
@@ -132,7 +132,7 @@ public enum MCPDispatch {
     }
 
     /// Screenshot handler returns MCP image content type for inline display.
-    private static func handleScreenshot(_ args: [String: Any]) -> [String: Any] {
+    nonisolated private static func handleScreenshot(_ args: [String: Any]) -> [String: Any] {
         let result = AXScanner.screenshot(
             appName: str(args, "app"),
             fullResolution: bool(args, "full_resolution") ?? false
@@ -171,7 +171,7 @@ public enum MCPDispatch {
 
     // MARK: - Dispatch
 
-    private static func dispatch(tool: String, args: [String: Any]) -> ToolResult {
+    nonisolated private static func dispatch(tool: String, args: [String: Any]) -> ToolResult {
         switch tool {
 
         // Perception
@@ -773,7 +773,7 @@ public enum MCPDispatch {
     // MARK: - Response Formatting
 
     /// Format a ToolResult as MCP content array.
-    private static func formatResult(_ result: ToolResult, toolName: String) -> [String: Any] {
+    nonisolated nonisolated private static func formatResult(_ result: ToolResult, toolName: String) -> [String: Any] {
         let dict = result.toDict()
 
         // Serialize to JSON string for MCP text content

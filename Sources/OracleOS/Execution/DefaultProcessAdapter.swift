@@ -159,13 +159,13 @@ public final class DefaultProcessAdapter: ProcessAdapter {
 
         return ProcessResult(
             exitCode: process.terminationStatus,
-            stdout: String(data: stdoutData, encoding: .utf8) ?? "",
-            stderr: String(data: stderrData, encoding: .utf8) ?? "",
+            stdout: String(data: stdoutRes.data, encoding: .utf8) ?? "",
+            stderr: String(data: stderrRes.data, encoding: .utf8) ?? "",
             durationMs: durationMs,
             timedOut: false,
             terminationReason: .exit,
-            stdoutTruncated: stdoutTruncated,
-            stderrTruncated: stderrTruncated
+            stdoutTruncated: stdoutRes.truncated,
+            stderrTruncated: stderrRes.truncated
         )
     }
     
