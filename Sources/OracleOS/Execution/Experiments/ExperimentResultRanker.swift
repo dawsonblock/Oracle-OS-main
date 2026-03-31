@@ -3,7 +3,7 @@ import Foundation
 public struct ExperimentResultRanker: Sendable {
     private let patchRanker: PatchRanker
 
-    public init(patchRanker: PatchRanker = PatchRanker()) {
+    public init(patchRanker: PatchRanker) {
         self.patchRanker = patchRanker
     }
 

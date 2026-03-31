@@ -86,7 +86,7 @@ public final class MainPlanner: @unchecked Sendable {
     public func nextStep(
         worldState: WorldState,
         graphStore: GraphStore,
-        memoryStore: UnifiedMemoryStore = UnifiedMemoryStore(),
+        memoryStore: UnifiedMemoryStore,
         selectedStrategy: SelectedStrategy
     ) -> PlannerDecision? {
         guard let currentGoal else { return nil }

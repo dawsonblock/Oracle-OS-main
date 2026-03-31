@@ -3,7 +3,7 @@ import Foundation
 public struct MemoryDrafter: Sendable {
     private let llmClient: LLMClient
     
-    public init(llmClient: LLMClient = LLMClient()) {
+    public init(llmClient: LLMClient) {
         self.llmClient = llmClient
     }
     

@@ -107,7 +107,7 @@ public struct PatchPipeline: Sendable {
     public init(
         targetSelector: PatchTargetSelector = PatchTargetSelector(),
         strategyLibrary: PatchStrategyLibrary = PatchStrategyLibrary(),
-        impactPredictor: PatchImpactPredictor = PatchImpactPredictor(),
+        impactPredictor: PatchImpactPredictor,
         maximumStrategiesPerTarget: Int = 3,
         sandboxEvaluator: @escaping SandboxEvaluatorFn = PatchPipeline.defaultEvaluator
     ) {

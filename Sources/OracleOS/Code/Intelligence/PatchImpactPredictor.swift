@@ -25,7 +25,7 @@ public struct PatchImpactPrediction: Sendable, Equatable {
 public struct PatchImpactPredictor: Sendable {
     private let impactAnalyzer: RepositoryChangeImpactAnalyzer
 
-    public init(impactAnalyzer: RepositoryChangeImpactAnalyzer = RepositoryChangeImpactAnalyzer()) {
+    public init(impactAnalyzer: RepositoryChangeImpactAnalyzer) {
         self.impactAnalyzer = impactAnalyzer
     }
 

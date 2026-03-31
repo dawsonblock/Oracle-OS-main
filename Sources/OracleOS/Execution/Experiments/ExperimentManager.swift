@@ -3,16 +3,19 @@ import Foundation
 public final class ExperimentManager: @unchecked Sendable {
     private let runner: ParallelRunner
     private let ranker: PatchRanker
+    private let repositoryIndexer: RepositoryIndexer
     private let promptEngine: PromptEngine
     private let fileManager = FileManager.default
 
     public init(
-        runner: ParallelRunner = ParallelRunner(),
-        ranker: PatchRanker = PatchRanker(),
+        runner: ParallelRunner,
+        ranker: PatchRanker,
+        repositoryIndexer: RepositoryIndexer,
         promptEngine: PromptEngine = PromptEngine()
     ) {
         self.runner = runner
         self.ranker = ranker
+        self.repositoryIndexer = repositoryIndexer
         self.promptEngine = promptEngine
     }
 
@@ -37,7 +40,7 @@ public final class ExperimentManager: @unchecked Sendable {
             for: workspaceRootURL
         )
         try fileManager.createDirectory(at: experimentsRoot, withIntermediateDirectories: true)
-        let snapshot = RepositoryIndexer().indexIfNeeded(workspaceRoot: workspaceRootURL)
+        let snapshot = self.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRootURL)
         let promptDiagnostics = bounded.promptDiagnostics
             ?? promptEngine.experimentGeneration(
                 spec: bounded,

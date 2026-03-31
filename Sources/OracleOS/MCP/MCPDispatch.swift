@@ -4,6 +4,7 @@
 // Formats responses as MCP content arrays.
 
 import Foundation
+import Dispatch
 
 /// Routes MCP tool calls to the appropriate module function.
 @MainActor

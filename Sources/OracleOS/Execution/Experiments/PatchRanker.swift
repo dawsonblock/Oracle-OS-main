@@ -29,7 +29,7 @@ public struct PatchRankingSignals: Sendable {
 public struct PatchRanker: Sendable {
     private let comparator: ResultComparator
 
-    public init(comparator: ResultComparator = ResultComparator()) {
+    public init(comparator: ResultComparator) {
         self.comparator = comparator
     }
 

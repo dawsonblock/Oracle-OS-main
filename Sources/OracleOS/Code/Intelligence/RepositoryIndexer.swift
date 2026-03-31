@@ -15,7 +15,7 @@ public final class RepositoryIndexer: @unchecked Sendable {
         let kind: SymbolEdgeKind
     }
 
-    public init(processAdapter: ProcessAdapter = DefaultProcessAdapter()) {
+    public init(processAdapter: ProcessAdapter) {
         self.processAdapter = processAdapter
     }
 

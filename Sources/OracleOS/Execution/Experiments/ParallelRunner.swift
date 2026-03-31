@@ -6,8 +6,8 @@ public final class ParallelRunner: @unchecked Sendable {
     private let architectureEngine: ArchitectureEngine
 
     public init(
-        workspaceRunner: WorkspaceRunner = WorkspaceRunner(),
-        repositoryIndexer: RepositoryIndexer = RepositoryIndexer(),
+        workspaceRunner: WorkspaceRunner,
+        repositoryIndexer: RepositoryIndexer,
         architectureEngine: ArchitectureEngine = ArchitectureEngine()
     ) {
         self.workspaceRunner = workspaceRunner

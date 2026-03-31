@@ -13,7 +13,7 @@ public final class UnifiedMemoryStore: @unchecked Sendable {
     private let executionStore: ExecutionMemoryStore
     private let patternStore: PatternMemoryStore
     
-    public init(appMemory: StrategyMemory = StrategyMemory()) {
+    public init(appMemory: StrategyMemory) {
         self.appMemory = appMemory
         self.executionStore = ExecutionMemoryStore(store: appMemory)
         self.patternStore = PatternMemoryStore(store: appMemory)

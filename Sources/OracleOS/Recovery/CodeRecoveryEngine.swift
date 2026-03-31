@@ -4,7 +4,7 @@ import Foundation
 public final class CodeRecoveryEngine {
     private let engine: RecoveryEngine
 
-    public init(engine: RecoveryEngine = RecoveryEngine()) {
+    public init(engine: RecoveryEngine) {
         self.engine = engine
     }
 

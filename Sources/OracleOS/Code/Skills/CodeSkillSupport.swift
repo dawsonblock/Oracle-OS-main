@@ -29,11 +29,11 @@ enum CodeSkillSupport {
         throw CodeSkillResolutionError.missingWorkspace
     }
 
-    static func repositorySnapshot(state: WorldState, workspaceRoot: URL) throws -> RepositorySnapshot {
+    static func repositorySnapshot(state: WorldState, workspaceRoot: URL, repositoryIndexer: RepositoryIndexer) throws -> RepositorySnapshot {
         if let repositorySnapshot = state.repositorySnapshot {
             return repositorySnapshot
         }
-        return RepositoryIndexer().indexIfNeeded(workspaceRoot: workspaceRoot)
+        return repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
     }
 
     static func preferredPath(

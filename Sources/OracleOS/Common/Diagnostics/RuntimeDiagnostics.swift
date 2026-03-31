@@ -726,7 +726,7 @@ public struct RuntimeDiagnosticsBuilder: Sendable {
             return workspaceRoot(fromSandboxPath: event.sandboxPath)
         })
 
-        let indexer = RepositoryIndexer()
+        let indexer = RepositoryIndexer(processAdapter: DefaultProcessAdapter())
         return roots
             .compactMap { indexer.loadPersistedSnapshot(workspaceRoot: $0) }
             .map(DiagnosticsRepositoryIndex.init)
