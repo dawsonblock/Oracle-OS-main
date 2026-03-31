@@ -537,7 +537,7 @@ public enum MCPDispatch {
             let rootURL = URL(fileURLWithPath: workspaceRoot, isDirectory: true)
             let buildTool = BuildToolDetector.detect(at: rootURL)
             
-            var buildCommand: CommandSpec? = BuildToolDetector.defaultBuildCommand(for: buildTool, workspaceRoot: rootURL)
+            var buildCommand: BuildSpec? = BuildToolDetector.defaultBuildCommand(for: buildTool, workspaceRoot: rootURL)
             if let customBuild = args["build_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customBuild.isEmpty {
                 buildCommand = CommandSpec(
                     category: .build,
@@ -548,7 +548,7 @@ public enum MCPDispatch {
                 )
             }
             
-            var testCommand: CommandSpec? = BuildToolDetector.defaultTestCommand(for: buildTool, workspaceRoot: rootURL)
+            var testCommand: TestSpec? = BuildToolDetector.defaultTestCommand(for: buildTool, workspaceRoot: rootURL)
             if let customTest = args["test_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customTest.isEmpty {
                 testCommand = CommandSpec(
                     category: .test,

@@ -33,76 +33,16 @@ public enum BuildToolDetector {
     public static func defaultBuildCommand(
         for buildTool: BuildTool,
         workspaceRoot: URL
-    ) -> CommandSpec? {
-        switch buildTool {
-        case .swiftPackage:
-            return CommandSpec(
-                category: .build,
-                executable: "/usr/bin/env",
-                arguments: ["swift", "build"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "swift build"
-            )
-        case .npm:
-            return CommandSpec(
-                category: .build,
-                executable: "/usr/bin/env",
-                arguments: ["npm", "run", "build"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "npm run build"
-            )
-        case .xcodebuild:
-            return CommandSpec(
-                category: .build,
-                executable: "/usr/bin/env",
-                arguments: ["xcodebuild", "-quiet"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "xcodebuild -quiet"
-            )
-        case .pytest, .unknown:
-            return nil
-        }
+    ) -> BuildSpec? {
+        // Typed build spec simplifies to just passing the root. WorkspaceRunner applies the tool-specific command.
+        return BuildSpec(workspaceRoot: workspaceRoot.path)
     }
 
     public static func defaultTestCommand(
         for buildTool: BuildTool,
         workspaceRoot: URL
-    ) -> CommandSpec? {
-        switch buildTool {
-        case .swiftPackage:
-            return CommandSpec(
-                category: .test,
-                executable: "/usr/bin/env",
-                arguments: ["swift", "test"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "swift test"
-            )
-        case .npm:
-            return CommandSpec(
-                category: .test,
-                executable: "/usr/bin/env",
-                arguments: ["npm", "test", "--", "--runInBand"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "npm test"
-            )
-        case .pytest:
-            return CommandSpec(
-                category: .test,
-                executable: "/usr/bin/env",
-                arguments: ["pytest"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "pytest"
-            )
-        case .xcodebuild:
-            return CommandSpec(
-                category: .test,
-                executable: "/usr/bin/env",
-                arguments: ["xcodebuild", "test", "-quiet"],
-                workspaceRoot: workspaceRoot.path,
-                summary: "xcodebuild test -quiet"
-            )
-        case .unknown:
-            return nil
-        }
+    ) -> TestSpec? {
+        // Typed test spec simplifies to just passing the root.
+        return TestSpec(workspaceRoot: workspaceRoot.path)
     }
 }

@@ -6,7 +6,7 @@ public enum BuildConfiguration: String, Sendable, Codable {
 }
 
 /// Typed build specification. No generic shell execution.
-public struct BuildSpec: Sendable, Codable {
+public struct BuildSpec: Sendable, Codable, Equatable {
     public let workspaceRoot: String
     public let target: String?
     public let configuration: BuildConfiguration?

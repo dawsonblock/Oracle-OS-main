@@ -38,42 +38,20 @@ public final class ParallelRunner: @unchecked Sendable {
 
                     var results: [CommandResult] = []
                     let buildTool = BuildToolDetector.detect(at: URL(fileURLWithPath: sandbox.sandboxPath, isDirectory: true))
-                    let buildCommand = spec.buildCommand.map {
-                        CommandSpec(
-                            category: $0.category,
-                            executable: $0.executable,
-                            arguments: $0.arguments,
-                            workspaceRoot: sandbox.sandboxPath,
-                            workspaceRelativePath: $0.workspaceRelativePath,
-                            summary: $0.summary,
-                            mutatesWorkspace: $0.mutatesWorkspace,
-                            touchesNetwork: $0.touchesNetwork
-                        )
-                    } ?? BuildToolDetector.defaultBuildCommand(
+                    let buildCommand = spec.buildCommand ?? BuildToolDetector.defaultBuildCommand(
                         for: buildTool,
                         workspaceRoot: URL(fileURLWithPath: sandbox.sandboxPath, isDirectory: true)
                     )
-                    let testCommand = spec.testCommand.map {
-                        CommandSpec(
-                            category: $0.category,
-                            executable: $0.executable,
-                            arguments: $0.arguments,
-                            workspaceRoot: sandbox.sandboxPath,
-                            workspaceRelativePath: $0.workspaceRelativePath,
-                            summary: $0.summary,
-                            mutatesWorkspace: $0.mutatesWorkspace,
-                            touchesNetwork: $0.touchesNetwork
-                        )
-                    } ?? BuildToolDetector.defaultTestCommand(
+                    let testCommand = spec.testCommand ?? BuildToolDetector.defaultTestCommand(
                         for: buildTool,
                         workspaceRoot: URL(fileURLWithPath: sandbox.sandboxPath, isDirectory: true)
                     )
 
                     if let buildCommand {
-                        results.append(try await workspaceRunner.execute(spec: buildCommand))
+                        results.append(try await self.convertProcessResult(workspaceRunner.runBuild(buildCommand), spec: buildCommand, category: .build))
                     }
                     if results.allSatisfy(\.succeeded), let testCommand {
-                        results.append(try await workspaceRunner.execute(spec: testCommand))
+                        results.append(try await self.convertProcessResult(workspaceRunner.runTest(testCommand), spec: testCommand, category: .test))
                     }
 
                     let diffSummary = sandbox.diffSummary()
@@ -107,5 +85,22 @@ public final class ParallelRunner: @unchecked Sendable {
             }
             return collected
         }
+    }
+
+    private func convertProcessResult(
+        _ result: ProcessResult,
+        spec: Any,
+        category: CodeCommandCategory
+    ) -> CommandResult {
+        return CommandResult(
+            succeeded: result.exitCode == 0,
+            exitCode: result.exitCode,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            elapsedMs: result.durationMs,
+            workspaceRoot: "", // can be derived if needed
+            category: category,
+            summary: category == .build ? "build" : "test"
+        )
     }
 }

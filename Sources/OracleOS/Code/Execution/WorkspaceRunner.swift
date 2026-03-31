@@ -145,57 +145,6 @@ public final class WorkspaceRunner: @unchecked Sendable {
         return try await processAdapter.run(systemCommand, in: workspaceContext, policy: policy)
     }
 
-    // MARK: - Legacy CommandSpec-based execution (for backwards compatibility)
-    private func policy(for category: CodeCommandCategory) -> CommandExecutionPolicy {
-        switch category {
-        case .build, .test, .gitPush:
-            // High timeout, high output byte limit for intensive commands
-            return CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 100 * 1024 * 1024)
-        case .indexRepository, .searchCode, .generatePatch, .formatter, .linter, .parseBuildFailure, .parseTestFailure:
-            // Medium timeout for tooling
-            return CommandExecutionPolicy(timeoutSeconds: 60, maxOutputBytes: 10 * 1024 * 1024)
-        case .openFile, .editFile, .writeFile, .gitStatus, .gitBranch, .gitCommit:
-            // Quick local operations
-            return CommandExecutionPolicy(timeoutSeconds: 15, maxOutputBytes: 1 * 1024 * 1024)
-        }
-    }
-
-    public func execute(spec: CommandSpec) async throws -> CommandResult {
-        guard isAllowed(spec) else {
-            throw WorkspaceRunnerError.unsupportedCommand(spec.summary)
-        }
-
-        try validateGitPolicy(spec)
-
-        // Derive network access from the command structure rather than trusting
-        // the touchesNetwork field on CommandSpec.
-        if derivedTouchesNetwork(spec) {
-            throw WorkspaceRunnerError.networkNotAllowed(
-                "Command \(spec.category.rawValue) requires network access which is not permitted"
-            )
-        }
-
-        let scope = try WorkspaceScope(rootURL: URL(fileURLWithPath: spec.workspaceRoot, isDirectory: true))
-        _ = try scope.resolve(relativePath: spec.workspaceRelativePath)
-
-        let start = Date()
-        let systemCommand = SystemCommand(executable: spec.executable, arguments: spec.arguments)
-        let workspaceContext = WorkspaceContext(rootURL: scope.rootURL)
-        let execPolicy = policy(for: spec.category)
-        let processResult = try await processAdapter.run(systemCommand, in: workspaceContext, policy: execPolicy)
-
-        return CommandResult(
-            succeeded: processResult.exitCode == 0,
-            exitCode: processResult.exitCode,
-            stdout: processResult.stdout,
-            stderr: processResult.stderr,
-            elapsedMs: Date().timeIntervalSince(start) * 1000.0,
-            workspaceRoot: spec.workspaceRoot,
-            category: spec.category,
-            summary: spec.summary
-        )
-    }
-
     // MARK: - Git Subcommand Policy
 
     /// Allowed git subcommands and their access levels. Subcommands not in this
@@ -256,83 +205,13 @@ public final class WorkspaceRunner: @unchecked Sendable {
         return nil
     }
 
-    /// Validate that a git command conforms to the structured policy.
-    private func validateGitPolicy(_ spec: CommandSpec) throws {
-        guard spec.category.isGit else { return }
+    
 
-        guard let subcommand = Self.parseGitSubcommand(from: spec.arguments) else {
-            throw WorkspaceRunnerError.forbiddenGitOperation("could not parse git subcommand")
-        }
+    
 
-        guard Self.gitSubcommandPolicy[subcommand] != nil else {
-            throw WorkspaceRunnerError.forbiddenGitOperation(
-                "git subcommand '\(subcommand)' is not in the allowed set"
-            )
-        }
+    
 
-        // Check for forbidden flags
-        for arg in spec.arguments where arg.hasPrefix("-") {
-            // Treat an argument as forbidden if it:
-            //  - exactly matches a forbidden flag (e.g. "--force-with-lease")
-            //  - or starts with "<forbidden-flag>=" (e.g. "--force-with-lease=origin/main")
-            //  - or, for single-character short flags (e.g. "-f"), appears in a combined
-            //    short flag group (e.g. "-fn")
-            for forbidden in Self.forbiddenGitFlags {
-                if arg == forbidden || arg.hasPrefix(forbidden + "=") {
-                    throw WorkspaceRunnerError.forbiddenGitOperation(
-                        "flag '\(arg)' is forbidden on git commands"
-                    )
-                }
+    
 
-                // Handle combined short flags like "-fn" when "-f" is forbidden.
-                if forbidden.hasPrefix("-"),
-                   !forbidden.hasPrefix("--"),
-                   forbidden.count == 2,
-                   arg.hasPrefix("-"),
-                   arg.count > 2 {
-                    let shortFlagChar = forbidden.dropFirst()
-                    if arg.dropFirst().contains(shortFlagChar) {
-                        throw WorkspaceRunnerError.forbiddenGitOperation(
-                            "flag '\(arg)' is forbidden on git commands"
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    /// Derive whether a command touches the network from its structure, rather
-    /// than trusting the `touchesNetwork` field on CommandSpec.
-    func derivedTouchesNetwork(_ spec: CommandSpec) -> Bool {
-        guard spec.category.isGit else { return false }
-        guard let subcommand = Self.parseGitSubcommand(from: spec.arguments) else {
-            return false
-        }
-        return Self.gitSubcommandPolicy[subcommand] == .network
-    }
-
-    private func isAllowed(_ spec: CommandSpec) -> Bool {
-        switch spec.category {
-        case .build, .test, .formatter, .linter, .gitStatus, .gitBranch, .gitCommit, .gitPush:
-            return allowedExecutable(spec.executable)
-        case .indexRepository, .searchCode, .openFile, .editFile, .writeFile, .generatePatch, .parseBuildFailure, .parseTestFailure:
-            return true
-        }
-    }
-
-    private func allowedExecutable(_ executable: String) -> Bool {
-        let allowedExecutables = [
-            "/usr/bin/env",
-            "/usr/bin/git",
-        ]
-        return allowedExecutables.contains(executable)
-    }
-
-    private func sanitizedEnvironment() -> [String: String] {
-        let source = ProcessInfo.processInfo.environment
-        let keys = ["PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "DEVELOPER_DIR"]
-        return Dictionary(uniqueKeysWithValues: keys.compactMap { key in
-            source[key].map { (key, $0) }
-        })
-    }
+    
 }
