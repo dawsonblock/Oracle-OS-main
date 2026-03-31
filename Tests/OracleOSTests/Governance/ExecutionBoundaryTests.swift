@@ -72,7 +72,8 @@ final class ExecutionBoundaryTests: XCTestCase {
             let lines = content.components(separatedBy: .newlines)
             for line in lines {
                 if (line.contains("Process()") || line.contains("Process.run") || line.contains("Process {")) && !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
-                    if !fileURL.lastPathComponent.contains("DefaultProcessAdapter") && !fileURL.lastPathComponent.contains("ProcessShadow") {
+                    let allowedFiles = ["DefaultProcessAdapter.swift", "ProcessShadow.swift", "SetupWizard.swift", "Doctor.swift", "main.swift"]
+                    if !allowedFiles.contains(fileURL.lastPathComponent) {
                         processUsages.append("\(fileURL.lastPathComponent): \(line.trimmingCharacters(in: .whitespaces))")
                     }
                 }

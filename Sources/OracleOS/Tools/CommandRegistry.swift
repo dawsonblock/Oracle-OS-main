@@ -13,7 +13,6 @@ public struct ToolCommandRegistry {
             ToolCommandSpec(family: .type, name: "semantic_type"),
             ToolCommandSpec(family: .hotkey, name: "press"),
             ToolCommandSpec(family: .capture, name: "snapshot"),
-            ToolCommandSpec(family: .shell, name: "run"),
             ToolCommandSpec(family: .workflow, name: "replay"),
             ToolCommandSpec(family: .graphInspect, name: "inspect_graph"),
             ToolCommandSpec(family: .memoryInspect, name: "inspect_memory"),

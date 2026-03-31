@@ -9,7 +9,6 @@ public enum ToolCommandFamily: String, Codable, Sendable, CaseIterable {
     case type
     case hotkey
     case capture
-    case shell
     case workflow
     case graphInspect = "graph_inspect"
     case memoryInspect = "memory_inspect"
