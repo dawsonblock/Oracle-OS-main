@@ -539,24 +539,12 @@ public enum MCPDispatch {
             
             var buildCommand: BuildSpec? = BuildToolDetector.defaultBuildCommand(for: buildTool, workspaceRoot: rootURL)
             if let customBuild = args["build_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customBuild.isEmpty {
-                buildCommand = CommandSpec(
-                    category: .build,
-                    executable: "/usr/bin/env",
-                    arguments: customBuild,
-                    workspaceRoot: workspaceRoot,
-                    summary: customBuild.joined(separator: " ")
-                )
+                buildCommand = BuildSpec(workspaceRoot: workspaceRoot)
             }
             
             var testCommand: TestSpec? = BuildToolDetector.defaultTestCommand(for: buildTool, workspaceRoot: rootURL)
             if let customTest = args["test_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customTest.isEmpty {
-                testCommand = CommandSpec(
-                    category: .test,
-                    executable: "/usr/bin/env",
-                    arguments: customTest,
-                    workspaceRoot: workspaceRoot,
-                    summary: customTest.joined(separator: " ")
-                )
+                testCommand = TestSpec(workspaceRoot: workspaceRoot)
             }
             
             let spec = ExperimentSpec(
