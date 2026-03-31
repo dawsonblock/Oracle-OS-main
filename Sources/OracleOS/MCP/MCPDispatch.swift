@@ -19,7 +19,6 @@ public enum MCPDispatch {
     // Previous split (separate runtimeContext + runtimeContainer) eliminated.
     
     private static var _bootstrappedRuntime: BootstrappedRuntime?
-    private static var _runtimeContext: RuntimeContext?
     
     /// Lazily bootstrap the unified runtime with recovery.
     /// Returns the BootstrappedRuntime containing container, orchestrator, and recovery report.
@@ -38,75 +37,56 @@ public enum MCPDispatch {
         return built
     }
     
-    /// RuntimeContext with services pulled from the unified container.
-    private static func getRuntimeContext() async throws -> RuntimeContext {
-        if let existing = _runtimeContext {
-            return existing
-        }
-        let bootstrapped = try await getBootstrappedRuntime()
-        let ctx = RuntimeContext(container: bootstrapped.container)
-        _runtimeContext = ctx
-        return ctx
-    }
-    
     /// Properties that are safe to access ONCE bootstrap has finished.
-    private static var runtimeContext: RuntimeContext { _runtimeContext! }
     private static var runtime: RuntimeOrchestrator { _bootstrappedRuntime!.orchestrator }
     private static var runtimeContainer: RuntimeContainer { _bootstrappedRuntime!.container }
 
-    private struct ResultWrapper: @unchecked Sendable {
-        let payload: [String: Any]?
+    private struct ResultWrapper: Sendable {
+        let payload: MCPToolResponse?
     }
 
     /// Handle a tools/call request. Returns MCP-formatted result.
     /// Wraps every tool call in a timeout so no single tool can block
     /// the MCP server indefinitely (the #1 user-reported issue).
-    public static func handle(_ params: [String: Any]) async -> [String: Any] {
+    public static func handle(_ request: MCPToolRequest) async -> MCPToolResponse {
         do {
-            let ctx = try await getRuntimeContext()
-            ctx.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
+            let bootstrapped = try await getBootstrappedRuntime()
+            bootstrapped.container.memoryStore.setWorkspaceRoot(FileManager.default.currentDirectoryPath)
         } catch {
             return errorContent("Failed to bootstrap runtime kernel: \(error)")
         }
-        
-        guard let toolName = params["name"] as? String else {
-            return errorContent("Missing tool name")
-        }
 
-        let args = params["arguments"] as? [String: Any] ?? [:]
+        let toolName = request.name
         let startTime = DispatchTime.now()
         Log.info("Tool call: \(toolName)")
 
         let actualTimeout = toolName == "oracle_experiment_search" ? 600.0 : toolTimeoutSeconds
 
-        struct ArgsWrapper: @unchecked Sendable {
-            let args: [String: Any]
+        struct RequestWrapper: Sendable {
+            let request: MCPToolRequest
         }
-        let argsWrapper = ArgsWrapper(args: args)
+        let argsWrapper = RequestWrapper(request: request)
 
         let responseWrapper: ResultWrapper
         do {
             responseWrapper = try await withThrowingTaskGroup(of: ResultWrapper.self) { group in
-                let wArgs = argsWrapper
-                group.addTask { @Sendable in
-                    let wrappedResult: ResultWrapper = await MainActor.run {
-                        let result: [String: Any]
-                        if toolName == "oracle_screenshot" {
-                            result = handleScreenshot(wArgs.args)
-                        } else {
-                            let toolResult = dispatch(tool: toolName, args: wArgs.args)
-                            result = formatResult(toolResult, toolName: toolName)
-                        }
-                        return ResultWrapper(payload: result)
+                let wReq = argsWrapper
+                group.addTask { @MainActor @Sendable in
+                    let result: MCPToolResponse
+                    if toolName == "oracle_screenshot" {
+                        result = handleScreenshot(wReq.request)
+                    } else {
+                        let toolResult = await dispatch(request: wReq.request)
+                        result = formatResult(toolResult, toolName: toolName)
                     }
-                    return wrappedResult
+                    return ResultWrapper(payload: result)
                 }
-                
+
                 group.addTask {
                     try await Task.sleep(nanoseconds: UInt64(actualTimeout * 1_000_000_000))
                     return ResultWrapper(payload: nil)
                 }
-                
+
                 if let first = try await group.next() {
                     group.cancelAll()
                     return first
@@ -124,9 +104,9 @@ public enum MCPDispatch {
             return errorContent("Tool \(toolName) timed out after \(Int(actualTimeout))s")
         }
 
-        if let errStr = payload["isError"] as? Bool, errStr, 
-           let firstContent = (payload["content"] as? [[String: Any]])?.first,
-           let textStr = firstContent["text"] as? String, 
+        if payload.isError,
+           let firstContent = payload.content.first,
+           case .text(let textStr) = firstContent,
            textStr.contains("timed out") {
             // Already logged error inside closure
         } else {
@@ -141,7 +121,8 @@ public enum MCPDispatch {
     }
 
     /// Screenshot handler returns MCP image content type for inline display.
-    private static func handleScreenshot(_ args: [String: Any]) -> [String: Any] {
+    private static func handleScreenshot(_ request: MCPToolRequest) -> MCPToolResponse {
+        let args = request.arguments
         let result = AXScanner.screenshot(
             appName: str(args, "app"),
             fullResolution: bool(args, "full_resolution") ?? false
@@ -154,7 +135,6 @@ public enum MCPDispatch {
             return formatResult(result, toolName: "oracle_screenshot")
         }
 
-        // Return as MCP image + text caption (v1 pattern: both content types)
         let mimeType = data["mime_type"] as? String ?? "image/png"
         let width = data["width"] as? Int ?? 0
         let height = data["height"] as? Int ?? 0
@@ -162,25 +142,14 @@ public enum MCPDispatch {
         var caption = "Screenshot: \(width)x\(height)"
         if !windowTitle.isEmpty { caption += " - \(windowTitle)" }
 
-        return [
-            "content": [
-                [
-                    "type": "image",
-                    "data": base64,
-                    "mimeType": mimeType,
-                ] as [String: Any],
-                [
-                    "type": "text",
-                    "text": caption,
-                ] as [String: Any],
-            ] as [[String: Any]],
-            "isError": false,
-        ]
+        return MCPToolResponse.imageAndCaption(base64: base64, mimeType: mimeType, caption: caption)
     }
 
     // MARK: - Dispatch
 
-    private static func dispatch(tool: String, args: [String: Any]) -> ToolResult {
+    private static func dispatch(request: MCPToolRequest) async -> ToolResult {
+        let tool = request.name
+        let args = request.arguments
         switch tool {
 
         // Perception
@@ -278,7 +247,7 @@ public enum MCPDispatch {
             guard let key = str(args, "key") else {
                 return ToolResult(success: false, error: "Missing required parameter: key")
             }
-            let modifiers = (args["modifiers"] as? [String])
+            let modifiers = args["modifiers"]?.arrayValue?.compactMap { $0.stringValue }
             return Actions.pressKey(
                 key: key,
                 modifiers: modifiers,
@@ -290,7 +259,8 @@ public enum MCPDispatch {
             )
 
         case "oracle_hotkey":
-            guard let keys = args["keys"] as? [String] else {
+            guard let keys = args["keys"]?.arrayValue?.compactMap({ $0.stringValue }),
+                  !keys.isEmpty else {
                 return ToolResult(success: false, error: "Missing required parameter: keys (array of strings)")
             }
             return Actions.hotkey(
@@ -404,14 +374,7 @@ public enum MCPDispatch {
                 )
             }
             // Parse params from the MCP arguments
-            let recipeParams: [String: String]
-            if let paramsObj = args["params"] as? [String: Any] {
-                recipeParams = paramsObj.reduce(into: [:]) { result, pair in
-                    result[pair.key] = "\(pair.value)"
-                }
-            } else {
-                recipeParams = [:]
-            }
+            let recipeParams = args["params"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
 
             return RecipeEngine.run(
                 recipe: recipe,
@@ -471,16 +434,7 @@ public enum MCPDispatch {
             guard let description = str(args, "description") else {
                 return ToolResult(success: false, error: "Missing required parameter: description")
             }
-            let cropBox: [Double]?
-            if let arr = args["crop_box"] as? [Any] {
-                cropBox = arr.compactMap { val -> Double? in
-                    if let d = val as? Double { return d }
-                    if let i = val as? Int { return Double(i) }
-                    return nil
-                }
-            } else {
-                cropBox = nil
-            }
+            let cropBox = args["crop_box"]?.arrayValue?.compactMap { $0.doubleValue }
             return VisionScanner.groundElement(
                 description: description,
                 appName: str(args, "app"),
@@ -490,12 +444,12 @@ public enum MCPDispatch {
         // Project Memory
         case "oracle_memory_query":
             let queryText = str(args, "query") ?? ""
-            let modules = args["modules"] as? [String] ?? []
-            let kindsRaw = args["kinds"] as? [String] ?? []
+            let modules = args["modules"]?.arrayValue?.compactMap { $0.stringValue } ?? []
+            let kindsRaw = args["kinds"]?.arrayValue?.compactMap { $0.stringValue } ?? []
             let kinds = kindsRaw.compactMap { ProjectMemoryKind(rawValue: $0) }
             let limit = int(args, "limit") ?? 10
             
-            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+            guard let projectStore = runtimeContainer.memoryStore.projectStore else {
                 return ToolResult(success: false, error: "Project Memory store is not available. Ensure Oracle OS is running in a valid project workspace.")
             }
             
@@ -522,12 +476,12 @@ public enum MCPDispatch {
                 return ToolResult(success: false, error: "Invalid kind: \(kindRaw)")
             }
             
-            guard let projectStore = runtimeContext.memoryStore.projectStore else {
+            guard let projectStore = runtimeContainer.memoryStore.projectStore else {
                 return ToolResult(success: false, error: "Project Memory store is not available.")
             }
             
-            let modules = args["affected_modules"] as? [String] ?? []
-            let evidence = args["evidence_refs"] as? [String] ?? []
+            let modules = args["affected_modules"]?.arrayValue?.compactMap { $0.stringValue } ?? []
+            let evidence = args["evidence_refs"]?.arrayValue?.compactMap { $0.stringValue } ?? []
             let knowledgeClass = KnowledgeClass.reusable
             
             do {
@@ -549,16 +503,16 @@ public enum MCPDispatch {
         // Experiments
         case "oracle_experiment_search":
             guard let goal = str(args, "goal_description"),
-                  let candidatesRaw = args["candidates"] as? [[String: Any]] else {
+                  let candidatesArr = args["candidates"]?.arrayValue else {
                 return ToolResult(success: false, error: "Missing required parameters: goal_description, candidates")
             }
             
             var candidates = [CandidatePatch]()
-            for (i, c) in candidatesRaw.enumerated() {
-                guard let content = c["content"] as? String,
-                      let rp = c["workspace_relative_path"] as? String,
-                      let title = c["title"] as? String,
-                      let summary = c["summary"] as? String else {
+            for (i, c) in candidatesArr.enumerated() {
+                guard let content = c["content"]?.stringValue,
+                      let rp = c["workspace_relative_path"]?.stringValue,
+                      let title = c["title"]?.stringValue,
+                      let summary = c["summary"]?.stringValue else {
                     return ToolResult(success: false, error: "Candidate \(i) is missing required fields (content, workspace_relative_path, title, summary)")
                 }
                 candidates.append(CandidatePatch(
@@ -566,8 +520,8 @@ public enum MCPDispatch {
                     summary: summary,
                     workspaceRelativePath: rp,
                     content: content,
-                    hypothesis: c["hypothesis"] as? String,
-                    strategyKind: c["strategy_kind"] as? String
+                    hypothesis: c["hypothesis"]?.stringValue,
+                    strategyKind: c["strategy_kind"]?.stringValue
                 ))
             }
             
@@ -576,7 +530,7 @@ public enum MCPDispatch {
             let buildTool = BuildToolDetector.detect(at: rootURL)
             
             var buildCommand: CommandSpec? = BuildToolDetector.defaultBuildCommand(for: buildTool, workspaceRoot: rootURL)
-            if let customBuild = args["build_command"] as? [String], !customBuild.isEmpty {
+            if let customBuild = args["build_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customBuild.isEmpty {
                 buildCommand = CommandSpec(
                     category: .build,
                     executable: "/usr/bin/env",
@@ -587,7 +541,7 @@ public enum MCPDispatch {
             }
             
             var testCommand: CommandSpec? = BuildToolDetector.defaultTestCommand(for: buildTool, workspaceRoot: rootURL)
-            if let customTest = args["test_command"] as? [String], !customTest.isEmpty {
+            if let customTest = args["test_command"]?.arrayValue?.compactMap({ $0.stringValue }), !customTest.isEmpty {
                 testCommand = CommandSpec(
                     category: .test,
                     executable: "/usr/bin/env",
@@ -605,51 +559,39 @@ public enum MCPDispatch {
                 testCommand: testCommand
             )
             
-            let sema = DispatchSemaphore(value: 0)
-            var runResult: ToolResult?
-            
-            // This MUST hop onto a new Task because dispatch() is synchronous 
-            // but run() is async.
-            Task {
-                do {
-                    let results = try await runtimeContext.experimentManager.run(spec: spec)
-                    // Format results
-                    let serialized = results.map { [
-                        "id": $0.id,
-                        "candidate_title": $0.candidate.title,
-                        "selected": $0.selected,
+            do {
+                let results = try await runtimeContainer.experimentManager.run(spec: spec)
+                let serialized = results.map { [
+                    "id": $0.id,
+                    "candidate_title": $0.candidate.title,
+                    "selected": $0.selected,
+                    "succeeded": $0.succeeded,
+                    "elapsed_ms": $0.elapsedMs,
+                    "diff_summary": $0.diffSummary,
+                    "architecture_risk_score": $0.architectureRiskScore,
+                    "command_results": $0.commandResults.map { [
+                        "category": $0.category.rawValue,
+                        "summary": $0.summary,
                         "succeeded": $0.succeeded,
-                        "elapsed_ms": $0.elapsedMs,
-                        "diff_summary": $0.diffSummary,
-                        "architecture_risk_score": $0.architectureRiskScore,
-                        "command_results": $0.commandResults.map { [
-                            "category": $0.category.rawValue,
-                            "summary": $0.summary,
-                            "succeeded": $0.succeeded,
-                            "exit_code": $0.exitCode,
-                            "stdout": $0.stdout.count > 1000 ? String($0.stdout.prefix(1000)) + "...(truncated)" : $0.stdout,
-                            "stderr": $0.stderr.count > 1000 ? String($0.stderr.prefix(1000)) + "...(truncated)" : $0.stderr
-                        ] as [String: Any] }
+                        "exit_code": $0.exitCode,
+                        "stdout": $0.stdout.count > 1000 ? String($0.stdout.prefix(1000)) + "...(truncated)" : $0.stdout,
+                        "stderr": $0.stderr.count > 1000 ? String($0.stderr.prefix(1000)) + "...(truncated)" : $0.stderr
                     ] as [String: Any] }
-                    
-                    runResult = ToolResult(success: true, data: ["results": serialized])
-                } catch {
-                    runResult = ToolResult(success: false, error: "Experiment search failed: \(error)")
-                }
-                sema.signal()
+                ] as [String: Any] }
+                return ToolResult(success: true, data: ["results": serialized])
+            } catch {
+                return ToolResult(success: false, error: "Experiment search failed: \(error)")
             }
-            
-            sema.wait()
-            return runResult ?? ToolResult(success: false, error: "Experiment task completed without setting result.")
 
         // Architecture
         case "oracle_architecture_review":
             guard let goal = str(args, "goal_description"),
-                  let paths = args["candidate_paths"] as? [String] else {
+                  let paths = args["candidate_paths"]?.arrayValue?.compactMap({ $0.stringValue }),
+                  !paths.isEmpty else {
                 return ToolResult(success: false, error: "Missing required parameters: goal_description, candidate_paths")
             }
             let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let snapshot = runtimeContainer.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
             let engine = ArchitectureEngine()
             let review = engine.review(goalDescription: goal, snapshot: snapshot, candidatePaths: paths)
             
@@ -661,15 +603,15 @@ public enum MCPDispatch {
 
         case "oracle_candidate_review":
             guard let goal = str(args, "goal_description"),
-                  let candidateRaw = args["candidate"] as? [String: Any],
+                  let candidateRaw = args["candidate"]?.objectValue,
                   let diffSummary = str(args, "diff_summary") else {
                 return ToolResult(success: false, error: "Missing required parameters: goal_description, candidate, diff_summary")
             }
             
-            guard let content = candidateRaw["content"] as? String,
-                  let rp = candidateRaw["workspace_relative_path"] as? String,
-                  let title = candidateRaw["title"] as? String,
-                  let summary = candidateRaw["summary"] as? String else {
+            guard let content = candidateRaw["content"]?.stringValue,
+                  let rp = candidateRaw["workspace_relative_path"]?.stringValue,
+                  let title = candidateRaw["title"]?.stringValue,
+                  let summary = candidateRaw["summary"]?.stringValue else {
                 return ToolResult(success: false, error: "Candidate is missing required fields (content, workspace_relative_path, title, summary)")
             }
             let candidate = CandidatePatch(
@@ -677,12 +619,12 @@ public enum MCPDispatch {
                 summary: summary,
                 workspaceRelativePath: rp,
                 content: content,
-                hypothesis: candidateRaw["hypothesis"] as? String,
-                strategyKind: candidateRaw["strategy_kind"] as? String
+                hypothesis: candidateRaw["hypothesis"]?.stringValue,
+                strategyKind: candidateRaw["strategy_kind"]?.stringValue
             )
             
             let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-            let snapshot = runtimeContext.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
+            let snapshot = runtimeContainer.repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRoot)
             let engine = ArchitectureEngine()
             let review = engine.reviewCandidatePatch(
                 goalDescription: goal,
@@ -704,28 +646,21 @@ public enum MCPDispatch {
             }
             let limit = int(args, "limit") ?? 1000
             
-            let sema = DispatchSemaphore(value: 0)
-            var runResult: ToolResult?
-            Task {
-                let events = runtimeContext.traceStore.loadRecentEvents(limit: limit)
-                let synthesizer = WorkflowSynthesizer()
-                let plans = synthesizer.synthesize(goalPattern: goalPattern, events: events)
-                
-                let index = WorkflowIndex()
-                for plan in plans {
-                    index.add(plan)
-                }
-                
-                let serialized = plans.compactMap { plan -> [String: Any]? in
-                    guard let data = try? JSONEncoder().encode(plan),
-                          let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-                    return dict
-                }
-                runResult = ToolResult(success: true, data: ["mined_count": plans.count, "plans": serialized])
-                sema.signal()
+            let events = runtimeContainer.traceStore.loadRecentEvents(limit: limit)
+            let synthesizer = WorkflowSynthesizer()
+            let plans = synthesizer.synthesize(goalPattern: goalPattern, events: events)
+            
+            let index = WorkflowIndex()
+            for plan in plans {
+                index.add(plan)
             }
-            sema.wait()
-            return runResult ?? ToolResult(success: false, error: "Task completed without result.")
+            
+            let serialized = plans.compactMap { plan -> [String: Any]? in
+                guard let data = try? JSONEncoder().encode(plan),
+                      let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+                return dict
+            }
+            return ToolResult(success: true, data: ["mined_count": plans.count, "plans": serialized])
 
         case "oracle_workflow_list":
             let index = WorkflowIndex()
@@ -750,7 +685,7 @@ public enum MCPDispatch {
             // or we could bridge it directly to RecipeStore's run logic. For now,
             // we will return the workflow plan details dynamically formatted.
             
-            let substitutions = args["parameters"] as? [String: String] ?? [:]
+            let substitutions = args["parameters"]?.objectValue?.compactMapValues { $0.stringified } ?? [:]
             
             // Format for execution instructions
             var executionSteps: [[String: Any]] = []
@@ -782,52 +717,48 @@ public enum MCPDispatch {
     // MARK: - Response Formatting
 
     /// Format a ToolResult as MCP content array.
-    private static func formatResult(_ result: ToolResult, toolName: String) -> [String: Any] {
+    private static func formatResult(_ result: ToolResult, toolName: String) -> MCPToolResponse {
         let dict = result.toDict()
 
-        // Serialize to JSON string for MCP text content
         if let data = try? JSONSerialization.data(withJSONObject: dict, options: [.sortedKeys]),
            let jsonStr = String(data: data, encoding: .utf8)
         {
-            return [
-                "content": [
-                    ["type": "text", "text": jsonStr],
-                ],
-                "isError": !result.success,
-            ]
+            return MCPToolResponse(content: [.text(jsonStr)], isError: !result.success)
         }
 
         return errorContent("Failed to serialize response for \(toolName)")
     }
 
-    static func errorContent(_ message: String) -> [String: Any] {
-        [
-            "content": [
-                ["type": "text", "text": "{\"success\":false,\"error\":\"\(message)\"}"],
-            ],
-            "isError": true,
+    static func errorContent(_ message: String) -> MCPToolResponse {
+        let payload: [String: Any] = [
+            "success": false,
+            "error": message
         ]
+
+        if let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
+           let jsonStr = String(data: data, encoding: .utf8) {
+            return MCPToolResponse.error(jsonStr)
+        }
+
+        // Fallback: do not include the original message to avoid invalid JSON.
+        return MCPToolResponse.error("{\"success\":false,\"error\":\"Serialization error\"}")
     }
 
     // MARK: - Parameter Helpers
 
-    private static func str(_ args: [String: Any], _ key: String) -> String? {
-        args[key] as? String
+    private static func str(_ args: JSONValue, _ key: String) -> String? {
+        args[key]?.stringValue
     }
 
-    private static func int(_ args: [String: Any], _ key: String) -> Int? {
-        if let i = args[key] as? Int { return i }
-        if let d = args[key] as? Double { return Int(d) }
-        return nil
+    private static func int(_ args: JSONValue, _ key: String) -> Int? {
+        args[key]?.intValue
     }
 
-    private static func double(_ args: [String: Any], _ key: String) -> Double? {
-        if let d = args[key] as? Double { return d }
-        if let i = args[key] as? Int { return Double(i) }
-        return nil
+    private static func double(_ args: JSONValue, _ key: String) -> Double? {
+        args[key]?.doubleValue
     }
 
-    private static func bool(_ args: [String: Any], _ key: String) -> Bool? {
-        args[key] as? Bool
+    private static func bool(_ args: JSONValue, _ key: String) -> Bool? {
+        args[key]?.boolValue
     }
 }
