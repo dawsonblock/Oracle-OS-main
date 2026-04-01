@@ -1,0 +1,504 @@
+# Instincts generated from https://github.com/dawsonblock/Oracle-OS-main
+# Generated: 2026-04-01T23:32:51.860Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: Oracle-OS-main-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Commit Length
+
+## Action
+
+Write moderate-length commit messages (~84 characters)
+
+## Evidence
+
+- Average commit message length: 84 chars
+- Based on 78 commits
+
+---
+id: Oracle-OS-main-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: Oracle-OS-main-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Export Style
+
+## Action
+
+Prefer default exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: default
+
+---
+id: Oracle-OS-main-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: Oracle-OS-main-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: Oracle-OS-main-workflow-test-driven-development
+trigger: "when adding new functionality"
+confidence: 0.7
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Test Driven Development
+
+## Action
+
+Follow the test-driven-development workflow:
+1. Write failing test
+2. Implement code to pass test
+3. Refactor if needed
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~4x per month
+- Files: **/*.test.*, **/*.spec.*, src/**/*
+
+---
+id: Oracle-OS-main-workflow-refactoring
+trigger: "when refactoring code"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Refactoring
+
+## Action
+
+Follow the refactoring workflow:
+1. Ensure tests pass before refactor
+2. Refactor code structure
+3. Verify tests still pass
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~14x per month
+- Files: src/**/*
+
+---
+id: Oracle-OS-main-workflow-phase-based-architecture-refactor
+trigger: "when doing phase based architecture refactor"
+confidence: 0.7
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Phase Based Architecture Refactor
+
+## Action
+
+Follow the phase-based-architecture-refactor workflow:
+1. Implement code changes for the targeted architectural phase (e.g., decouple memory side effects, enforce event sourcing invariants, collapse planner surface).
+2. Update or add new documentation files summarizing the phase, its goals, and results (e.g., docs/..., PHASE_X_DONE.md, REFACTOR_STATUS.md).
+3. Add or update governance and boundary tests to enforce new invariants.
+4. Summarize the phase completion in a dedicated commit message and documentation.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~4x per month
+- Files: docs/*.md, PHASE_*_DONE.md, REFACTOR_STATUS.md
+
+---
+id: Oracle-OS-main-workflow-typed-command-and-execution-boundary-enforcement
+trigger: "when doing typed command and execution boundary enforcement"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Typed Command And Execution Boundary Enforcement
+
+## Action
+
+Follow the typed-command-and-execution-boundary-enforcement workflow:
+1. Remove or refactor legacy command cases (e.g., .shell) from Command.swift and related files.
+2. Update all routers, planners, and executors to handle only typed commands/specs (e.g., BuildSpec, TestSpec, FileMutationSpec).
+3. Update or add governance and execution boundary tests to ensure no unsafe paths remain.
+4. Update policy and planning logic to validate by type, not by string or executable path.
+5. Document the changes and update phase or rebuild summary files.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: Sources/OracleOS/Core/Command/Command.swift, Sources/OracleOS/Execution/VerifiedExecutor.swift, Sources/OracleOS/Execution/Routing/*
+
+---
+id: Oracle-OS-main-workflow-refactor-initializers-and-dependencies
+trigger: "when doing refactor initializers and dependencies"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Refactor Initializers And Dependencies
+
+## Action
+
+Follow the refactor-initializers-and-dependencies workflow:
+1. Update class initializers to require explicit parameters (e.g., memoryStore, repositoryIndexer, planners).
+2. Remove default values and optional parameters from constructors.
+3. Update all instantiations in both source and test files to provide required dependencies.
+4. Add or update convenience initializers for testing where needed.
+5. Update related test files to ensure compatibility with new requirements.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: Sources/OracleOS/*/*.swift, Tests/OracleOSTests/*/*.swift, Tests/OracleOSEvals/*/*.swift
+
+---
+id: Oracle-OS-main-workflow-remove-legacy-or-obsolete-code-paths
+trigger: "when doing remove legacy or obsolete code paths"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Remove Legacy Or Obsolete Code Paths
+
+## Action
+
+Follow the remove-legacy-or-obsolete-code-paths workflow:
+1. Identify and remove obsolete files (e.g., patching scripts, deprecated protocols, legacy planners).
+2. Update all references in the codebase to ensure no usage of removed paths.
+3. Update or add tests to confirm the absence of legacy code.
+4. Document the removals in phase or rebuild summary files.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: fix_*.py, patch_*.py, Sources/OracleOS/Planning/MixedTaskPlanner.swift
+
+---
+id: Oracle-OS-main-workflow-documentation-and-phase-summary-update
+trigger: "when doing documentation and phase summary update"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/dawsonblock/Oracle-OS-main
+---
+
+# Oracle OS Main Workflow Documentation And Phase Summary Update
+
+## Action
+
+Follow the documentation-and-phase-summary-update workflow:
+1. Create or update summary markdown files (e.g., PHASE_X_DONE.md, REFACTOR_STATUS.md, REFACTOR_COMPLETE.md, COMPLETE_REBUILD_SUMMARY.md).
+2. Document what changed, key insights, and next steps.
+3. Ensure documentation matches the current state of the codebase.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: PHASE_*_DONE.md, REFACTOR_STATUS.md, REFACTOR_COMPLETE.md
+
+---
+id: oracle-os-main-instinct-naming-conventions
+trigger: "When creating or renaming files, classes, functions, or constants in Swift code"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Naming Conventions
+
+## Action
+
+Use PascalCase for files and classes, camelCase for functions, and SCREAMING_SNAKE_CASE for constants
+
+## Evidence
+
+- Pattern in namingConventions: files=PascalCase, functions=camelCase, classes=PascalCase, constants=SCREAMING_SNAKE_CASE
+- Seen in Sources/OracleOS/Events/FileEventStore.swift
+
+---
+id: oracle-os-main-instinct-import-export-style
+trigger: "When importing or exporting modules in Swift code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Import Export Style
+
+## Action
+
+Use absolute import paths and default export style
+
+## Evidence
+
+- Pattern: importStyle=absolute, exportStyle=default
+
+---
+id: oracle-os-main-instinct-test-file-pattern
+trigger: "When adding new test files for TypeScript/JavaScript code"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Test File Pattern
+
+## Action
+
+Name test files with the pattern *.test.ts
+
+## Evidence
+
+- Pattern: filePattern=*.test.ts
+- Example: src/utils/validation.test.ts
+
+---
+id: oracle-os-main-instinct-unit-testing
+trigger: "When writing tests for code in the repository"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Unit Testing
+
+## Action
+
+Write unit tests for individual functions or components
+
+## Evidence
+
+- Pattern: testTypes=['unit']
+- Example: test: add tests for user validation
+
+---
+id: oracle-os-main-instinct-tdd-workflow
+trigger: "When developing new features or fixing bugs"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Tdd Workflow
+
+## Action
+
+Follow test-driven development: write a failing test, implement code to pass, then refactor if needed
+
+## Evidence
+
+- Workflow: test-driven-development
+- Commit sequence: Write failing test → Implement code to pass test → Refactor if needed
+
+---
+id: oracle-os-main-instinct-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Commit Format
+
+## Action
+
+Use a conventional commit prefix (refactor, feat, fix, docs, chore) followed by a colon and a concise description
+
+## Evidence
+
+- Pattern: commit prefixes ['refactor', 'feat', 'fix', 'docs', 'chore']
+- Example: refactor: replace CommandSpec with BuildSpec and TestSpec in MCPDispatch
+
+---
+id: oracle-os-main-instinct-phase-architecture-refactor
+trigger: "When undertaking a major architectural refactor or kernel hardening as part of a planned multi-phase effort"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Phase Architecture Refactor
+
+## Action
+
+Implement code changes for the targeted phase, update/add documentation files, add/update governance and boundary tests, and summarize phase completion in a dedicated commit and documentation
+
+## Evidence
+
+- Workflow: phase-based-architecture-refactor
+- Files: docs/*.md, PHASE_*_DONE.md, REFACTOR_STATUS.md, Sources/OracleOS/Planning/*, Tests/OracleOSTests/Governance/*
+- Example commit: Phase 6: Separate support persistence (documentation)
+
+---
+id: oracle-os-main-instinct-typed-command-boundary
+trigger: "When strengthening runtime safety, removing legacy code paths, or migrating to a single hard execution path"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Typed Command Boundary
+
+## Action
+
+Refactor to enforce strict type boundaries for commands and execution, remove legacy or unsafe execution paths, update related code and tests to use only typed, safe interfaces, and document the changes
+
+## Evidence
+
+- Workflow: typed-command-and-execution-boundary-enforcement
+- Files: Sources/OracleOS/Core/Command/Command.swift, Tests/OracleOSTests/Governance/ExecutionBoundaryTests.swift
+- Example commit: refactor: replace CommandSpec with BuildSpec and TestSpec in MCPDispatch
+
+---
+id: oracle-os-main-instinct-refactor-initializers
+trigger: "When improving code clarity, testability, or enforcing dependency injection"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Refactor Initializers
+
+## Action
+
+Update class initializers to require explicit parameters, remove default/optional parameters, update all instantiations and tests accordingly
+
+## Evidence
+
+- Workflow: refactor-initializers-and-dependencies
+- Files: Sources/OracleOS/*/*.swift, Tests/OracleOSTests/*/*.swift
+- Example commit: Update class initializers to require explicit parameters (e.g., memoryStore, repositoryIndexer, planners)
+
+---
+id: oracle-os-main-instinct-remove-legacy-paths
+trigger: "When cleaning up after a major refactor or deprecating legacy features"
+confidence: 0.88
+domain: workflow
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Remove Legacy Paths
+
+## Action
+
+Identify and remove obsolete files and code paths, update all references, confirm absence with tests, and document removals
+
+## Evidence
+
+- Workflow: remove-legacy-or-obsolete-code-paths
+- Files: fix_*.py, patch_*.py, Sources/OracleOS/Planning/MixedTaskPlanner.swift
+- Example commit: chore: remove obsolete diagnostic and test files
+
+---
+id: oracle-os-main-instinct-update-phase-docs
+trigger: "When a phase of work is completed or architectural changes need to be communicated"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: dawsonblock/Oracle-OS-main
+---
+
+# Oracle Os Main Instinct Update Phase Docs
+
+## Action
+
+Create or update summary markdown files, document changes and next steps, and ensure documentation matches the current state of the codebase
+
+## Evidence
+
+- Workflow: documentation-and-phase-summary-update
+- Files: PHASE_*_DONE.md, REFACTOR_STATUS.md, docs/*.md
+- Example commit: docs: finalize rebuild and green build tests
+
