@@ -1,9 +1,30 @@
 import Foundation
 
-/// Bridges the AgentLoop execution path to the IntentAPI spine.
+/// **DEPRECATED** — Compatibility bridge for synchronous execution patterns.
 ///
-/// Translates ActionIntent → Intent → submitIntent, routing all execution
-/// through the IntentAPI-based RuntimeOrchestrator.
+/// This class bridges legacy synchronous ActionIntent-based execution paths into the
+/// async IntentAPI spine using `DispatchSemaphore` and a detached task.
+///
+/// **Status**: Compatibility-only. Do not use in new code.
+///
+/// **Removal Timeline**: v2.0 (scheduled for removal)
+/// - Before v2.0, all call sites must migrate to async `IntentAPI.submitIntent()` directly
+/// - New surfaces must use `RuntimeBootstrap.makeBootstrappedRuntime()` and async submission
+/// - See [docs/deprecation_map.md](docs/deprecation_map.md) for migration guide
+///
+/// **Rationale**: The synchronous semaphore bridge defeats async/await benefits and
+/// complicates the canonical execution path. Direct async intent submission is preferred.
+///
+/// **Migration**:
+/// ```swift
+/// // OLD (don't use)
+/// let driver = RuntimeExecutionDriver(intentAPI: api)
+/// let result = driver.execute(intent: actionIntent, plannerDecision: d, selectedCandidate: nil)
+///
+/// // NEW (preferred)
+/// let runtime = try await RuntimeBootstrap.makeBootstrappedRuntime()
+/// let response = try await runtime.orchestrator.submitIntent(intent)
+/// ```
 @MainActor
 public final class RuntimeExecutionDriver: AgentExecutionDriver {
     private final class SubmissionState: @unchecked Sendable {
