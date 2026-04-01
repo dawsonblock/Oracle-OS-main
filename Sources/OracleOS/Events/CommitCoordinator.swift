@@ -74,7 +74,7 @@ public actor CommitCoordinator {
 
     public func commit(_ envelopes: [EventEnvelope]) async throws -> CommitReceipt {
         guard !envelopes.isEmpty else {
-            throw CommitError.emptyCommit
+            throw CommitError.emptyCommit(reason: "Empty commits are forbidden. Events must represent real state transitions.")
         }
 
         // Assign sequence numbers to envelopes before appending

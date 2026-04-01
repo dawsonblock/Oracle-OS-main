@@ -29,5 +29,9 @@ public struct CommitReceipt: Sendable, Codable {
 }
 
 public enum CommitError: Error {
-    case emptyCommit
+    /// Empty commit attempted. Commits must contain at least one event.
+    /// Rationale: No-op commits are forbidden because they provide no value and
+    /// make the commit log harder to reason about. If there's no state transition,
+    /// don't create an event.
+    case emptyCommit(reason: String = "Commit must contain at least one event")
 }

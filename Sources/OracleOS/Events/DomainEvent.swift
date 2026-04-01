@@ -1,13 +1,40 @@
 import Foundation
 
+/// The seven domain events that constitute runtime truth.
+/// Domain events are:
+/// - AUTHORITATIVE: Only these events define committed world state
+/// - IMMUTABLE: Once appended to EventStore, never modified
+/// - REPLAYABLE: Replay all events to empty state yields the same final state
+/// - TYPED: Strongly typed with mandatory fields
+/// - DURABLE: Persisted via CommitCoordinator to append-only JSONL
+///
+/// **Non-domain events** (fileModified, traces, metrics) use separate sinks.
+/// They do NOT flow through the domain event stream.
 public enum DomainEvent: Sendable, Codable {
+    /// Runtime accepted the intent and is starting work
     case intentReceived(IntentReceivedEvent)
+    
+    /// Planner produced command(s) to execute
     case planGenerated(PlanGeneratedEvent)
+    
+    /// Command executed successfully; postconditions verified
     case commandExecuted(CommandExecutedEvent)
+    
+    /// Command failed or violated postconditions
     case commandFailed(CommandFailedEvent)
+    
+    /// Critic completed verdict (SUCCESS, PARTIAL_SUCCESS, FAILURE, UNKNOWN)
     case evaluationCompleted(EvaluationCompletedEvent)
+    
+    /// Observation captured and fused (AX + vision + DOM)
     case uiObserved(UIObservedEvent)
+    
+    /// Memory system updated with learned facts
     case memoryRecorded(MemoryRecordedEvent)
+    
+    /// **DEPRECATED**: fileModified should not be a domain event.
+    /// Use a dedicated repository observation event instead, or emit as telemetry.
+    /// Retained for backward compatibility.
     case fileModified(FileModifiedEvent)
 }
 
