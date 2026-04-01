@@ -12,11 +12,10 @@ public final class MemoryEventIngestor {
     public func handle(_ event: DomainEvent) {
         switch event {
         case .fileModified(let payload):
-            // TODO: Extract workspace root from path if needed, or assume default
-            // For now, trigger re-index
-            let pathURL = URL(fileURLWithPath: payload.path)
-            let dir = pathURL.deletingLastPathComponent()
-            _ = repositoryIndexer.indexIfNeeded(workspaceRoot: dir)
+            // Use an explicit workspace root instead of deriving it from the file path.
+            // Align with commandExecuted, which uses the current working directory.
+            let workspaceRootURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            _ = repositoryIndexer.indexIfNeeded(workspaceRoot: workspaceRootURL)
             
         case .commandExecuted(let payload):
             guard let store = memoryStore else { return }
