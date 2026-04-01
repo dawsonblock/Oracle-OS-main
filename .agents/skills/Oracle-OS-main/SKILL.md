@@ -5,173 +5,149 @@
 
 ## Overview
 
-This skill teaches you the core development patterns, coding conventions, and architectural workflows used in the `Oracle-OS-main` Swift codebase. The repository is focused on building a robust, modular system with strong boundaries, explicit dependency management, and phased architectural refactoring. It emphasizes clarity, safety, and maintainability through strict typing, clear documentation, and systematic removal of legacy code.
+This skill provides a comprehensive guide to developing, extending, and maintaining the `Oracle-OS-main` codebase. The repository is primarily written in Swift and implements a modular, agent-oriented operating system kernel. It features strong architectural boundaries, conventional commit practices, and a focus on extensibility through skills, bundles, and agent definitions. This guide covers coding conventions, core workflows, testing patterns, and recommended commands for contributors.
 
 ## Coding Conventions
 
-- **File Naming:**  
-  Use PascalCase for all file names.
-  - Example: `MainPlanner.swift`, `VerifiedExecutor.swift`
+**File Naming**
+- Use PascalCase for Swift source files and most code artifacts.
+  - Example: `MainPlanner.swift`, `MCPDispatch.swift`
 
-- **Import Style:**  
-  Use absolute imports.
+**Import Style**
+- Use absolute imports in Swift files.
   - Example:
     ```swift
     import OracleOSCore
+    import Foundation
     ```
 
-- **Export Style:**  
-  Use default exports for modules and types.
-
-- **Commit Message Patterns:**  
-  - Prefixes: `refactor:`, `feat:`, `fix:`
-  - Example:  
-    ```
-    refactor: enforce execution boundary in planner and update related tests
-    ```
-
-- **Initializer and Dependency Injection:**  
-  Require explicit dependencies in initializers; avoid default values and optionals.
+**Export Style**
+- Use default exports for modules and classes.
   - Example:
     ```swift
-    class Planner {
-        let memoryStore: MemoryStore
-        let repositoryIndexer: RepositoryIndexer
-
-        init(memoryStore: MemoryStore, repositoryIndexer: RepositoryIndexer) {
-            self.memoryStore = memoryStore
-            self.repositoryIndexer = repositoryIndexer
-        }
-    }
+    public class MainPlanner { ... }
     ```
+
+**Commit Messages**
+- Follow [Conventional Commits](https://www.conventionalcommits.org/) with prefixes:
+  - `feat`: For new features
+  - `refactor`: For refactoring existing code
+  - `fix`: For bug fixes
+- Commit messages are typically concise but descriptive (average ~89 characters).
+  - Example: `feat: add ECC agent skill integration for new bundle support`
 
 ## Workflows
 
-### Phase-Based Architecture Refactor
-**Trigger:** When undertaking a major architectural refactor or kernel hardening  
-**Command:** `/start-architecture-phase`
+### Feature Bundle Integration / ECC or Agent Skill
 
-1. Identify the architectural concern for the current phase (e.g., execution boundary, planner simplification).
-2. Implement code changes for the targeted phase (e.g., decouple memory side effects, enforce event sourcing).
-3. Update or add documentation files summarizing the phase, its goals, and results (e.g., `docs/PHASE_1_DONE.md`).
-4. Add or update governance and boundary tests to enforce new invariants.
-5. Summarize phase completion in a dedicated commit and documentation.
+**Trigger:** When adding a new ECC bundle, agent skill, or capability to Oracle-OS-main  
+**Command:** `/add-ecc-bundle`
 
-**Example:**
-```markdown
-# PHASE_2_DONE.md
+1. Add or update `SKILL.md` in `.agents/skills/Oracle-OS-main/` and/or `.claude/skills/Oracle-OS-main/`.
+2. Add or update agent definition YAML (e.g., `openai.yaml`) in `.agents/skills/Oracle-OS-main/agents/`.
+3. Update or add ECC tools/configuration files:
+    - `.claude/ecc-tools.json`
+    - `.claude/identity.json`
+4. Add or update Codex agent TOML files in `.codex/agents/*.toml`, and update `.codex/AGENTS.md` and `.codex/config.toml`.
+5. Update or add instincts YAML in `.claude/homunculus/instincts/inherited/Oracle-OS-main-instincts.yaml`.
+6. Update documentation and command markdowns in `.claude/commands/*.md`.
 
-## Goal
-Collapse planner surface and enforce event sourcing invariants.
-
-## Summary
-- Refactored `MainPlanner.swift` to remove legacy entry points.
-- Updated governance tests.
+**Example: Adding a new agent skill**
+```bash
+cp .agents/skills/Oracle-OS-main/SKILL.md .agents/skills/Oracle-OS-main/skills/NewSkill.md
+# Edit the new SKILL.md to document the new skill
+vim .agents/skills/Oracle-OS-main/skills/NewSkill.md
 ```
 
 ---
 
-### Typed Command and Execution Boundary Enforcement
-**Trigger:** When strengthening runtime safety or removing legacy execution paths  
-**Command:** `/enforce-typed-commands`
+### Core Refactor or Feature with Test Update
 
-1. Remove or refactor legacy command cases (e.g., `.shell`) from `Command.swift` and related files.
-2. Update routers, planners, and executors to handle only typed commands/specs.
-3. Update or add governance and execution boundary tests.
-4. Update policy and planning logic to validate by type.
-5. Document changes and update phase/rebuild summary files.
+**Trigger:** When refactoring core logic or adding new features, ensuring tests are updated  
+**Command:** `/refactor-core-feature`
 
-**Example:**
+1. Modify core Swift source files in `Sources/OracleOS/` (e.g., `MCPDispatch.swift`, `MainPlanner.swift`, `Command.swift`).
+2. Update or add tests in `Tests/OracleOSTests/` and/or `Tests/OracleOSEvals/`.
+3. Optionally update or add Python/JS patch/fix scripts for migration or compatibility.
+4. Update documentation or phase-completion markers (e.g., `PHASE_X_DONE.md`, `REBUILD_PLAN.md`).
+
+**Example: Refactoring a core module**
 ```swift
-// Before
-enum Command {
-    case shell(String)
-    case build(BuildSpec)
+// Sources/OracleOS/Core/Command/Command.swift
+public class Command {
+    // Refactored logic here
 }
-
-// After
-enum Command {
-    case build(BuildSpec)
-    case test(TestSpec)
-    case fileMutation(FileMutationSpec)
+```
+```swift
+// Tests/OracleOSTests/Core/CommandTests.swift
+func testCommandExecution() {
+    let command = Command()
+    XCTAssertTrue(command.execute())
 }
 ```
 
 ---
 
-### Refactor Initializers and Dependencies
-**Trigger:** When improving code clarity and enforcing dependency injection  
-**Command:** `/refactor-initializers`
+### Governance, Boundary, or Invariant Test Hardening
 
-1. Update class initializers to require explicit parameters.
-2. Remove default values and optional parameters from constructors.
-3. Update all instantiations in source and test files to provide required dependencies.
-4. Add or update convenience initializers for testing as needed.
-5. Update related test files for compatibility.
+**Trigger:** When enforcing or verifying architectural boundaries, execution constraints, or durability invariants  
+**Command:** `/add-governance-test`
 
-**Example:**
+1. Add or update test files in `Tests/OracleOSTests/Governance/` (e.g., `ExecutionBoundaryTests.swift`).
+2. Update or refactor related core files to match new invariants (`Command.swift`, `PolicyEngine.swift`, routers).
+3. Optionally update or remove transitional scripts or artifacts.
+4. Mark phase completion in `PHASE_X_DONE.md` or similar.
+
+**Example: Adding an invariant test**
 ```swift
-// Before
-init(memoryStore: MemoryStore? = nil) { ... }
-
-// After
-init(memoryStore: MemoryStore) { ... }
+// Tests/OracleOSTests/Governance/RuntimeInvariantTests.swift
+func testKernelInvariant() {
+    let kernel = OracleOSKernel()
+    XCTAssertTrue(kernel.enforcesInvariant())
+}
 ```
 
 ---
 
-### Remove Legacy or Obsolete Code Paths
-**Trigger:** When cleaning up after a major refactor or deprecating legacy features  
-**Command:** `/remove-legacy-paths`
+### Removal of Transitional or Obsolete Scripts
 
-1. Identify and remove obsolete files (e.g., patching scripts, deprecated planners).
-2. Update all references to ensure no usage of removed paths.
-3. Update or add tests to confirm absence of legacy code.
-4. Document removals in phase or rebuild summary files.
+**Trigger:** When a major refactor or rebuild is complete and legacy scripts/artifacts are obsolete  
+**Command:** `/cleanup-transitional-scripts`
 
-**Example:**
-```diff
-- Sources/OracleOS/Planning/MixedTaskPlanner.swift
-- fix_legacy_patch.py
-```
-
----
-
-### Documentation and Phase Summary Update
-**Trigger:** When a phase is completed or architectural changes need to be communicated  
-**Command:** `/update-phase-docs`
-
-1. Create or update summary markdown files (e.g., `PHASE_X_DONE.md`, `REFACTOR_STATUS.md`).
-2. Document what changed, key insights, and next steps.
-3. Ensure documentation matches the current codebase state.
+1. Identify and delete `fix_*.py`, `patch_*.py`, `overwrite_script.py`, and similar transitional scripts.
+2. Optionally update documentation to reflect cleanup.
+3. Commit with a message referencing cleanup or removal.
 
 **Example:**
-```markdown
-# REFACTOR_STATUS.md
-
-- Phase 3 complete: Event sourcing invariants enforced.
-- Next: Memory projection refactor.
+```bash
+rm fix_migration.py patch_legacy.py overwrite_script.py
+git commit -am "chore: remove obsolete transitional scripts after refactor"
 ```
 
 ## Testing Patterns
 
-- **Framework:** Unknown (not explicitly detected)
-- **Test File Pattern:** `*.test.ts` (note: this may be legacy or for non-Swift portions)
-- **Governance Tests:**  
-  Specialized tests enforce architectural boundaries and invariants.
-  - Example:  
-    `Tests/OracleOSTests/Governance/ExecutionBoundaryTests.swift`
+- **Framework:** Not explicitly detected; tests are written in Swift, likely using XCTest or similar.
+- **Test File Pattern:** Swift test files are in `Tests/OracleOSTests/` and subdirectories, named with `*Tests.swift`.
+- **Test Structure:** Each test file targets a specific module or feature, with clear function-based test cases.
 
-- **Test Update Pattern:**  
-  When refactoring, always update or add tests to reflect new boundaries or removed code.
+**Example:**
+```swift
+import XCTest
+
+final class MainPlannerTests: XCTestCase {
+    func testPlanGeneration() {
+        let planner = MainPlanner()
+        XCTAssertNotNil(planner.generatePlan())
+    }
+}
+```
 
 ## Commands
 
-| Command                  | Purpose                                                        |
-|--------------------------|----------------------------------------------------------------|
-| /start-architecture-phase| Begin a new architectural refactor phase                       |
-| /enforce-typed-commands  | Enforce strict typed command and execution boundaries          |
-| /refactor-initializers   | Refactor initializers to require explicit dependencies         |
-| /remove-legacy-paths     | Remove legacy or obsolete code paths and update references     |
-| /update-phase-docs       | Update documentation and phase summary files                   |
+| Command                     | Purpose                                                      |
+|-----------------------------|--------------------------------------------------------------|
+| /add-ecc-bundle             | Integrate a new ECC bundle or agent skill                    |
+| /refactor-core-feature      | Refactor or add core features with corresponding tests       |
+| /add-governance-test        | Add or update governance, boundary, or invariant tests       |
+| /cleanup-transitional-scripts | Remove obsolete or transitional scripts after refactors      |
 ```
