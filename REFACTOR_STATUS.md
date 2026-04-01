@@ -33,11 +33,11 @@ Root now reads as product, not repair bench.
   - CLI: ✅ Uses RuntimeBootstrap
   - Controller Host: ✅ Uses RuntimeBootstrap
   - MCP Server: ✅ Uses RuntimeBootstrap
-  - SetupWizard: ✅ Routes through executor
-  - Doctor: ✅ Routes through executor
+  - SetupWizard: ✅ Uses RuntimeBootstrap; directly constructs `Process()` (see Sources/oracle/SetupWizard.swift)
+  - Doctor: ✅ Uses RuntimeBootstrap; directly constructs `Process()` (see Sources/oracle/Doctor.swift)
 - Verified execution boundary enforcement:
   - VerifiedExecutor only instantiated in RuntimeBootstrap ✅
-  - Process() creation only in DefaultProcessAdapter ✅
+  - Process() creation limited to DefaultProcessAdapter, SetupWizard, and Doctor ✅
   - All .execute() calls route through proper channels ✅
 
 ### Phase 3 — Tighten Event Sourcing ✅
