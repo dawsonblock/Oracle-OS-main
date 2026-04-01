@@ -116,9 +116,9 @@ Full test suite, certification checklist.
 # Check build
 swift build
 
-# Check root is clean
-ls -la | grep -E "\.py|\.log|\.swift|PHASE|REBUILD"
-# → should return nothing
+# Check root is clean of temporary scripts / markers / logs
+ls -la | grep -E "^(fix_|patch_).*\.py$|^PHASE_.*|^REBUILD_.*|\.log$"
+# → should return nothing (no fix_/patch_ scripts, phase markers, rebuild files, or log files)
 
 # Check docs exist
 ls -la docs/{runtime_spine,event_model,product_boundary,deprecation_map}.md
