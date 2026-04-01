@@ -23,7 +23,7 @@ public final class MemoryEventIngestor {
             // Let memory update itself based on command result
             store.recordCommandResult(
                 category: payload.commandKind,
-                workspaceRoot: FileManager.default.currentDirectoryPath,
+                workspaceRoot: payload.workspaceRoot,
                 success: payload.status == "success"
             )
             
