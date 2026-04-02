@@ -14,7 +14,7 @@ extension ControllerRuntimeBridge {
         let approvals = listApprovalRequests()
         let traces = listTraceSessions()
         let recentSteps = Array(recordedSteps(since: 0).suffix(8))
-        let metrics = runtimeContext.metricsRecorder.current
+        let metrics = bootstrappedRuntime.container.metricsRecorder.current
         let providerStatus = chatProviderStatus()
 
         return MissionControlSnapshot(
