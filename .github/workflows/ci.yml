@@ -19,5 +19,16 @@ jobs:
       - name: Build
         run: swift build
 
+      - name: Check repo hygiene
+        run: |
+          # Fail if unexpected executable scripts appear at root
+          FORBIDDEN=$(find . -maxdepth 1 \( -name "*.py" -o -name "*.js" -o -name "*.sh" \) -type f 2>/dev/null | wc -l)
+          if [ "$FORBIDDEN" -gt 0 ]; then
+            echo "ERROR: Found $FORBIDDEN executable script(s) at repo root"
+            find . -maxdepth 1 \( -name "*.py" -o -name "*.js" -o -name "*.sh" \) -type f
+            exit 1
+          fi
+          echo "✓ Root hygiene check passed"
+
       - name: Test
         run: swift test

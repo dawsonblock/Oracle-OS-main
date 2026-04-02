@@ -1,160 +1,51 @@
-════════════════════════════════════════════════════════════════════════════════
-                    SINGLE-HARD-PATH RUNTIME: PHASE 1 DONE
-════════════════════════════════════════════════════════════════════════════════
+# Oracle OS — Current Status
 
-STATUS: ✅ 90% COMPLETE — Execution Boundary Closed
+## Authoritative Today
 
-The shell model has been COMPLETELY ELIMINATED from the runtime's domain model.
+**Runtime Spine**: Core bootstrap path, RuntimeOrchestrator, VerifiedExecutor, CommitCoordinator, and EventStore exist and are operational.
 
-════════════════════════════════════════════════════════════════════════════════
-WHAT WAS ACCOMPLISHED
-════════════════════════════════════════════════════════════════════════════════
+**Event Model**: Seven domain event types formally defined (intentReceived, planGenerated, commandExecuted, commandFailed, evaluationCompleted, uiObserved, memoryRecorded).
 
-1. CommandPayload Enum Restructured
-   ❌ Removed: case .shell(CommandSpec)
-   ✅ Added: .build(BuildSpec), .test(TestSpec), .git(GitSpec), .file(FileMutationSpec)
+**Command Types**: Typed CommandPayload with six cases (build, test, git, file, ui, code) and proper routing through CommandRouter.
 
-2. 4 New Typed Spec Types Created
-   ✅ BuildSpec.swift
-   ✅ TestSpec.swift
-   ✅ GitSpec.swift
-   ✅ FileMutationSpec.swift
+**Core Governance Tests**: ExecutionBoundaryTests, ExecutionBoundaryEnforcementTests, EventHistoryInvariantTests exist and validate key invariants.
 
-3. PolicyEngine Rewritten
-   ❌ Removed: Hardcoded /usr/bin/env and /usr/bin/git allowlist
-   ✅ Changed: Type-based validation (no executable path checking)
+**Documentation**: ARCHITECTURE.md, runtime_spine.md, event_model.md, product_boundary.md, deprecation_map.md are current.
 
-4. Routers Updated (CodeRouter, SystemRouter)
-   ✅ Now handle: .build(), .test(), .git(), .file()
-   ✅ Call: WorkspaceRunner typed methods
+## Not Yet Authoritative
 
-5. WorkspaceRunner Extended
-   ✅ runBuild(_ spec: BuildSpec) async throws -> ProcessResult
-   ✅ runTest(_ spec: TestSpec) async throws -> ProcessResult
-   ✅ runGit(_ spec: GitSpec) async throws -> ProcessResult
-   ✅ applyFile(_ spec: FileMutationSpec) async throws
+**RuntimeContext Authority**: RuntimeContext.swift still exposes policyEngine, workspaceRunner, repositoryIndexer alongside read-side services. These create an alternate authority surface. (Fix: Phase 1)
 
-════════════════════════════════════════════════════════════════════════════════
-VERIFICATION
-════════════════════════════════════════════════════════════════════════════════
+**Controller Bridge Storage**: ControllerRuntimeBridge still stores runtimeContext as a first-class runtime object. (Fix: Phase 1)
 
-✅ grep -r "case \.shell" Sources/OracleOS --include="*.swift"
-   → 0 results (shell enum completely gone)
+**MCP Transport**: MCPDispatch.swift remains monolithic, contains [String: Any] dictionaries at the runtime boundary, and has tangled concurrency logic. (Fix: Phase 3)
 
-✅ Routers call typed methods
-   → CodeRouter.swift, SystemRouter.swift use runBuild, runTest, runGit, applyFile
+**Process Boundary Enforcement**: Direct Process() calls exist in CLI tooling, but enforcement is grep-based and governance tests are narrative-style rather than structural. (Fix: Phase 2)
 
-✅ PolicyEngine validates by type
-   → No more executable path allowlists
+**Sidecar Contracts**: vision-sidecar/ and web/ are still directories in the main tree without versioned contracts. (Fix: Phase 6)
 
-════════════════════════════════════════════════════════════════════════════════
-REMAINING: Phase 1 Finale (10%)
-════════════════════════════════════════════════════════════════════════════════
+## Known Contracts Still Loose
 
-Four CLI/UI files still have direct Process() calls:
-  1. Sources/oracle/SetupWizard.swift
-  2. Sources/oracle/Doctor.swift
-  3. Sources/OracleController/HostProcessClient.swift
-  4. Sources/OracleControllerHost/CopilotSupport.swift
+**MCP Request/Response**: MCPDispatch still handles tools with loose dictionary arguments and responses.
 
-Fix: Route through RuntimeOrchestrator.submitIntent() instead of direct Process()
+**RuntimeContext Service Semantics**: No clear distinction between read-side and execution-capable access patterns.
 
-Pattern:
-  OLD: let process = Process(); process.run()
-  NEW: let command = Command(...); executor.execute(command)
+**Vision Sidecar**: Schema exists but is not a frozen contract with round-trip tests.
 
-See PHASE_1_FINALE.md for implementation template.
+## Known Governance Test Weakness
 
-════════════════════════════════════════════════════════════════════════════════
-EXECUTION PATH (UNIFIED)
-════════════════════════════════════════════════════════════════════════════════
+**Narrative vs Structural**: Governance tests include documentation-style assertions and comment-based "this is enforced by" statements rather than failing on real drift.
 
-Intent (user goal)
-  ↓
-RuntimeOrchestrator.submitIntent()
-  ↓
-Planner.plan() → Command (typed payload)
-  ↓
-VerifiedExecutor.execute()
-  → PolicyEngine.validate() [payload type check]
-  ↓
-CommandRouter.execute()
-  ↓
-TypedRouter (CodeRouter/SystemRouter/UIRouter)
-  ├→ case .build(spec): WorkspaceRunner.runBuild(spec)
-  ├→ case .test(spec): WorkspaceRunner.runTest(spec)
-  ├→ case .git(spec): WorkspaceRunner.runGit(spec)
-  ├→ case .file(spec): WorkspaceRunner.applyFile(spec)
-  ↓
-DefaultProcessAdapter (ONLY place Process() exists)
-  ↓
-CommitCoordinator.commit(events)
-  ↓
-EventStore (immutable log)
+**RuntimeContext Leakage**: Tests still construct RuntimeContext with execution adapters, validating the wrong model.
 
-INVARIANT: No bypass exists. No alternate path in code.
+**Process Guard**: Enforcement is external (scripts/guard_process.sh) rather than compile-time or test-integrated.
 
-════════════════════════════════════════════════════════════════════════════════
-WHAT NO LONGER EXISTS
-════════════════════════════════════════════════════════════════════════════════
+## Known Repo Hygiene Problem
 
-❌ CommandPayload.shell()
-❌ Shell execution strings
-❌ Generic command specs
-❌ Hardcoded executable allowlists
-❌ Policy validation by executable path
-❌ Multiple routing paths for process execution
+**Root-Level Debris**: 51 patch/fix scripts were moved to tools/quarantine/legacy-repair/, but 15 stale "completion" and "handoff" documents remained at root until Phase 0.
 
-════════════════════════════════════════════════════════════════════════════════
-FILES CHANGED
-════════════════════════════════════════════════════════════════════════════════
+## Next Action
 
-CREATED:
-  + Sources/OracleOS/Core/Command/BuildSpec.swift
-  + Sources/OracleOS/Core/Command/TestSpec.swift
-  + Sources/OracleOS/Core/Command/GitSpec.swift
-  + Sources/OracleOS/Core/Command/FileMutationSpec.swift
+See FULL_PLAN.md for the ordered eight-phase refactor that will address each of these gaps in dependency order.
 
-MODIFIED:
-  ~ Sources/OracleOS/Core/Command/Command.swift
-  ~ Sources/OracleOS/Intent/Policies/PolicyEngine.swift
-  ~ Sources/OracleOS/Execution/Routing/CodeRouter.swift
-  ~ Sources/OracleOS/Execution/Routing/SystemRouter.swift
-  ~ Sources/OracleOS/Code/Execution/WorkspaceRunner.swift
-
-════════════════════════════════════════════════════════════════════════════════
-NEXT: PHASE 2
-════════════════════════════════════════════════════════════════════════════════
-
-Single Planner Entry Point
-
-After Phase 1 completion, Phase 2:
-  1. Remove PlannerFacade.swift (duplicate abstraction)
-  2. Convert MainPlanner to internal PlannerEngine
-  3. Ensure only RuntimeOrchestrator calls planner
-  4. Add planner boundary tests
-
-Result: One Planner.plan() surface, no multi-headed reasoning.
-
-════════════════════════════════════════════════════════════════════════════════
-DOCUMENTATION
-════════════════════════════════════════════════════════════════════════════════
-
-See:
-  - HANDOFF.md              (Overview and next steps)
-  - PHASE_1_DONE.md         (Phase 1 summary)
-  - PHASE_1_FINALE.md       (How to complete Phase 1 - 10% remaining)
-  - PHASE_1_STATUS.md       (Detailed Phase 1 status)
-  - REBUILD_PLAN.md         (Full 7-phase strategy)
-
-════════════════════════════════════════════════════════════════════════════════
-CORE INVARIANT ACHIEVED
-════════════════════════════════════════════════════════════════════════════════
-
-✅ No shell model exists
-✅ All operations typed
-✅ Single execution path
-✅ No bypass in code
-✅ Deterministic validation
-
-This is a real kernel, not a sandbox.
+Stale historical documents archived to docs/archive/status-history/.
