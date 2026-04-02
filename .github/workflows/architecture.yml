@@ -24,3 +24,6 @@ jobs:
 
       - name: Run Architecture Guard
         run: python scripts/architecture_guard.py
+
+      - name: Check Execution Boundary
+        run: python scripts/execution_boundary_guard.py
