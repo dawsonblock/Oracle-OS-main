@@ -1,0 +1,217 @@
+import Foundation
+
+public enum WorkspaceRunnerError: Error, LocalizedError, Sendable, Equatable {
+    case unsupportedCommand(String)
+    case scopeViolation(String)
+    case forbiddenGitOperation(String)
+    case networkNotAllowed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case let .unsupportedCommand(summary):
+            "Unsupported command: \(summary)"
+        case let .scopeViolation(message):
+            message
+        case let .forbiddenGitOperation(detail):
+            "Forbidden git operation: \(detail)"
+        case let .networkNotAllowed(detail):
+            "Network access not allowed: \(detail)"
+        }
+    }
+}
+
+/// Classifies git subcommands by their access level.
+public enum GitAccessLevel: Sendable {
+    /// Read-only operations that never mutate the repo or touch the network.
+    case readOnly
+    /// Local write operations that mutate the working tree or index but do not contact remotes.
+    case localWrite
+    /// Network operations that contact remote servers.
+    case network
+}
+
+public final class WorkspaceRunner: @unchecked Sendable {
+    private let processAdapter: any ProcessAdapter
+
+    public init(processAdapter: any ProcessAdapter) {
+        self.processAdapter = processAdapter
+    }
+
+    // MARK: - Typed Command Execution (Phase 1 refactoring)
+
+    /// Execute a build command with typed spec.
+    public func runBuild(_ spec: BuildSpec) async throws -> ProcessResult {
+        let args = buildArgs(spec)
+        return try await executeProcess(
+            executable: "/usr/bin/swift",
+            arguments: args,
+            workspace: spec.workspaceRoot
+        )
+    }
+
+    /// Execute a test command with typed spec.
+    public func runTest(_ spec: TestSpec) async throws -> ProcessResult {
+        let args = testArgs(spec)
+        return try await executeProcess(
+            executable: "/usr/bin/swift",
+            arguments: args,
+            workspace: spec.workspaceRoot
+        )
+    }
+
+    /// Execute a git command with typed spec.
+    public func runGit(_ spec: GitSpec) async throws -> ProcessResult {
+        // Validate git policy
+        let args = [spec.operation.rawValue] + spec.args
+        
+        // Ensure git operation is allowed
+        guard let _ = Self.gitSubcommandPolicy[spec.operation.rawValue] else {
+            throw WorkspaceRunnerError.forbiddenGitOperation(
+                "git subcommand '\(spec.operation.rawValue)' is not allowed"
+            )
+        }
+
+        return try await executeProcess(
+            executable: "/usr/bin/git",
+            arguments: args,
+            workspace: spec.workspaceRoot
+        )
+    }
+
+    /// Apply a file mutation with typed spec.
+    public func applyFile(_ spec: FileMutationSpec) async throws {
+        let url = try resolvePath(spec)
+        
+        switch spec.operation {
+        case .write:
+            guard let content = spec.content else {
+                throw NSError(domain: "FileMutation", code: 1, userInfo: [NSLocalizedDescriptionKey: "Write operation requires content"])
+            }
+            try content.write(to: url, atomically: true, encoding: .utf8)
+            
+        case .delete:
+            try FileManager.default.removeItem(at: url)
+            
+        case .append:
+            guard let content = spec.content else {
+                throw NSError(domain: "FileMutation", code: 1, userInfo: [NSLocalizedDescriptionKey: "Append operation requires content"])
+            }
+            let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+            try (existing + content).write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    private func resolvePath(_ spec: FileMutationSpec) throws -> URL {
+        let rootPath = spec.workspaceRoot ?? FileManager.default.currentDirectoryPath
+        let root = URL(fileURLWithPath: rootPath).standardizedFileURL
+        
+        let target: URL
+        if spec.path.hasPrefix("/") {
+            target = URL(fileURLWithPath: spec.path).standardizedFileURL
+        } else {
+            target = root.appendingPathComponent(spec.path).standardizedFileURL
+        }
+        
+        guard target.path.hasPrefix(root.path) else {
+            throw WorkspaceRunnerError.scopeViolation("Path \(target.path) is outside workspace root \(root.path)")
+        }
+        return target
+    }
+
+    private func buildArgs(_ spec: BuildSpec) -> [String] {
+        var args = ["build"]
+        if let target = spec.target { args += ["--target", target] }
+        if spec.configuration == .release { args += ["-c", "release"] }
+        return args
+    }
+
+    private func testArgs(_ spec: TestSpec) -> [String] {
+        var args = ["test"]
+        if let target = spec.target { args += ["--filter", target] }
+        return args
+    }
+
+    private func executeProcess(
+        executable: String,
+        arguments: [String],
+        workspace: String
+    ) async throws -> ProcessResult {
+        let systemCommand = SystemCommand(executable: executable, arguments: arguments)
+        let workspaceContext = WorkspaceContext(rootURL: URL(fileURLWithPath: workspace, isDirectory: true))
+        let policy = CommandExecutionPolicy(timeoutSeconds: 300, maxOutputBytes: 100 * 1024 * 1024)
+        
+        return try await processAdapter.run(systemCommand, in: workspaceContext, policy: policy)
+    }
+
+    // MARK: - Git Subcommand Policy
+
+    /// Allowed git subcommands and their access levels. Subcommands not in this
+    /// map are rejected.
+    static let gitSubcommandPolicy: [String: GitAccessLevel] = [
+        "status": .readOnly,
+        "log": .readOnly,
+        "diff": .readOnly,
+        "show": .readOnly,
+        "branch": .readOnly,
+        "rev-parse": .readOnly,
+        "ls-files": .readOnly,
+        "blame": .readOnly,
+        "stash": .localWrite,
+        "add": .localWrite,
+        "commit": .localWrite,
+        "checkout": .localWrite,
+        "switch": .localWrite,
+        "merge": .localWrite,
+        "rebase": .localWrite,
+        "reset": .localWrite,
+        "restore": .localWrite,
+        "tag": .localWrite,
+        "push": .network,
+        "pull": .network,
+        "fetch": .network,
+        "clone": .network,
+        "remote": .network,
+    ]
+
+    /// Flags that are never allowed on any git subcommand.
+    static let forbiddenGitFlags: Set<String> = [
+        "--force", "-f",
+        "--force-with-lease",
+        "--mirror",
+        "--bare",
+        "--delete",
+        "--prune-tags",
+    ]
+
+    /// Parse the git subcommand from arguments (skipping global flags like -C, -c).
+    static func parseGitSubcommand(from arguments: [String]) -> String? {
+        var i = 0
+        while i < arguments.count {
+            let arg = arguments[i]
+            // Skip global git flags that take a value
+            if arg == "-C" || arg == "-c" || arg == "--git-dir" || arg == "--work-tree" {
+                i += 2
+                continue
+            }
+            // Skip global boolean flags
+            if arg.hasPrefix("-") {
+                i += 1
+                continue
+            }
+            return arg
+        }
+        return nil
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+}
