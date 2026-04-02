@@ -1,11 +1,14 @@
 import Foundation
 
-/// RuntimeContext provides peripheral services and adapters for the runtime environment.
-/// NOTE: This is NOT the authoritative execution kernel. RuntimeKernel owns execution truth.
-/// RuntimeContext provides integration services like tracing, memory, browser control, etc.
+/// RuntimeContext provides read-side facades and peripheral services for the runtime environment.
+/// NOTE: This is NOT the authoritative execution kernel. RuntimeContainer owns execution authority.
+/// RuntimeContext MUST NOT expose execution-capable or execution-adjacent services.
+/// Execution-adjacent services (policyEngine, workspaceRunner, repositoryIndexer) are FORBIDDEN here.
+/// RuntimeContext provides only read-side access, tracing, and integration helpers.
 ///
 /// IMPORTANT: RuntimeContext must receive services from RuntimeContainer.
 /// Do NOT create services here that should be shared across the runtime.
+/// Do NOT add policyEngine, workspaceRunner, or repositoryIndexer back to this class.
 @MainActor
 public final class RuntimeContext {
     // MARK: - Configuration
@@ -36,10 +39,10 @@ public final class RuntimeContext {
     public let browserController: BrowserController
     public let browserPageStateBuilder: BrowserPageStateBuilder
 
-    // MARK: - Execution Adapters (from kernel, not owned here)
-    public let policyEngine: PolicyEngine
-    public let workspaceRunner: WorkspaceRunner
-    public let repositoryIndexer: RepositoryIndexer
+    // MARK: - Removed: Execution-Adjacent Services
+    // policyEngine, workspaceRunner, repositoryIndexer were removed
+    // These are execution-adjacent and must not live on a convenience facade.
+    // Access them through RuntimeContainer directly.
 
     /// Primary initializer: creates RuntimeContext from a RuntimeContainer.
     /// This ensures all shared services come from the same authority.
@@ -57,9 +60,6 @@ public final class RuntimeContext {
         self.memoryStore = container.memoryStore
         self.stateMemoryIndex = container.stateMemoryIndex
         self.searchController = container.searchController
-        self.policyEngine = container.policyEngine
-        self.workspaceRunner = container.workspaceRunner
-        self.repositoryIndexer = container.repositoryIndexer
 
         // Peripheral services that don't need sharing
         self.stateAbstraction = container.stateAbstraction
@@ -73,5 +73,28 @@ public final class RuntimeContext {
         self.automationHost = container.automationHost
         self.browserController = container.browserController
         self.browserPageStateBuilder = container.browserPageStateBuilder
+    }
+}
+
+// MARK: - Compile-time guards against re-introducing execution authority leaks
+
+@available(*, unavailable, message: "policyEngine is execution-adjacent and FORBIDDEN on RuntimeContext. Access through RuntimeContainer only.")
+extension RuntimeContext {
+    public var policyEngine: Never {
+        fatalError("Attempted to access forbidden policyEngine on RuntimeContext")
+    }
+}
+
+@available(*, unavailable, message: "workspaceRunner is execution-adjacent and FORBIDDEN on RuntimeContext. Access through RuntimeContainer only.")
+extension RuntimeContext {
+    public var workspaceRunner: Never {
+        fatalError("Attempted to access forbidden workspaceRunner on RuntimeContext")
+    }
+}
+
+@available(*, unavailable, message: "repositoryIndexer is execution-adjacent and FORBIDDEN on RuntimeContext. Access through RuntimeContainer only.")
+extension RuntimeContext {
+    public var repositoryIndexer: Never {
+        fatalError("Attempted to access forbidden repositoryIndexer on RuntimeContext")
     }
 }
