@@ -2,12 +2,29 @@ import Foundation
 
 @MainActor
 public enum RuntimeBootstrap {
+    // MARK: - THE ONLY AUTHORIZED RUNTIME ASSEMBLY PATH
+    // All entry surfaces (MCP, Controller, CLI) MUST use makeBootstrappedRuntime().
+    // Do NOT assemble runtime services separately.
+    // Do NOT repackage the BootstrappedRuntime into convenience bags.
+    // RuntimeContainer is the singular authority. Nothing downstream should recreate service graphs.
+    // Direct consumers of bootstrap must hold BootstrappedRuntime and access container as needed.
+    // Do NOT create RuntimeContext as a broad pseudo-kernel.
 
     // MARK: - Primary Entry Point
 
     /// Creates a fully bootstrapped runtime with recovery completed.
-    /// This is the ONLY authorized way to create the runtime.
-    /// All entry points (MCP, Controller, CLI) MUST use this.
+    /// 
+    /// This is THE ONLY authorized way to create the runtime.
+    /// 
+    /// Contract for callers:
+    /// - Store BootstrappedRuntime as your single runtime bundle
+    /// - Access services only through bootstrappedRuntime.container
+    /// - Do NOT create or store RuntimeContext as a pseudo-authority
+    /// - Do NOT repackage services into convenience facades
+    /// - All execution work goes through bootstrappedRuntime.orchestrator
+    /// 
+    /// All entry points (MCP, Controller, CLI) MUST use this exact path.
+    /// No exceptions. No alternate assembly surfaces.
     public static func makeBootstrappedRuntime(
         configuration: RuntimeConfig = .live()
     ) async throws -> BootstrappedRuntime {
