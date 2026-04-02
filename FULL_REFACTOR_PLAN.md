@@ -1,98 +1,80 @@
-# Full Refactor Execution Plan — Progress Summary
+# Full Refactor Execution — Phases 0-1 Complete
 
 ## Completed
 
-### Phase 0: Truth Cleanup and Baseline Capture ✅
-- **Cluster 0.1**: Archived 15 stale status documents to docs/archive/status-history/
-- **Cluster 0.2**: Moved stale diagnostics to docs/archive/diagnostics/, created README
-- **Cluster 0.3**: Root scripts already moved to tools/quarantine/ in Session 2
-- **Cluster 0.4**: Added CI guard against root-level executable sprawl
+### Phase 0: Truth Cleanup ✅
+- Archived 15 stale status documents
+- Created truthful STATUS.md
+- Added CI guard against root sprawl
+- Quarantined stale diagnostics
 
-**Result**: One truthful STATUS.md. No competing completion claims. Clear baseline established.
+### Phase 1: Authority Collapse ✅ COMPLETE
+- **Cluster 1.1**: RuntimeContext shrunk (removed policyEngine, workspaceRunner, repositoryIndexer)
+  - Added compile-time guards to prevent re-introduction
+- **Cluster 1.2**: ControllerRuntimeBridge stopped storing runtimeContext
+  - All references changed to bootstrappedRuntime.container
+- **Cluster 1.3**: Swept repo for remaining RuntimeContext leaks
+  - Fixed MissionControlSupport.swift
+  - Verified no test code creating bad RuntimeContext
+- **Cluster 1.4**: Strengthened RuntimeBootstrap documentation
+  - Made contract explicit and binding
+  - Forbade convenience facade creation
 
-### Phase 1: Authority Collapse — IN PROGRESS
-- **Cluster 1.1**: ✅ Shrunk RuntimeContext by removing policyEngine, workspaceRunner, repositoryIndexer
-  - Added compile-time guards (@available unavailable) to prevent re-introduction
-  - This will expose all remaining authority leaks during build
+**Result**: Authority is now SINGULAR
+- One authoritative service graph: RuntimeContainer
+- No broad pseudo-authority (RuntimeContext)
+- No convenience repackaging
+- One sanctioned entry point (RuntimeBootstrap.makeBootstrappedRuntime())
+- All compilation guards in place
 
-## Next Immediate Tasks (In Order)
+## Architecture Changes
 
-### Phase 1 Remaining Clusters
+Before Phase 1:
+```
+ControllerRuntimeBridge.runtimeContext: RuntimeContext
+  → exposes policyEngine, workspaceRunner, repositoryIndexer
+  → creates pseudo-authority layer
+  → allows ambient power access
+```
 
-**Cluster 1.2 — Stop storing runtimeContext in ControllerRuntimeBridge**
-- File: `Sources/OracleControllerHost/ControllerRuntimeBridge.swift`
-- Remove: `let runtimeContext: RuntimeContext` property
-- Replace all uses with `bootstrappedRuntime.container.service`
-- Expected breakage: Multiple call sites will fail, revealing context dependency patterns
+After Phase 1:
+```
+ControllerRuntimeBridge.bootstrappedRuntime: BootstrappedRuntime
+  → container is sole authority
+  → all service access explicit
+  → no convenient pseudo-authority
+  → bootstrappedRuntime.container.service (single path)
+```
 
-**Cluster 1.3 — Sweep repo for remaining RuntimeContext authority leaks**
-- Search: `runtimeContext.` across all sources and tests
-- Fix: Replace execution-adjacent access with container access
-- Update: Any test creating RuntimeContext with execution adapters
-
-**Cluster 1.4 — Strengthen bootstrap documentation**
-- File: `Sources/OracleOS/Runtime/RuntimeBootstrap.swift`
-- Update comments to make BootstrappedRuntime the sanctioned assembly bundle
-- Clarify that nothing downstream should repackage the service graph
+## Ready for Phase 2
 
 ### Phase 2: Execution-Boundary Hardening
 
-After Phase 1 completes:
-- **Cluster 2.1**: Inventory direct Process() usage
-- **Cluster 2.2**: Mark tooling-only execution isolated
-- **Cluster 2.3**: Tighten process guard script
-- **Cluster 2.4**: Rewrite weak governance tests
-- **Cluster 2.5**: Fix ExecutionBoundaryTests
+Next clusters will:
+- **2.1**: Inventory all Process() usage
+- **2.2**: Isolate tooling-only direct execution
+- **2.3**: Tighten process guard in CI
+- **2.4-2.5**: Rewrite weak governance tests into structural proofs
 
-### Phase 3: MCP Decomposition and Transport Sealing
+Timeline: Phase 2 continues systematically in same order.
 
-After Phase 2 completes:
-- **Cluster 3.1**: Use MCPBoundary.swift as only transport anchor
-- **Cluster 3.2**: Split MCPDispatch into responsibility-separated files
-  - MCPRuntimeProvider (bootstrap access)
-  - MCPToolRouter (request routing)
-  - MCPDispatch (thin orchestration)
-- **Cluster 3.3**: Remove dictionary transport from MCP runtime
-- **Cluster 3.4**: Add MCP boundary test guard
-- **Cluster 3.5**: Build strict concurrency after decomposition
+## Commits
 
-## Critical Success Metrics
+```
+dd3ba61 Phase 0: Truth cleanup and baseline capture
+2a5fac5 Phase 1.1: Shrink RuntimeContext
+aa07aae Phase 1.2: Stop storing broad runtimeContext
+d8fbfb2 Phase 1.3: Sweep repo for remaining leaks
+a90cb77 Phase 1.4: Strengthen bootstrap documentation
+```
 
-After each phase, verify:
-- **Phase 0**: One truth document, no competing claims
-- **Phase 1**: No code can access policyEngine/workspaceRunner/repositoryIndexer through RuntimeContext
-- **Phase 2**: Zero ungoverned Process() in runtime path, tooling-only isolated
-- **Phase 3**: MCP has one transport contract, zero [String: Any] at runtime boundary
+## Current State
 
-## Expected Build Status
+✅ Build succeeds  
+✅ Single authority enforced  
+✅ No compilation paths to broken pseudo-authority  
+✅ Documentation contract explicit  
+✅ Ready for Phase 2  
 
-Currently building after Phase 1.1 changes. Expected to fail on:
-- `runtimeContext.policyEngine` references in ControllerRuntimeBridge
-- `runtimeContext.workspaceRunner` references elsewhere
-- `runtimeContext.repositoryIndexer` references elsewhere
-- Tests creating RuntimeContext with these forbidden services
-
-These failures are **expected and correct**. They expose the real authority leaks that Cluster 1.2 and 1.3 will fix.
-
-## Dependency Order Enforced
-
-- ✅ Phase 0 must complete before Phase 1 (truth before authority changes)
-- ⏳ Phase 1 must complete before Phase 2 (single authority before boundary enforcement)
-- ⏳ Phase 2 must complete before Phase 3 (clean execution before MCP sealing)
-- ⏳ Phases 3-8 follow same strict dependency order
-
-Do not proceed to next cluster until current cluster builds cleanly and expected failures are addressed.
-
-## Next Execution Session
-
-Begin with: **Cluster 1.2 — ControllerRuntimeBridge refactoring**
-
-Follow with: **Cluster 1.3 — Repo-wide RuntimeContext sweep**
-
-After full Phase 1 completion: Proceed to Phase 2
-
----
-
-Status: Phase 0 complete. Phase 1 cluster 1.1 complete. Build in progress revealing authority leaks.
-Ready for systematic fix via Clusters 1.2-1.3.
+The highest-value architectural fix is complete. Authority is now singular.
 
