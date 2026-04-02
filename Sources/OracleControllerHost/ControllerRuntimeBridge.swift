@@ -8,7 +8,6 @@ import OracleOS
 final class ControllerRuntimeBridge {
     let sessionID: String
     let sessionStartedAt: Date
-    let runtimeContext: RuntimeContext
     let oracleRuntime: RuntimeOrchestrator
     let runtimeLifecycle: RuntimeLifecycle
     let diagnosticsBuilder: RuntimeDiagnosticsBuilder
@@ -31,12 +30,12 @@ final class ControllerRuntimeBridge {
             Log.info("Controller runtime recovered: replayed \(bootstrapped.recoveryReport.eventsReplayed) events")
         }
         
-        // Pull context from the unified container
-        self.runtimeContext = RuntimeContext(container: bootstrapped.container)
+        // NOTE: RuntimeContext no longer stored here.
+        // All service access goes through bootstrappedRuntime.container directly.
         self.oracleRuntime = bootstrapped.orchestrator
         self.diagnosticsBuilder = RuntimeDiagnosticsBuilder()
         
-        self.runtimeLifecycle = RuntimeLifecycle(approvalStore: runtimeContext.approvalStore)
+        self.runtimeLifecycle = RuntimeLifecycle(approvalStore: bootstrapped.container.approvalStore)
         self.sessionID = bootstrapped.container.traceRecorder.sessionID
         self.sessionStartedAt = Date()
         self.runtimeLifecycle.startControllerHeartbeat(sessionID: sessionID)
@@ -93,9 +92,9 @@ final class ControllerRuntimeBridge {
             experimentsDirectoryPath: OracleProductPaths.experimentsDirectory.path,
             logsDirectoryPath: OracleProductPaths.logsDirectory.path,
             graphDatabasePath: OracleProductPaths.graphDatabaseURL.path,
-            approvalBrokerActive: runtimeContext.approvalStore.isActive(),
+            approvalBrokerActive: bootstrappedRuntime.container.approvalStore.isActive(),
             controllerConnected: runtimeLifecycle.controllerConnected(),
-            policyMode: runtimeContext.config.policyMode.rawValue,
+            policyMode: bootstrappedRuntime.container.config.policyMode.rawValue,
             runningFromAppBundle: OracleProductPaths.runningFromAppBundle,
             bundledHostAvailable: OracleProductPaths.runningFromAppBundle,
             bundledVisionBootstrapAvailable: OracleProductPaths.bundledVisionBootstrapDirectory != nil,
@@ -108,13 +107,13 @@ final class ControllerRuntimeBridge {
     func diagnosticsSnapshot() -> ControllerDiagnosticsSnapshot {
         let traceEvents = diagnosticsBuilder.loadTraceEvents()
         let observation = ObservationBuilder.capture(appName: nil)
-        let hostSnapshot = runtimeContext.automationHost.snapshots.captureSnapshot(appName: observation.app)
-        let browserSession = runtimeContext.browserController.snapshot(
+        let hostSnapshot = bootstrappedRuntime.container.automationHost.snapshots.captureSnapshot(appName: observation.app)
+        let browserSession = bootstrappedRuntime.container.browserController.snapshot(
             appName: observation.app,
             observation: observation
         ).map { BrowserSession(appName: observation.app ?? $0.browserApp, page: $0, available: true) }
         let snapshot = diagnosticsBuilder.build(
-            graphStore: runtimeContext.graphStore,
+            graphStore: bootstrappedRuntime.container.graphStore,
             traceEvents: traceEvents,
             hostSnapshot: hostSnapshot,
             browserSession: browserSession
@@ -270,15 +269,15 @@ final class ControllerRuntimeBridge {
     }
 
     func listApprovalRequests() -> [ApprovalRequestDocument] {
-        runtimeContext.approvalStore.listPendingRequests().map(map)
+        bootstrappedRuntime.container.approvalStore.listPendingRequests().map(map)
     }
 
     func approveApprovalRequest(id: String) throws -> ApprovalReceipt {
-        try runtimeContext.approvalStore.approve(requestID: id)
+        try bootstrappedRuntime.container.approvalStore.approve(requestID: id)
     }
 
     func rejectApprovalRequest(id: String) throws {
-        try runtimeContext.approvalStore.reject(requestID: id)
+        try bootstrappedRuntime.container.approvalStore.reject(requestID: id)
     }
 
     func recordedSteps(since count: Int) -> [TraceStepViewModel] {
