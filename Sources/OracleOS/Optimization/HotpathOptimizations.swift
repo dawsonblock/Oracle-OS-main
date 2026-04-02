@@ -73,13 +73,14 @@ final class ObjectivePatternMatcher: Sendable {
 // MARK: - 2. LRU CACHE: Generic high-speed cache implementation
 
 /// Generic LRU cache with O(1) get/set operations.
-/// Used for pattern matching, context caching, and projection results.
-final actor LRUCache<Key: Hashable, Value>: Sendable where Key: Sendable, Value: Sendable {
-    private struct CacheEntry {
+/// Thread-safe via NSLock. Used for pattern matching, context caching, and projection results.
+final class LRUCache<Key: Hashable, Value>: Sendable where Key: Sendable, Value: Sendable {
+    private struct CacheEntry: Sendable {
         var value: Value
         var timestamp: Date
     }
     
+    private let lock = NSLock()
     private var storage: [Key: CacheEntry] = [:]
     private var accessOrder: [Key] = []
     private let capacity: Int
@@ -89,6 +90,9 @@ final actor LRUCache<Key: Hashable, Value>: Sendable where Key: Sendable, Value:
     }
     
     public func get(_ key: Key) -> Value? {
+        lock.lock()
+        defer { lock.unlock() }
+        
         guard let entry = storage[key] else { return nil }
         
         // Update access order for LRU eviction
@@ -101,6 +105,9 @@ final actor LRUCache<Key: Hashable, Value>: Sendable where Key: Sendable, Value:
     }
     
     public func set(_ key: Key, _ value: Value) {
+        lock.lock()
+        defer { lock.unlock() }
+        
         if storage[key] != nil {
             // Update existing
             storage[key] = CacheEntry(value: value, timestamp: Date())
@@ -120,11 +127,18 @@ final actor LRUCache<Key: Hashable, Value>: Sendable where Key: Sendable, Value:
     }
     
     public func clear() {
+        lock.lock()
+        defer { lock.unlock() }
+        
         storage.removeAll()
         accessOrder.removeAll()
     }
     
-    public var count: Int { storage.count }
+    public var count: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return storage.count
+    }
 }
 
 // MARK: - 3. METADATA EXTRACTOR: Fast metadata parsing
@@ -178,12 +192,10 @@ final class ContextSnapshotCache: Sendable {
     /// Cache key is based on active app + visible elements hash.
     public func getOrCache(_ context: PlannerContext, for intentID: UUID) -> PlannerContext {
         let cacheKey = intentID
-        if let cached = Task { await cache.get(cacheKey) }.result {
-            return try! cached.get()
+        if let cached = cache.get(cacheKey) {
+            return cached
         }
-        Task {
-            await cache.set(cacheKey, context)
-        }
+        cache.set(cacheKey, context)
         return context
     }
 }
@@ -433,7 +445,7 @@ struct MemoryRecord: Sendable {
 public final class HotpathOptimizationTests: XCTestCase {
     
     /// Test 1: Pattern matcher speed (40-60% faster)
-    func testPatternMatcherPerformance() async throws {
+    func testPatternMatcherPerformance() throws {
         let matcher = ObjectivePatternMatcher(cacheCapacity: 512)
         
         // Warm up cache
@@ -460,7 +472,7 @@ public final class HotpathOptimizationTests: XCTestCase {
     }
     
     /// Test 2: LRU cache hit rate
-    func testLRUCacheHitRate() async throws {
+    func testLRUCacheHitRate() throws {
         let cache = LRUCache<String, String>(capacity: 100)
         
         // Simulate realistic access pattern (20% of keys cause 80% of hits)
@@ -470,11 +482,11 @@ public final class HotpathOptimizationTests: XCTestCase {
         for i in 0..<10000 {
             let key = "key_\(i % 20)"  // Only 20 unique keys, but 10k accesses
             
-            if let _ = await cache.get(key) {
+            if let _ = cache.get(key) {
                 hits += 1
             } else {
                 misses += 1
-                await cache.set(key, "value_\(i)")
+                cache.set(key, "value_\(i)")
             }
         }
         
