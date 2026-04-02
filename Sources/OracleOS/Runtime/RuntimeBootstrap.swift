@@ -102,9 +102,22 @@ public enum RuntimeBootstrap {
         )
 
         let impactAnalyzer = RepositoryChangeImpactAnalyzer()
-        let planner = MainPlanner(
+        
+        // Phase 5.5: Use MainPlannerRefactored with strong dependency injection
+        let plannerDeps = RuntimeBootstrap.makePlannerDependencies(
             repositoryIndexer: repositoryIndexer,
             impactAnalyzer: impactAnalyzer
+        )
+        let planner = MainPlannerRefactored(
+            workflowIndex: plannerDeps.workflowIndex,
+            workflowRetriever: plannerDeps.workflowRetriever,
+            osPlanner: plannerDeps.osPlanner,
+            codePlanner: plannerDeps.codePlanner,
+            reasoningEngine: plannerDeps.reasoningEngine,
+            planEvaluator: plannerDeps.planEvaluator,
+            promptEngine: plannerDeps.promptEngine,
+            reasoningThreshold: plannerDeps.reasoningThreshold,
+            taskGraphStore: plannerDeps.taskGraphStore
         )
 
         // Create shared runtime services ONCE here
