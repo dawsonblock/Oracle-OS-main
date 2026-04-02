@@ -381,6 +381,9 @@ struct Doctor {
     }
 
     private func runShell(_ command: String) async -> ShellResult {
+        // TOOLING_ONLY_DIRECT_PROCESS: Doctor is explicit diagnostics tooling, not runtime kernel.
+        // This direct process spawning is allowed only in diagnostics/tooling paths.
+        // Runtime action execution must route through VerifiedExecutor and CommandRouter.
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
         process.arguments = ["-c", command]
